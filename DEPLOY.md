@@ -34,10 +34,10 @@
 
 | Переменная | Пример |
 |---|---|
-| `UNO_BOT` / `UNO_LINK` | `wildcards_play_bot` / полный URL |
+| `UNO_BOT` / `UNO_LINK` | `odinkartibot` / полный URL |
 | `CROCO_BOT` / `CROCO_LINK` | `krokosha_play_bot` / полный URL |
-| `MAFIA_BOT` / `MAFIA_LINK` | `nightfall_play_bot` / полный URL |
-| `PET_BOT` / `PET_LINK` | `druzhok_pet_bot` / полный URL |
+| `MAFIA_BOT` / `MAFIA_LINK` | `secretnochibot` / полный URL |
+| `PET_BOT` / `PET_LINK` | `sharikrubot` / полный URL |
 
 Чтобы `?startapp` открывал игру сразу, у каждого бота-игры должно быть включено
 главное мини-приложение (BotFather → Bot Settings → Configure Mini App → Main Mini App).

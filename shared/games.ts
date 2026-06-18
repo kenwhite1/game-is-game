@@ -31,7 +31,7 @@ export const GAMES: GameDef[] = [
     emoji: '🎴',
     accent: '#e1554b',
     accentDeep: '#b8362c',
-    bot: 'wildcards_play_bot',
+    bot: 'odinkartibot',
   },
   {
     id: 'croco',
@@ -51,7 +51,7 @@ export const GAMES: GameDef[] = [
     emoji: '🌙',
     accent: '#6c5ce0',
     accentDeep: '#4b3bc0',
-    bot: 'nightfall_play_bot',
+    bot: 'secretnochibot',
   },
   {
     id: 'pet',
@@ -61,7 +61,7 @@ export const GAMES: GameDef[] = [
     emoji: '🐾',
     accent: '#f2a93b',
     accentDeep: '#d98b1f',
-    bot: 'druzhok_pet_bot',
+    bot: 'sharikrubot',
   },
 ]
 
