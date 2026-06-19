@@ -1,8 +1,12 @@
 import type { CSSProperties } from 'react'
 import { useStore } from '../store'
-import { Logo } from './Logo'
-import { APP_NAME, APP_TAG } from '../brand'
+import { HeroFan } from './Logo'
+import { GameIcon } from '../art/GameIcon'
+import { SoundOnIcon, SoundOffIcon, InfoIcon, HelpIcon, ChevronIcon } from '../art/icons'
+import { APP_TAG } from '../brand'
 import type { GameCard } from '@shared/types'
+
+type IconId = 'uno' | 'croco' | 'mafia' | 'pet'
 
 export function Home() {
   const catalog = useStore(s => s.catalog)
@@ -16,60 +20,63 @@ export function Home() {
 
   return (
     <div className="launcher rise">
-      <div className="topbar-mini">
-        <button className="round-btn" onClick={toggleSound} aria-label={soundOn ? 'Выключить звук' : 'Включить звук'}>
-          {soundOn ? '🔊' : '🔇'}
-        </button>
-        <button className="round-btn" onClick={() => openSheet('help')} aria-label="Помощь">?</button>
+      <div className="topbar">
+        <div className="brandmark">GG</div>
+        <div className="topbar-actions">
+          <button className="icon-btn" onClick={toggleSound} aria-label={soundOn ? 'Выключить звук' : 'Включить звук'}>
+            {soundOn ? <SoundOnIcon /> : <SoundOffIcon />}
+          </button>
+          <button className="icon-btn" onClick={() => openSheet('help')} aria-label="Помощь"><HelpIcon /></button>
+        </div>
       </div>
 
       <div className="brand">
-        <Logo />
-        <div className="brand-name">{APP_NAME}</div>
+        <HeroFan />
+        <div className="brand-name">Game<span className="sm"> is </span>Game</div>
+        <div className="brand-rule" />
         <div className="brand-tag">{APP_TAG}</div>
       </div>
 
-      {firstName && <div className="greet">Привет, <b>{firstName}</b> 👋 Во что сыграем?</div>}
+      {firstName && <div className="greet">С возвращением, <b>{firstName}</b></div>}
 
       <div className="section-label">Выбери игру</div>
 
       <div className="game-list">
         {catalog.map(g => (
-          <GameTile key={g.id} game={g} recent={g.id === recentTop} />
+          <GameRow key={g.id} game={g} recent={g.id === recentTop} />
         ))}
       </div>
 
-      <div className="foot-row">
-        <button className="foot-tile" onClick={() => openSheet('about')}>ℹ️ Об этом</button>
-        <button className="foot-tile" onClick={() => openSheet('help')}>❓ Помощь</button>
+      <div className="foot">
+        <button className="foot-btn" onClick={() => openSheet('about')}><InfoIcon /> Об этом</button>
+        <button className="foot-btn" onClick={() => openSheet('help')}><HelpIcon /> Помощь</button>
       </div>
 
-      <div className="foot-note">Сделано с любовью 💛</div>
+      <div className="foot-note">Сделано с любовью <span className="heart">♥</span></div>
     </div>
   )
 }
 
-function GameTile({ game, recent }: { game: GameCard; recent: boolean }) {
+function GameRow({ game, recent }: { game: GameCard; recent: boolean }) {
   const launch = useStore(s => s.launch)
-  const launching = useStore(s => s.launching === game.id)
-  const style = { '--a': game.accent, '--ad': game.accentDeep } as CSSProperties
-
+  const style = { '--a': game.accent, '--glow': hexGlow(game.accent) } as CSSProperties
   return (
-    <button
-      className={`game-tile${launching ? ' launching' : ''}`}
-      style={style}
-      onClick={() => launch(game)}
-      aria-label={`Открыть: ${game.name}`}
-    >
-      <span className="gt-badge"><span className="gt-emoji">{game.emoji}</span></span>
-      <span className="gt-text">
-        <span className="gt-title">
-          {game.name}
-          {recent && <span className="recent-chip">Недавнее</span>}
-        </span>
-        <span className="gt-sub">{game.tagline}</span>
+    <button className="game-row" style={style} onClick={() => launch(game)} aria-label={`Открыть: ${game.name}`}>
+      <span className="gi-wrap"><GameIcon id={game.id as IconId} size={60} /></span>
+      <span className="gr-text">
+        <span className="gr-title">{game.name}{recent && <span className="recent-chip">Недавнее</span>}</span>
+        <span className="gr-sub">{game.tagline}</span>
       </span>
-      <span className="gt-chev">›</span>
+      <span className="gr-go"><ChevronIcon /></span>
     </button>
   )
+}
+
+// мягкое цветное свечение из hex акцента
+function hexGlow(hex: string): string {
+  const h = hex.replace('#', '')
+  const r = parseInt(h.slice(0, 2), 16)
+  const g = parseInt(h.slice(2, 4), 16)
+  const b = parseInt(h.slice(4, 6), 16)
+  return `rgba(${r},${g},${b},.42)`
 }
