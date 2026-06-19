@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { GameCard, Profile, ProfileDetail, Friend, ActivityItem, LeaderRow } from '@shared/types'
+import type { GameCard, Profile, ProfileDetail, Friend, ActivityItem, LeaderRow, Wardrobe, Slot } from '@shared/types'
 import { GAMES, defaultLink } from '@shared/games'
 import { api } from './api'
 import { haptic, openGame as openGameLink, getStartParam, inTelegram } from './telegram'
@@ -8,7 +8,7 @@ import { playSfx, isSoundOn, setSoundOn } from './sound'
 // Статичный каталог на случай, если сервер недоступен (гость, офлайн).
 const STATIC_CATALOG: GameCard[] = GAMES.map(g => ({ ...g, link: defaultLink(g.bot) }))
 
-export type Tab = 'home' | 'friends' | 'activity' | 'profile'
+export type Tab = 'home' | 'friends' | 'activity' | 'style' | 'profile'
 type Sheet = 'about' | 'help' | 'settings' | 'editProfile' | null
 
 interface S {
@@ -22,6 +22,8 @@ interface S {
   activity: ActivityItem[]
   leaderboard: LeaderRow[]
   socialLoaded: boolean
+  wardrobe: Wardrobe | null
+  wardrobeLoaded: boolean
   sheet: Sheet
   soundOn: boolean
   toast: string | null
@@ -36,9 +38,12 @@ interface S {
 
   loadSocial(): Promise<void>
   loadDetail(): Promise<void>
+  loadWardrobe(): Promise<void>
+  equip(slot: Slot, itemId: string): Promise<void>
+  buy(itemId: string, name: string): Promise<boolean>
   addFriend(code: string): Promise<{ ok: boolean; error?: string; name?: string }>
   removeFriend(id: number): Promise<void>
-  saveProfile(patch: { name?: string; avatar?: string }): Promise<void>
+  saveProfile(patch: { name: string }): Promise<void>
 }
 
 let toastTimer: ReturnType<typeof setTimeout> | null = null
@@ -54,6 +59,8 @@ export const useStore = create<S>((set, get) => ({
   activity: [],
   leaderboard: [],
   socialLoaded: false,
+  wardrobe: null,
+  wardrobeLoaded: false,
   sheet: null,
   soundOn: isSoundOn(),
   toast: null,
@@ -103,6 +110,7 @@ export const useStore = create<S>((set, get) => ({
     set({ tab })
     if ((tab === 'friends' || tab === 'activity') && !get().socialLoaded) void get().loadSocial()
     if (tab === 'profile') void get().loadDetail()
+    if (tab === 'style' && !get().wardrobeLoaded) void get().loadWardrobe()
   },
 
   launch(card) {
@@ -149,6 +157,41 @@ export const useStore = create<S>((set, get) => ({
       const detail = await api.profileDetail()
       set({ detail, profile: detail.profile })
     } catch { /* офлайн */ }
+  },
+
+  async loadWardrobe() {
+    try {
+      const wardrobe = await api.cosmetics()
+      set({ wardrobe, wardrobeLoaded: true })
+    } catch { /* офлайн */ }
+  },
+
+  async equip(slot, itemId) {
+    try {
+      const r = await api.equip(slot, itemId)
+      // обновляем профиль (баннер/рамка/титул живьём) и гардероб; соц-данные
+      // и детали профиля пересчитаем при следующем заходе.
+      set({ profile: r.profile, wardrobe: r.wardrobe, socialLoaded: false, detail: null })
+      haptic('success')
+    } catch (e) {
+      haptic('warn')
+      const reason = (e as { message?: string }).message
+      get().showToast(reason === 'locked' ? 'Этот предмет ещё закрыт' : 'Не удалось надеть')
+    }
+  },
+
+  async buy(itemId, name) {
+    try {
+      const r = await api.buy(itemId)
+      set({ profile: r.profile, wardrobe: r.wardrobe, socialLoaded: false, detail: null })
+      haptic('success')
+      get().showToast(`«${name}» куплено 🎉`)
+      return true
+    } catch (e) {
+      haptic('warn')
+      get().showToast((e as { message?: string }).message === 'too_poor' ? 'Не хватает Game' : 'Покупка не удалась')
+      return false
+    }
   },
 
   async addFriend(code) {

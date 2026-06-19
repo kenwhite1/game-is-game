@@ -95,7 +95,7 @@ export function Friends() {
           const online = isOnline(f.lastSeen)
           return (
             <div className="row" key={f.id}>
-              <Avatar id={f.avatar} seed={f.id} size={44} />
+              <Avatar look={f.look} seed={f.id} size={44} />
               <div className="tx">
                 <div className="t">{f.name}</div>
                 <div className="s">

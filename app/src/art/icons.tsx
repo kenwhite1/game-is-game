@@ -86,6 +86,14 @@ export function SettingsIcon() {
 export function CloseIcon() {
   return (<svg viewBox="0 0 24 24" {...S}><path d="M6 6l12 12M18 6L6 18" /></svg>)
 }
+export function LockIcon() {
+  return (
+    <svg viewBox="0 0 24 24" {...S}>
+      <rect x="5" y="11" width="14" height="9" rx="2.2" />
+      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+    </svg>
+  )
+}
 export function TrophyIcon() {
   return (
     <svg viewBox="0 0 24 24" {...S}>
@@ -122,10 +130,20 @@ function ProfileNav() {
     </svg>
   )
 }
+function StyleNav() {
+  // искра/«магия» — кастомизация образа
+  return (
+    <svg viewBox="0 0 24 24" {...S}>
+      <path d="M12 3l1.8 4.2L18 9l-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8L12 3z" />
+      <path d="M18 14l.9 2.1L21 17l-2.1.9L18 20l-.9-2.1L15 17l2.1-.9L18 14z" />
+    </svg>
+  )
+}
 
 export const TabIcons: Record<string, JSX.Element> = {
   home: <HomeNav />,
   friends: <FriendsNav />,
   activity: <ActivityNav />,
+  style: <StyleNav />,
   profile: <ProfileNav />,
 }

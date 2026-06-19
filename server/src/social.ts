@@ -2,10 +2,28 @@ import { db } from './db'
 import type { Friend, ActivityItem, LeaderRow } from '../../shared/types'
 import { xpFromOpens, levelInfo } from '../../shared/progression'
 import { avatarOf } from '../../shared/avatars'
+import { DEFAULT_EQUIP, type Look } from '../../shared/cosmetics'
 import { getProfile } from './profiles'
 import { GAMES } from '../../shared/games'
 
 const VALID_GAME_IDS = new Set(GAMES.map(g => g.id))
+
+// Колонки образа, которые тянем во всех соц-выборках.
+const LOOK_COLS = 'u.avatar, u.frame, u.hat, u.eyewear, u.effect, u.companion'
+interface LookRow {
+  avatar: string | null; frame: string | null; hat: string | null
+  eyewear: string | null; effect: string | null; companion: string | null
+}
+function lookOf(r: LookRow, seed: number): Look {
+  return {
+    avatar: avatarOf(r.avatar, seed).id,
+    frame: r.frame || DEFAULT_EQUIP.frame,
+    hat: r.hat || DEFAULT_EQUIP.hat,
+    eyewear: r.eyewear || DEFAULT_EQUIP.eyewear,
+    effect: r.effect || DEFAULT_EQUIP.effect,
+    companion: r.companion || DEFAULT_EQUIP.companion,
+  }
+}
 
 export type AddFriendResult =
   | { ok: true; friend: Friend }
@@ -24,9 +42,7 @@ export function addFriendByCode(uid: number, rawCode: string): AddFriendResult {
   if (existing) return { ok: false, reason: 'already' }
 
   db.transaction(() => {
-    const ins = db.prepare(
-      'INSERT OR IGNORE INTO friendships (user_id, friend_id) VALUES (?,?)',
-    )
+    const ins = db.prepare('INSERT OR IGNORE INTO friendships (user_id, friend_id) VALUES (?,?)')
     ins.run(uid, target.id)
     ins.run(target.id, uid)
   })()
@@ -43,29 +59,22 @@ export function removeFriend(uid: number, friendId: number): void {
   })()
 }
 
-/** Список друзей с уровнем и последней сыгранной игрой, недавно активные выше. */
+/** Список друзей с образом, уровнем и последней игрой, недавно активные выше. */
 export function friendsOf(uid: number): Friend[] {
   const rows = db
     .prepare(
-      `SELECT u.id, u.name, u.avatar, u.opens, u.last_seen,
+      `SELECT u.id, u.name, ${LOOK_COLS}, u.opens, u.last_seen,
               (SELECT game_id FROM opens o WHERE o.user_id=u.id ORDER BY o.id DESC LIMIT 1) AS last_game
          FROM friendships f
          JOIN users u ON u.id = f.friend_id
         WHERE f.user_id = ?
         ORDER BY u.last_seen DESC NULLS LAST, u.id DESC`,
     )
-    .all(uid) as {
-    id: number
-    name: string
-    avatar: string | null
-    opens: number
-    last_seen: string | null
-    last_game: string | null
-  }[]
+    .all(uid) as (LookRow & { id: number; name: string; opens: number; last_seen: string | null; last_game: string | null })[]
   return rows.map(r => ({
     id: r.id,
     name: r.name,
-    avatar: avatarOf(r.avatar, r.id).id,
+    look: lookOf(r, r.id),
     level: levelInfo(xpFromOpens(r.opens)).level,
     lastGame: r.last_game && VALID_GAME_IDS.has(r.last_game) ? r.last_game : null,
     lastSeen: r.last_seen,
@@ -76,7 +85,7 @@ export function friendsOf(uid: number): Friend[] {
 export function activityFeed(uid: number, limit = 30): ActivityItem[] {
   const rows = db
     .prepare(
-      `SELECT o.id, o.user_id, o.game_id, o.ts, u.name, u.avatar
+      `SELECT o.id, o.user_id, o.game_id, o.ts, u.name, ${LOOK_COLS}
          FROM opens o
          JOIN users u ON u.id = o.user_id
         WHERE o.user_id = ?
@@ -84,21 +93,14 @@ export function activityFeed(uid: number, limit = 30): ActivityItem[] {
         ORDER BY o.id DESC
         LIMIT ?`,
     )
-    .all(uid, uid, limit) as {
-    id: number
-    user_id: number
-    game_id: string
-    ts: string
-    name: string
-    avatar: string | null
-  }[]
+    .all(uid, uid, limit) as (LookRow & { id: number; user_id: number; game_id: string; ts: string; name: string })[]
   return rows
     .filter(r => VALID_GAME_IDS.has(r.game_id))
     .map(r => ({
       id: r.id,
       userId: r.user_id,
       name: r.name,
-      avatar: avatarOf(r.avatar, r.user_id).id,
+      look: lookOf(r, r.user_id),
       gameId: r.game_id,
       ts: r.ts,
     }))
@@ -108,20 +110,20 @@ export function activityFeed(uid: number, limit = 30): ActivityItem[] {
 export function leaderboard(uid: number, limit = 20): LeaderRow[] {
   const rows = db
     .prepare(
-      `SELECT u.id, u.name, u.avatar, u.opens
+      `SELECT u.id, u.name, ${LOOK_COLS}, u.opens
          FROM users u
         WHERE u.id = ?
            OR u.id IN (SELECT friend_id FROM friendships WHERE user_id = ?)
         ORDER BY u.opens DESC, u.id ASC
         LIMIT ?`,
     )
-    .all(uid, uid, limit) as { id: number; name: string; avatar: string | null; opens: number }[]
+    .all(uid, uid, limit) as (LookRow & { id: number; name: string; opens: number })[]
   return rows.map(r => {
     const xp = xpFromOpens(r.opens)
     return {
       id: r.id,
       name: r.name,
-      avatar: avatarOf(r.avatar, r.id).id,
+      look: lookOf(r, r.id),
       level: levelInfo(xp).level,
       xp,
       isMe: r.id === uid,
@@ -131,8 +133,7 @@ export function leaderboard(uid: number, limit = 20): LeaderRow[] {
 
 /** Сводка для соц-вкладок одним запросом. */
 export function socialSnapshot(uid: number) {
-  // Гарантируем, что код друга и аватар у текущего игрока есть.
-  getProfile(uid)
+  getProfile(uid) // гарантируем код друга и аватар у текущего игрока
   return {
     friends: friendsOf(uid),
     activity: activityFeed(uid),

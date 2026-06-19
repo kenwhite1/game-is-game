@@ -4,13 +4,13 @@ import { validateInitData, issueToken, verifyToken } from './auth'
 import { BOT_USERNAME, gameOverrides, type Env } from './env'
 import { getOrCreateUser, getProfile, recordOpen, recentGames, profileDetail, updateProfile } from './profiles'
 import { addFriendByCode, removeFriend, friendsOf, activityFeed, leaderboard, socialSnapshot } from './social'
+import { wardrobeOf, equip, buy } from './cosmetics'
 import { buildCatalog, GAMES } from '../../shared/games'
-import { AVATARS } from '../../shared/avatars'
 
 export const api = new Hono<Env>()
 
 const VALID_IDS = new Set(GAMES.map(g => g.id))
-const VALID_AVATARS = new Set(AVATARS.map(a => a.id))
+const SLOTS = ['avatar', 'frame', 'hat', 'eyewear', 'effect', 'companion', 'banner', 'title'] as const
 const catalog = () => buildCatalog(gameOverrides())
 
 api.get('/health', c => c.json({ ok: true }))
@@ -56,18 +56,43 @@ api.get('/profile/detail', c => {
   return c.json(detail)
 })
 
-// Edit display name / avatar.
-const profileSchema = z.object({
-  name: z.string().trim().min(1).max(40).optional(),
-  avatar: z.string().max(32).optional(),
-})
+// Edit display name. Appearance (avatar/frame/banner/title) goes through
+// /cosmetics/equip so ownership is always enforced.
+const profileSchema = z.object({ name: z.string().trim().min(1).max(40) })
 api.post('/profile/update', async c => {
   const parsed = profileSchema.safeParse(await c.req.json().catch(() => null))
   if (!parsed.success) return c.json({ error: 'bad_request' }, 400)
-  if (parsed.data.avatar && !VALID_AVATARS.has(parsed.data.avatar)) return c.json({ error: 'bad_request' }, 400)
   const profile = updateProfile(c.get('uid'), parsed.data)
   if (!profile) return c.json({ error: 'not_found' }, 404)
   return c.json({ profile })
+})
+
+// ─── Cosmetics: wardrobe + equip ─────────────────────────────────────────
+api.get('/cosmetics', c => {
+  const wardrobe = wardrobeOf(c.get('uid'))
+  if (!wardrobe) return c.json({ error: 'not_found' }, 404)
+  return c.json(wardrobe)
+})
+
+const equipSchema = z.object({ slot: z.enum(SLOTS), itemId: z.string().min(1).max(48) })
+api.post('/cosmetics/equip', async c => {
+  const parsed = equipSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'bad_request' }, 400)
+  const uid = c.get('uid')
+  const r = equip(uid, parsed.data.slot, parsed.data.itemId)
+  if (!r.ok) return c.json({ error: r.reason }, r.reason === 'locked' ? 403 : 400)
+  return c.json({ profile: getProfile(uid), wardrobe: wardrobeOf(uid) })
+})
+
+// Buy a shop item with Game coins. Equipping stays a separate step.
+const buySchema = z.object({ itemId: z.string().min(1).max(48) })
+api.post('/cosmetics/buy', async c => {
+  const parsed = buySchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'bad_request' }, 400)
+  const uid = c.get('uid')
+  const r = buy(uid, parsed.data.itemId)
+  if (!r.ok) return c.json({ error: r.reason }, r.reason === 'too_poor' ? 402 : 400)
+  return c.json({ profile: getProfile(uid), wardrobe: wardrobeOf(uid) })
 })
 
 // Record that the player launched a game from the menu.

@@ -2,6 +2,7 @@ import { db } from './db'
 import type { Profile, GameStat, ProfileDetail } from '../../shared/types'
 import { xpFromOpens, levelInfo, computeBadges } from '../../shared/progression'
 import { defaultAvatar, avatarOf } from '../../shared/avatars'
+import { DEFAULT_EQUIP, type Slot } from '../../shared/cosmetics'
 import { GAMES } from '../../shared/games'
 
 interface UserRow {
@@ -9,12 +10,24 @@ interface UserRow {
   name: string
   username: string | null
   avatar: string | null
+  frame: string | null
+  hat: string | null
+  eyewear: string | null
+  effect: string | null
+  companion: string | null
+  banner: string | null
+  title: string | null
+  coins: number
   friend_code: string | null
   opens: number
   created_at: string
 }
 
 const VALID_GAME_IDS = new Set(GAMES.map(g => g.id))
+
+/** Экономика Game: бонус за регистрацию и заработок за запуск игры. */
+export const STARTER_COINS = 300
+export const COINS_PER_OPEN = 25
 
 // ─── Код друга ───────────────────────────────────────────────────────────
 // Без похожих символов (0/O, 1/I), чтобы код легко диктовать и набирать.
@@ -60,8 +73,8 @@ export function getOrCreateUser(id: number, name: string, username?: string): Us
   }
   const avatar = defaultAvatar(id)
   db.prepare(
-    "INSERT INTO users (id, name, username, avatar, last_seen) VALUES (?,?,?,?,datetime('now'))",
-  ).run(id, name, username ?? null, avatar)
+    "INSERT INTO users (id, name, username, avatar, coins, last_seen) VALUES (?,?,?,?,?,datetime('now'))",
+  ).run(id, name, username ?? null, avatar, STARTER_COINS)
   ensureFriendCode(id, null)
   return db.prepare('SELECT * FROM users WHERE id=?').get(id) as UserRow
 }
@@ -72,11 +85,47 @@ export function toProfile(u: UserRow): Profile {
     id: u.id,
     name: u.name,
     avatar: avatarOf(u.avatar, u.id).id,
+    frame: u.frame || DEFAULT_EQUIP.frame,
+    hat: u.hat || DEFAULT_EQUIP.hat,
+    eyewear: u.eyewear || DEFAULT_EQUIP.eyewear,
+    effect: u.effect || DEFAULT_EQUIP.effect,
+    companion: u.companion || DEFAULT_EQUIP.companion,
+    banner: u.banner || DEFAULT_EQUIP.banner,
+    title: u.title || DEFAULT_EQUIP.title,
+    coins: u.coins ?? 0,
     opens: u.opens,
     xp,
     level: levelInfo(xp).level,
     friendCode: u.friend_code ?? '',
     joinedAt: u.created_at,
+  }
+}
+
+/** Заработанные значки (id) игрока — для расчёта открытия косметики. */
+export function badgeSet(id: number): Set<string> {
+  const profile = getProfile(id)
+  if (!profile) return new Set()
+  const stats = gameStats(id)
+  const distinctGames = stats.filter(s => s.opens > 0).length
+  const friends = friendCount(id)
+  const badges = computeBadges({ opens: profile.opens, distinctGames, friends, level: profile.level })
+  return new Set(badges.filter(b => b.earned).map(b => b.id))
+}
+
+/** Что надето сейчас, по всем слотам (с дефолтами для пустых). */
+export function equippedOf(id: number): Record<Slot, string> {
+  const u = db
+    .prepare('SELECT avatar, frame, hat, eyewear, effect, companion, banner, title FROM users WHERE id=?')
+    .get(id) as Record<string, string | null> | undefined
+  return {
+    avatar: avatarOf(u?.avatar, id).id,
+    frame: u?.frame || DEFAULT_EQUIP.frame,
+    hat: u?.hat || DEFAULT_EQUIP.hat,
+    eyewear: u?.eyewear || DEFAULT_EQUIP.eyewear,
+    effect: u?.effect || DEFAULT_EQUIP.effect,
+    companion: u?.companion || DEFAULT_EQUIP.companion,
+    banner: u?.banner || DEFAULT_EQUIP.banner,
+    title: u?.title || DEFAULT_EQUIP.title,
   }
 }
 
@@ -92,21 +141,23 @@ export function getProfile(id: number): Profile | null {
   return toProfile(u)
 }
 
-/** Сменить отображаемое имя и/или аватар. Возвращает обновлённый профиль. */
-export function updateProfile(id: number, patch: { name?: string; avatar?: string }): Profile | null {
+/** Сменить отображаемое имя. Аватар и прочая косметика — через equip (там
+ *  проверяется владение), чтобы нельзя было надеть запертый предмет в обход. */
+export function updateProfile(id: number, patch: { name?: string }): Profile | null {
   const name = patch.name?.trim().slice(0, 40)
   if (name) db.prepare('UPDATE users SET name=? WHERE id=?').run(name, id)
-  if (patch.avatar) db.prepare('UPDATE users SET avatar=? WHERE id=?').run(avatarOf(patch.avatar).id, id)
   return getProfile(id)
 }
 
 // Record that a player launched a game and return their updated profile.
 export function recordOpen(id: number, gameId: string): Profile {
-  db.prepare("INSERT OR IGNORE INTO users (id, name) VALUES (?, 'Игрок')").run(id)
+  // Если игрок впервые появляется через /open (а не /auth), всё равно даём
+  // стартовый баланс — чтобы экономика была одинаковой на любом пути входа.
+  db.prepare("INSERT OR IGNORE INTO users (id, name, coins) VALUES (?, 'Игрок', ?)").run(id, STARTER_COINS)
   db.prepare('INSERT INTO opens (user_id, game_id) VALUES (?,?)').run(id, gameId)
-  // last_seen must advance on every launch: the friends list orders by it and
-  // the «в сети» / «недавно активные» status depends on it being fresh.
-  db.prepare("UPDATE users SET opens=opens+1, last_seen=datetime('now') WHERE id=?").run(id)
+  // last_seen must advance on every launch (friends ordering + «в сети»),
+  // and each launch pays out Game coins to feed the cosmetics economy.
+  db.prepare("UPDATE users SET opens=opens+1, coins=coins+?, last_seen=datetime('now') WHERE id=?").run(COINS_PER_OPEN, id)
   return getProfile(id)!
 }
 

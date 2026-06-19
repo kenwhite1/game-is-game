@@ -1,7 +1,7 @@
 import { getInitData } from './telegram'
 import type {
   AuthResponse, GameCard, Profile, ProfileDetail,
-  Friend, ActivityItem, LeaderRow,
+  Friend, ActivityItem, LeaderRow, Wardrobe, Slot,
 } from '@shared/types'
 
 let token: string | null = sessionStorage.getItem('gg_jwt')
@@ -37,9 +37,13 @@ export const api = {
   open: (gameId: string) => req<{ profile: Profile; recent: string[] }>('/open', { gameId }),
 
   profileDetail: () => req<ProfileDetail>('/profile/detail'),
-  updateProfile: (patch: { name?: string; avatar?: string }) => req<{ profile: Profile }>('/profile/update', patch),
+  updateProfile: (patch: { name: string }) => req<{ profile: Profile }>('/profile/update', patch),
 
   social: () => req<SocialSnapshot>('/social'),
   addFriend: (code: string) => req<{ friend: Friend; friends: Friend[] }>('/friends/add', { code }),
   removeFriend: (friendId: number) => req<{ friends: Friend[] }>('/friends/remove', { friendId }),
+
+  cosmetics: () => req<Wardrobe>('/cosmetics'),
+  equip: (slot: Slot, itemId: string) => req<{ profile: Profile; wardrobe: Wardrobe }>('/cosmetics/equip', { slot, itemId }),
+  buy: (itemId: string) => req<{ profile: Profile; wardrobe: Wardrobe }>('/cosmetics/buy', { itemId }),
 }

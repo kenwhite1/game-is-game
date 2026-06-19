@@ -1,12 +1,29 @@
 // Общие типы для клиента и сервера.
 import type { GameCard } from './games'
 import type { Badge } from './progression'
+import type { Cosmetic, Slot, Look } from './cosmetics'
 
 export interface Profile {
   id: number
   name: string
-  /** id аватара из shared/avatars. */
+  /** id персонажа из каталога косметики. */
   avatar: string
+  /** id надетой рамки (frame_*). */
+  frame: string
+  /** id надетой шляпы (hat_*). */
+  hat: string
+  /** id надетых очков (eye_*). */
+  eyewear: string
+  /** id надетого эффекта (fx_*). */
+  effect: string
+  /** id надетого питомца (comp_*). */
+  companion: string
+  /** id надетого баннера (banner_*). */
+  banner: string
+  /** id надетого титула (title_*). */
+  title: string
+  /** Баланс мягкой валюты Game. */
+  coins: number
   /** Сколько раз игрок открывал игры из хаба. */
   opens: number
   /** Накопленный опыт (выводится из opens). */
@@ -36,7 +53,8 @@ export interface ProfileDetail {
 export interface Friend {
   id: number
   name: string
-  avatar: string
+  /** Полный образ — чтобы видеть друга «как он одет». */
+  look: Look
   level: number
   /** id последней игры, которую запускал друг. */
   lastGame: string | null
@@ -48,7 +66,7 @@ export interface ActivityItem {
   id: number
   userId: number
   name: string
-  avatar: string
+  look: Look
   gameId: string
   ts: string
 }
@@ -56,10 +74,34 @@ export interface ActivityItem {
 export interface LeaderRow {
   id: number
   name: string
-  avatar: string
+  look: Look
   level: number
   xp: number
   isMe: boolean
+}
+
+// ─── Косметика ──────────────────────────────────────────────────────────
+
+/** Предмет каталога + состояние для конкретного игрока. */
+export interface CosmeticState {
+  item: Cosmetic
+  owned: boolean
+  equipped: boolean
+  /** Цена в Game, если это товар магазина и ещё не куплен. */
+  price: number | null
+  /** Подпись условия открытия, если предмет заперт. */
+  lockLabel: string
+}
+
+export interface Wardrobe {
+  /** Что надето сейчас, по слотам. */
+  equipped: Record<Slot, string>
+  /** Все предметы со статусом владения/надетости. */
+  items: CosmeticState[]
+  ownedCount: number
+  totalCount: number
+  /** Баланс Game (дублируем для удобства экрана стиля). */
+  coins: number
 }
 
 export interface AuthResponse {
@@ -75,3 +117,4 @@ export interface AuthResponse {
 
 export type { GameCard, GameDef } from './games'
 export type { Badge } from './progression'
+export type { Cosmetic, Slot, Rarity, Look } from './cosmetics'

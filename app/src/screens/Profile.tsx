@@ -4,6 +4,7 @@ import { Avatar } from '../art/Avatar'
 import { EditIcon, CopyIcon, SettingsIcon } from '../art/icons'
 import { copyText } from '../telegram'
 import { levelInfo } from '@shared/progression'
+import { bannerBg, titleText } from './Home'
 import type { GameCard } from '@shared/types'
 
 function gameStyle(card?: GameCard): CSSProperties {
@@ -15,6 +16,7 @@ export function Profile() {
   const detail = useStore(s => s.detail)
   const catalog = useStore(s => s.catalog)
   const openSheet = useStore(s => s.openSheet)
+  const setTab = useStore(s => s.setTab)
   const showToast = useStore(s => s.showToast)
 
   if (!profile) {
@@ -36,20 +38,25 @@ export function Profile() {
     <div className="tab-page stagger">
       <div className="topbar">
         <div className="hello"><div className="hi">Хаб</div><div className="nm">Профиль</div></div>
+        <button className="coin-chip" onClick={() => setTab('style')} aria-label="Магазин стиля"><span className="coin">G</span>{profile.coins.toLocaleString('ru')}</button>
         <button className="iconbtn" onClick={() => openSheet('settings')} aria-label="Настройки"><SettingsIcon /></button>
       </div>
 
       {/* identity card */}
-      <div className="banner">
+      <div className="banner" style={{ background: bannerBg(profile.banner) }}>
         <div className="banner-top">
-          <button onClick={() => openSheet('editProfile')} style={{ border: 'none', background: 'none', padding: 0, cursor: 'pointer' }} aria-label="Сменить аватар">
-            <Avatar id={profile.avatar} seed={profile.id} size={62} ring={false} />
+          <button onClick={() => setTab('style')} style={{ border: 'none', background: 'none', padding: 0, cursor: 'pointer' }} aria-label="Открыть стиль">
+            <Avatar
+              avatar={profile.avatar} frame={profile.frame} hat={profile.hat}
+              eyewear={profile.eyewear} effect={profile.effect} companion={profile.companion}
+              seed={profile.id} size={62} ring={false}
+            />
           </button>
           <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
             <div className="nm2">{profile.name}</div>
-            <div className="tag2">В хабе с {new Date(profile.joinedAt).getFullYear() || 2026}</div>
+            <div className="tag2">{titleText(profile.title)}</div>
           </div>
-          <button className="banner-edit" onClick={() => openSheet('editProfile')} aria-label="Редактировать профиль">
+          <button className="banner-edit" onClick={() => openSheet('editProfile')} aria-label="Редактировать имя">
             <EditIcon />
           </button>
         </div>

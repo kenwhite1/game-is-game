@@ -31,7 +31,7 @@ export function Activity() {
           leaderboard.map((r, i) => (
             <div className={`lb-row ${r.isMe ? 'me' : ''}`} key={r.id}>
               <span className={`rank ${i < 3 ? 'top' : ''}`}>{i < 3 ? MEDALS[i] : i + 1}</span>
-              <Avatar id={r.avatar} seed={r.id} size={40} />
+              <Avatar look={r.look} seed={r.id} size={40} />
               <div className="tx">
                 <div className="t">{r.name}{r.isMe ? ' · ты' : ''}</div>
                 <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--ink-soft)' }}>Уровень {r.level}</div>
@@ -48,7 +48,7 @@ export function Activity() {
             const game = gameById(catalog, a.gameId)
             return (
               <div className="act" key={a.id}>
-                <Avatar id={a.avatar} seed={a.userId} size={38} />
+                <Avatar look={a.look} seed={a.userId} size={38} />
                 <div className="tx">
                   <div className="t"><b>{a.name}</b> открыл(а) {game ? game.name : 'игру'}</div>
                   <div className="when">{timeAgo(a.ts)}</div>

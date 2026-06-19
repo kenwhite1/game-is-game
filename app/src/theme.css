@@ -381,7 +381,85 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 
 .soft { color: var(--ink-soft); }
 
+/* -- cosmetic frames (rings around avatars) ------------------ */
+.av-frame { display: inline-grid; place-items: center; border-radius: 50%; padding: 3px; flex-shrink: 0; }
+/* тонкое кольцо цвета персонажа сохраняется даже под декоративной рамкой */
+.av-frame .av--bare { box-shadow: inset 0 0 0 2px var(--av-ring, transparent), 0 2px 6px rgba(74,46,16,.22); }
+.fr-spin { animation: frSpin 6s linear infinite; }
+.fr-spin > .av--bare { animation: frSpin 6s linear infinite reverse; } /* держим эмодзи ровно */
+.fr-pulse { animation: frPulse 2.2s ease-in-out infinite; }
+.fr-shimmer { background-size: 220% 220% !important; animation: frShimmer 3s linear infinite; }
+
+/* -- avatar accessory layers (hat / eyewear / companion / fx) - */
+.av-stack { position: relative; display: inline-grid; place-items: center; flex-shrink: 0; }
+.av-stack > .av, .av-stack > .av-frame { grid-area: 1 / 1; }
+.acc { position: absolute; line-height: 1; pointer-events: none; z-index: 5; filter: drop-shadow(0 1px 2px rgba(0,0,0,.28)); }
+.acc-hat { top: -25%; left: 50%; transform: translateX(-50%) rotate(7deg); z-index: 6; }
+.acc-eye { top: 27%; left: 50%; transform: translateX(-50%); z-index: 4; }
+.acc-comp { bottom: -10%; right: -15%; z-index: 6; }
+.fx { position: absolute; inset: -14%; border-radius: 50%; pointer-events: none; z-index: 3; }
+.fx-p { position: absolute; line-height: 1; filter: drop-shadow(0 1px 1px rgba(0,0,0,.25)); }
+.fx-p.p1 { top: -8%; right: -4%; }
+.fx-p.p2 { bottom: -6%; left: -4%; }
+.fx-float .fx-p { animation: fxFloat 2.6s ease-in-out infinite; }
+.fx-float .fx-p.p2 { animation-delay: -1.3s; }
+.fx-rise .fx-p { animation: fxRise 2.4s linear infinite; }
+.fx-rise .fx-p.p2 { animation-delay: -1.2s; }
+.fx-orbit { animation: frSpin 7s linear infinite; }
+.fx-spin .fx-p { animation: frSpin 3.2s linear infinite; }
+.fx-pulse .fx-p { animation: fxPulse 1.7s ease-in-out infinite; }
+
+/* -- currency (Game) ----------------------------------------- */
+.coin-chip { flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; border: none; cursor: pointer;
+  background: var(--card); color: var(--brown-deep); font-weight: 900; font-size: 14px; padding: 7px 13px 7px 8px;
+  border-radius: 999px; box-shadow: var(--shadow-lip), inset 0 0 0 1px rgba(255,255,255,.5); transition: transform .1s ease; }
+.coin-chip:active { transform: scale(.94); }
+.coin { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; font-size: 11px; font-weight: 900; color: #6a4a06;
+  background: radial-gradient(circle at 35% 30%, #ffe7a6, #f2a93b 70%, #caa12e); box-shadow: inset 0 -1.5px 0 rgba(122,79,42,.35), 0 1px 2px rgba(0,0,0,.2); }
+
+/* -- slot strip (wardrobe categories) ------------------------ */
+.slot-strip { display: flex; gap: 8px; width: 100%; overflow-x: auto; padding-bottom: 4px; margin-bottom: 14px; scrollbar-width: none; }
+.slot-strip::-webkit-scrollbar { display: none; }
+.slot-chip { flex-shrink: 0; cursor: pointer; border: none; background: var(--card-2); color: var(--ink-soft); font-weight: 900; font-size: 13.5px;
+  padding: 9px 15px; border-radius: 14px; box-shadow: inset 0 0 0 1px var(--line); transition: all .12s ease; }
+.slot-chip.on { background: var(--blue); color: #fff; box-shadow: 0 3px 0 var(--blue-deep); }
+
+/* -- wardrobe / locker --------------------------------------- */
+.banner.preview { margin-bottom: 14px; }
+.cos-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 11px; width: 100%; }
+.cos { position: relative; cursor: pointer; border: none; background: var(--card); border-radius: var(--radius);
+  padding: 12px 8px 10px; display: flex; flex-direction: column; align-items: center; gap: 7px; overflow: hidden;
+  box-shadow: var(--shadow-lip), inset 0 0 0 1px rgba(255,255,255,.5); transition: transform .1s ease; }
+.cos:active { transform: scale(.95); }
+.cos.eq { box-shadow: var(--shadow-lip), inset 0 0 0 2.5px var(--rar); }
+.cos-art { height: 56px; display: grid; place-items: center; }
+.cos-name { font-size: 12px; font-weight: 900; color: var(--brown-deep); text-align: center; line-height: 1.1;
+  width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cos-rar { font-size: 9.5px; font-weight: 900; letter-spacing: .3px; text-transform: uppercase; }
+.cos-check { position: absolute; top: 7px; right: 7px; width: 20px; height: 20px; border-radius: 50%; background: var(--blue);
+  color: #fff; display: grid; place-items: center; box-shadow: 0 2px 5px rgba(0,0,0,.22); }
+.cos-check svg { width: 13px; height: 13px; }
+.cos-buy { position: absolute; top: 7px; left: 7px; display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 900;
+  color: #fff; background: var(--blue); padding: 3px 8px 3px 4px; border-radius: 999px; box-shadow: 0 2px 0 var(--blue-deep); }
+.cos-buy .coin { width: 15px; height: 15px; font-size: 9px; }
+.cos.locked .cos-art { filter: grayscale(.5) opacity(.65); }
+.cos-lock { position: absolute; inset: 0; border-radius: inherit; background: rgba(40,26,10,.4); backdrop-filter: blur(1.5px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #fff; padding: 6px; }
+.cos-lock svg { width: 18px; height: 18px; opacity: .9; }
+.cos-lock span { font-size: 10px; font-weight: 800; text-align: center; line-height: 1.15; }
+.sw-banner { width: 52px; height: 40px; border-radius: 11px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.4), 0 2px 5px rgba(74,46,16,.18); }
+.sw-title { font-size: 12px; font-weight: 900; color: var(--rar); background: var(--card-2); padding: 9px 12px; border-radius: 999px;
+  box-shadow: inset 0 0 0 1.5px var(--line); max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sw-none { width: 50px; height: 50px; border-radius: 50%; display: grid; place-items: center; color: var(--ink-soft);
+  border: 2px dashed rgba(122,79,42,.32); font-size: 13px; font-weight: 900; }
+
 /* -- keyframes ----------------------------------------------- */
+@keyframes frSpin { to { transform: rotate(360deg); } }
+@keyframes frPulse { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.28); } }
+@keyframes frShimmer { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+@keyframes fxFloat { 0%,100% { transform: translateY(0); opacity: .5; } 50% { transform: translateY(-22%); opacity: 1; } }
+@keyframes fxRise { 0% { transform: translateY(45%); opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { transform: translateY(-55%); opacity: 0; } }
+@keyframes fxPulse { 0%,100% { transform: scale(.8); opacity: .6; } 50% { transform: scale(1.25); opacity: 1; } }
 @keyframes fade { from { opacity: 0; } }
 @keyframes up { from { transform: translateY(100%); } }
 @keyframes pop { 0% { transform: scale(.8); opacity: 0; } 60% { transform: scale(1.03); } 100% { transform: scale(1); opacity: 1; } }

@@ -3,16 +3,16 @@ import { useStore, type Tab } from './store'
 import { Home } from './screens/Home'
 import { Friends } from './screens/Friends'
 import { Activity } from './screens/Activity'
+import { Style } from './screens/Style'
 import { Profile } from './screens/Profile'
 import { BrandLogo } from './screens/Logo'
-import { Avatar } from './art/Avatar'
 import { TabIcons, CheckIcon } from './art/icons'
-import { AVATARS } from '@shared/avatars'
 
 const TABS: { key: Tab; ru: string }[] = [
   { key: 'home', ru: 'Дом' },
   { key: 'friends', ru: 'Друзья' },
   { key: 'activity', ru: 'Лента' },
+  { key: 'style', ru: 'Стиль' },
   { key: 'profile', ru: 'Профиль' },
 ]
 
@@ -45,6 +45,7 @@ export function App() {
           {tab === 'home' && <Home />}
           {tab === 'friends' && <Friends />}
           {tab === 'activity' && <Activity />}
+          {tab === 'style' && <Style />}
           {tab === 'profile' && <Profile />}
         </div>
       </div>
@@ -146,35 +147,28 @@ function Settings() {
 function EditProfile({ onDone }: { onDone(): void }) {
   const profile = useStore(s => s.profile)!
   const saveProfile = useStore(s => s.saveProfile)
+  const setTab = useStore(s => s.setTab)
   const [name, setName] = useState(profile.name)
-  const [avatar, setAvatar] = useState(profile.avatar)
   const [busy, setBusy] = useState(false)
 
   const save = async () => {
     setBusy(true)
-    await saveProfile({ name: name.trim() || profile.name, avatar })
+    await saveProfile({ name: name.trim() || profile.name })
     setBusy(false)
     onDone()
   }
+  const toStyle = () => { onDone(); setTab('style') }
 
   return (
     <>
-      <h2>Профиль</h2>
-      <div style={{ display: 'grid', placeItems: 'center', margin: '14px 0' }}>
-        <Avatar id={avatar} seed={profile.id} size={84} />
-      </div>
-      <div className="kicker" style={{ marginBottom: 8 }}>Имя</div>
+      <h2>Имя профиля</h2>
+      <div className="kicker" style={{ margin: '14px 0 8px' }}>Имя</div>
       <input className="input" value={name} maxLength={40} onChange={e => setName(e.target.value)} placeholder="Как тебя зовут" style={{ width: '100%', letterSpacing: 0 }} />
-      <div className="kicker" style={{ margin: '16px 0 10px' }}>Аватар</div>
-      <div className="av-grid">
-        {AVATARS.map(a => (
-          <button key={a.id} className={`av-pick ${avatar === a.id ? 'sel' : ''}`} onClick={() => setAvatar(a.id)} aria-label={a.id}>
-            <span>{a.emoji}</span>
-          </button>
-        ))}
-      </div>
-      <button className="btn block" style={{ marginTop: 18 }} onClick={save} disabled={busy}>
+      <button className="btn block" style={{ marginTop: 16 }} onClick={save} disabled={busy}>
         <CheckIcon /> Сохранить
+      </button>
+      <button className="btn block ghost" style={{ marginTop: 10 }} onClick={toStyle}>
+        ✨ Сменить образ
       </button>
     </>
   )

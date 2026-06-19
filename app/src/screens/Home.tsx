@@ -4,9 +4,20 @@ import { Avatar } from '../art/Avatar'
 import { GameTileIcon } from '../art/GameTileIcon'
 import { SoundOnIcon, SoundOffIcon, HelpIcon, PlayIcon } from '../art/icons'
 import { levelInfo } from '@shared/progression'
+import { cosmeticById } from '@shared/cosmetics'
+import type { BannerItem, TitleItem } from '@shared/cosmetics'
 import type { GameCard } from '@shared/types'
 
 type IconId = 'uno' | 'croco' | 'mafia' | 'pet'
+
+export function bannerBg(id: string): string | undefined {
+  const c = cosmeticById(id)
+  return c && c.slot === 'banner' ? (c as BannerItem).bg : undefined
+}
+export function titleText(id: string): string {
+  const c = cosmeticById(id)
+  return c && c.slot === 'title' ? (c as TitleItem).text : 'Игрок'
+}
 
 function glow(hex: string, a = 0.22): string {
   const h = hex.replace('#', '')
@@ -39,6 +50,7 @@ export function Home() {
           <div className="hi">{firstName ? 'С возвращением' : 'Привет 👋'}</div>
           <div className="nm">{firstName ?? 'Game is Game'}</div>
         </div>
+        {profile && <button className="coin-chip" onClick={() => setTab('style')} aria-label="Магазин стиля"><span className="coin">G</span>{profile.coins.toLocaleString('ru')}</button>}
         <button className="iconbtn" onClick={toggleSound} aria-label="Звук">
           {soundOn ? <SoundOnIcon /> : <SoundOffIcon />}
         </button>
@@ -98,12 +110,16 @@ function PlayerBanner({ onOpen }: { onOpen(): void }) {
   const profile = useStore(s => s.profile)!
   const lv = levelInfo(profile.xp)
   return (
-    <button className="banner" onClick={onOpen} style={{ border: 'none', cursor: 'pointer' }}>
+    <button className="banner" onClick={onOpen} style={{ border: 'none', cursor: 'pointer', background: bannerBg(profile.banner) }}>
       <div className="banner-top">
-        <Avatar id={profile.avatar} seed={profile.id} size={56} ring={false} />
+        <Avatar
+          avatar={profile.avatar} frame={profile.frame} hat={profile.hat}
+          eyewear={profile.eyewear} effect={profile.effect} companion={profile.companion}
+          seed={profile.id} size={56} ring={false}
+        />
         <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
           <div className="nm2">{profile.name}</div>
-          <div className="tag2">Игрок Game is Game</div>
+          <div className="tag2">{titleText(profile.title)}</div>
         </div>
         <span style={{ fontSize: 13, fontWeight: 900, background: 'rgba(255,255,255,.2)', padding: '6px 12px', borderRadius: 999, boxShadow: 'inset 0 0 0 1.5px rgba(255,255,255,.35)' }}>
           Ур. {lv.level}

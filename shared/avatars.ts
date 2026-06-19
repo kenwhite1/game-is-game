@@ -1,5 +1,7 @@
-// Палитра аватаров хаба: эмодзи + цвет «кольца». Игрок выбирает в профиле.
-// Дефолт детерминированно зависит от id, чтобы у каждого был свой вид сразу.
+// Аватары хаба выводятся из единого каталога косметики (shared/cosmetics).
+// Здесь — тонкая обёртка: список, дефолт по seed и резолвер эмодзи+кольца,
+// чтобы любой аватар (в т.ч. редкие скины) корректно рисовался везде.
+import { AVATAR_ITEMS } from './cosmetics'
 
 export interface AvatarDef {
   id: string
@@ -7,27 +9,17 @@ export interface AvatarDef {
   ring: string
 }
 
-export const AVATARS: AvatarDef[] = [
-  { id: 'fox', emoji: '🦊', ring: '#f2a93b' },
-  { id: 'owl', emoji: '🦉', ring: '#3d8bff' },
-  { id: 'cat', emoji: '🐱', ring: '#e2574c' },
-  { id: 'panda', emoji: '🐼', ring: '#5c7cfa' },
-  { id: 'frog', emoji: '🐸', ring: '#7fb069' },
-  { id: 'dragon', emoji: '🐲', ring: '#9b6cff' },
-  { id: 'ghost', emoji: '👻', ring: '#22b8cf' },
-  { id: 'alien', emoji: '👾', ring: '#cc5de8' },
-  { id: 'robot', emoji: '🤖', ring: '#868e96' },
-  { id: 'unicorn', emoji: '🦄', ring: '#f06595' },
-  { id: 'lion', emoji: '🦁', ring: '#f59f00' },
-  { id: 'penguin', emoji: '🐧', ring: '#4dabf7' },
-]
+export const AVATARS: AvatarDef[] = AVATAR_ITEMS.map(a => ({ id: a.id, emoji: a.emoji, ring: a.ring }))
 
+// Стартовые аватары — только из них выбирается дефолт нового игрока.
+const STARTERS = AVATAR_ITEMS.filter(a => a.unlock.kind === 'starter').map(a => a.id)
 const byId = new Map(AVATARS.map(a => [a.id, a]))
 
 /** Детерминированный аватар по умолчанию из id пользователя. */
 export function defaultAvatar(seed: number): string {
-  const i = Math.abs(Math.floor(seed)) % AVATARS.length
-  return AVATARS[i].id
+  const pool = STARTERS.length ? STARTERS : AVATARS.map(a => a.id)
+  const i = Math.abs(Math.floor(seed)) % pool.length
+  return pool[i]
 }
 
 export function avatarOf(id: string | null | undefined, seed = 0): AvatarDef {
