@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useStore, type Tab } from './store'
 import { Home } from './screens/Home'
+import { Shop } from './screens/Shop'
 import { Friends } from './screens/Friends'
-import { Activity } from './screens/Activity'
 import { Style } from './screens/Style'
 import { Profile } from './screens/Profile'
 import { BrandLogo } from './screens/Logo'
@@ -10,9 +10,9 @@ import { TabIcons, CheckIcon } from './art/icons'
 
 const TABS: { key: Tab; ru: string }[] = [
   { key: 'home', ru: 'Дом' },
+  { key: 'shop', ru: 'Магазин' },
+  { key: 'style', ru: 'Аватар' },
   { key: 'friends', ru: 'Друзья' },
-  { key: 'activity', ru: 'Лента' },
-  { key: 'style', ru: 'Стиль' },
   { key: 'profile', ru: 'Профиль' },
 ]
 
@@ -43,9 +43,9 @@ export function App() {
       <div className="page">
         <div className="tab-host" key={tab}>
           {tab === 'home' && <Home />}
-          {tab === 'friends' && <Friends />}
-          {tab === 'activity' && <Activity />}
+          {tab === 'shop' && <Shop />}
           {tab === 'style' && <Style />}
+          {tab === 'friends' && <Friends />}
           {tab === 'profile' && <Profile />}
         </div>
       </div>

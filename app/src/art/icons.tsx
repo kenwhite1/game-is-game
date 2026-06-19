@@ -139,11 +139,20 @@ function StyleNav() {
     </svg>
   )
 }
+function ShopNav() {
+  return (
+    <svg viewBox="0 0 24 24" {...S}>
+      <path d="M6 8h12l-1 11a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1L6 8z" />
+      <path d="M9 8V6a3 3 0 0 1 6 0v2" />
+    </svg>
+  )
+}
 
 export const TabIcons: Record<string, JSX.Element> = {
   home: <HomeNav />,
+  shop: <ShopNav />,
+  style: <StyleNav />,
   friends: <FriendsNav />,
   activity: <ActivityNav />,
-  style: <StyleNav />,
   profile: <ProfileNav />,
 }

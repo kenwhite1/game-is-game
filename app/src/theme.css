@@ -393,10 +393,12 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 /* -- avatar accessory layers (hat / eyewear / companion / fx) - */
 .av-stack { position: relative; display: inline-grid; place-items: center; flex-shrink: 0; }
 .av-stack > .av, .av-stack > .av-frame { grid-area: 1 / 1; }
+.av-char { display: grid; place-items: center; width: 100%; height: 100%; }
+.character { display: block; }
 .acc { position: absolute; line-height: 1; pointer-events: none; z-index: 5; filter: drop-shadow(0 1px 2px rgba(0,0,0,.28)); }
-.acc-hat { top: -25%; left: 50%; transform: translateX(-50%) rotate(7deg); z-index: 6; }
-.acc-eye { top: 27%; left: 50%; transform: translateX(-50%); z-index: 4; }
-.acc-comp { bottom: -10%; right: -15%; z-index: 6; }
+.acc-hat { top: -9%; left: 50%; transform: translateX(-50%) rotate(5deg); z-index: 6; }
+.acc-eye { top: 26%; left: 50%; transform: translateX(-50%); z-index: 4; }
+.acc-comp { bottom: -8%; right: -14%; z-index: 6; }
 .fx { position: absolute; inset: -14%; border-radius: 50%; pointer-events: none; z-index: 3; }
 .fx-p { position: absolute; line-height: 1; filter: drop-shadow(0 1px 1px rgba(0,0,0,.25)); }
 .fx-p.p1 { top: -8%; right: -4%; }
@@ -442,6 +444,20 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 .cos-buy { position: absolute; top: 7px; left: 7px; display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 900;
   color: #fff; background: var(--blue); padding: 3px 8px 3px 4px; border-radius: 999px; box-shadow: 0 2px 0 var(--blue-deep); }
 .cos-buy .coin { width: 15px; height: 15px; font-size: 9px; }
+
+/* -- shop ----------------------------------------------------- */
+.shop-hero { width: 100%; border-radius: var(--radius-lg); padding: 16px 18px; margin-bottom: 14px; color: #fff; position: relative; overflow: hidden;
+  background: var(--grad-hero); box-shadow: var(--shadow-pop); }
+.shop-hero-t { font-size: 18px; font-weight: 900; letter-spacing: -.01em; }
+.shop-hero-s { font-size: 13px; font-weight: 700; color: rgba(255,255,255,.86); margin-top: 2px; }
+.cos.owned { opacity: .96; }
+.cos-price { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 900; color: #fff;
+  background: var(--green); padding: 4px 10px 4px 5px; border-radius: 999px; box-shadow: 0 2px 0 var(--green-deep); }
+.cos-price .coin { width: 15px; height: 15px; font-size: 9px; }
+.cos-owned { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 900; color: var(--green-deep); }
+.cos-owned svg { width: 13px; height: 13px; }
+.cos-soon { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 900; color: var(--ink-soft); }
+.cos-soon svg { width: 13px; height: 13px; }
 .cos.locked .cos-art { filter: grayscale(.5) opacity(.65); }
 .cos-lock { position: absolute; inset: 0; border-radius: inherit; background: rgba(40,26,10,.4); backdrop-filter: blur(1.5px);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #fff; padding: 6px; }

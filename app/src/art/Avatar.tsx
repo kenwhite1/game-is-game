@@ -1,7 +1,8 @@
 import type { CSSProperties } from 'react'
-import { avatarOf } from '@shared/avatars'
+import { colorOf, faceOf } from '@shared/avatars'
 import { cosmeticById } from '@shared/cosmetics'
 import type { FrameItem, EffectItem, Look } from '@shared/cosmetics'
+import { Character } from './Character'
 
 type Props = Partial<Look> & {
   /** Готовый образ (друзья/лента/лидеры). Имеет приоритет над отдельными props. */
@@ -16,22 +17,22 @@ function emojiOf(id: string | undefined): string {
   return c && (c.slot === 'hat' || c.slot === 'eyewear' || c.slot === 'companion') ? (c as { emoji: string }).emoji : ''
 }
 
-// Аватар = персонаж + надетые слои (рамка, очки, шляпа, питомец, эффект).
-// Аксессуары позиционируются в долях от размера, поэтому «сидят» на персонаже
-// при любом масштабе. Питомец и эффект показываются только на крупных аватарах.
+// Аватар = персонаж «Бубл» (цвет + лицо) + надетые слои. Аксессуары крепятся
+// в фиксированных точках персонажа, поэтому всегда сидят ровно. Питомец и
+// эффект показываются только на крупных аватарах.
 export function Avatar(props: Props) {
   const { look, size = 44, seed = 0, ring = true } = props
   const ids = {
-    avatar: look?.avatar ?? props.avatar,
+    color: look?.color ?? props.color,
+    face: look?.face ?? props.face,
     frame: look?.frame ?? props.frame,
     hat: look?.hat ?? props.hat,
     eyewear: look?.eyewear ?? props.eyewear,
     effect: look?.effect ?? props.effect,
     companion: look?.companion ?? props.companion,
   }
-  const a = avatarOf(ids.avatar, seed)
-  const emojiSize = Math.round(size * 0.52)
-  const dim: CSSProperties = { width: size, height: size, fontSize: emojiSize }
+  const hex = colorOf(ids.color, seed).hex
+  const faceKey = faceOf(ids.face).face
 
   const fr = ids.frame && ids.frame !== 'frame_none' ? (cosmeticById(ids.frame) as FrameItem | undefined) : undefined
   const hat = emojiOf(ids.hat)
@@ -40,28 +41,30 @@ export function Avatar(props: Props) {
   const fx = ids.effect && ids.effect !== 'fx_none' ? (cosmeticById(ids.effect) as EffectItem | undefined) : undefined
   const big = size >= 36
 
-  const circle = fr && fr.slot === 'frame'
+  const plate = <span className="av-char"><Character color={hex} face={faceKey} size={size} /></span>
+
+  const base = fr && fr.slot === 'frame'
     ? (
-      <span className={`av-frame ${fr.anim ? `fr-${fr.anim}` : ''}`} style={{ background: fr.bg, boxShadow: fr.glow ? `0 0 14px ${fr.glow}` : undefined }}>
-        {/* тонкое внутреннее кольцо цвета персонажа сохраняется под любой рамкой */}
-        <span className="av av--bare" style={{ ...dim, ['--av-ring']: a.ring } as CSSProperties}><span>{a.emoji}</span></span>
+      <span
+        className={`av-frame ${fr.anim ? `fr-${fr.anim}` : ''}`}
+        style={{ background: fr.bg, boxShadow: fr.glow ? `0 0 14px ${fr.glow}` : undefined, ['--av-ring']: hex } as CSSProperties}
+      >
+        <span className="av av--bare" style={{ width: size, height: size }}>{plate}</span>
       </span>
     )
     : (
-      <span className="av" style={{ ...dim, ...(ring ? ({ ['--av-ring']: a.ring } as CSSProperties) : {}) }}>
-        <span>{a.emoji}</span>
-      </span>
+      <span className="av" style={{ width: size, height: size, ...(ring ? ({ ['--av-ring']: hex } as CSSProperties) : {}) }}>{plate}</span>
     )
 
-  if (!hat && !eye && !comp && !(fx && big)) return circle
+  if (!hat && !eye && !comp && !(fx && big)) return base
 
   return (
     <span className="av-stack" style={{ width: size, height: size }}>
       {fx && big && <FxLayer fx={fx} size={size} />}
-      {circle}
-      {eye && <span className="acc acc-eye" style={{ fontSize: Math.round(size * 0.46) }}>{eye}</span>}
-      {hat && <span className="acc acc-hat" style={{ fontSize: Math.round(size * 0.6) }}>{hat}</span>}
-      {comp && big && <span className="acc acc-comp" style={{ fontSize: Math.round(size * 0.46) }}>{comp}</span>}
+      {base}
+      {eye && <span className="acc acc-eye" style={{ fontSize: Math.round(size * 0.42) }}>{eye}</span>}
+      {hat && <span className="acc acc-hat" style={{ fontSize: Math.round(size * 0.56) }}>{hat}</span>}
+      {comp && big && <span className="acc acc-comp" style={{ fontSize: Math.round(size * 0.44) }}>{comp}</span>}
     </span>
   )
 }

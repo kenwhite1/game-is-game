@@ -5,23 +5,26 @@ import { LockIcon, CheckIcon } from '../art/icons'
 import { levelInfo } from '@shared/progression'
 import { RARITY, cosmeticById, SLOTS, SLOT_RU } from '@shared/cosmetics'
 import type { Slot, Cosmetic, BannerItem, TitleItem, Look } from '@shared/cosmetics'
-import type { CosmeticState } from '@shared/types'
+import type { CosmeticState, Profile } from '@shared/types'
 
 function bannerBg(id: string): string {
   const c = cosmeticById(id)
   return c && c.slot === 'banner' ? (c as BannerItem).bg : ''
 }
-function profileLook(p: { avatar: string; frame: string; hat: string; eyewear: string; effect: string; companion: string }): Look {
-  return { avatar: p.avatar, frame: p.frame, hat: p.hat, eyewear: p.eyewear, effect: p.effect, companion: p.companion }
+export function profileLook(p: Profile): Look {
+  return { color: p.color, face: p.face, frame: p.frame, hat: p.hat, eyewear: p.eyewear, effect: p.effect, companion: p.companion }
 }
+
+const NONE_IDS = new Set(['frame_none', 'hat_none', 'eye_none', 'fx_none', 'comp_none'])
 
 export function Style() {
   const profile = useStore(s => s.profile)
   const wardrobe = useStore(s => s.wardrobe)
   const equip = useStore(s => s.equip)
   const buy = useStore(s => s.buy)
+  const setTab = useStore(s => s.setTab)
   const showToast = useStore(s => s.showToast)
-  const [slot, setSlot] = useState<Slot>('avatar')
+  const [slot, setSlot] = useState<Slot>('color')
 
   if (!profile) {
     return <div className="tab-page"><div className="empty"><div className="em">✨</div><div className="t">Загрузка стиля…</div></div></div>
@@ -31,14 +34,15 @@ export function Style() {
   const titleText = (cosmeticById(profile.title) as TitleItem | undefined)?.text ?? 'Игрок'
   const items = (wardrobe?.items ?? []).filter(i => i.item.slot === slot)
   const coins = wardrobe?.coins ?? profile.coins
+  const look = profileLook(profile)
 
   const onPick = async (s: CosmeticState) => {
     if (s.equipped) return
     if (s.owned) { void equip(slot, s.item.id); return }
     if (s.price != null) {
-      if (coins < s.price) { showToast('Не хватает Game 💰'); return }
+      if (coins < s.price) { showToast('Не хватает Game 💰 — загляни в Магазин'); return }
       const ok = await buy(s.item.id, s.item.name)
-      if (ok) void equip(slot, s.item.id) // купил — сразу надеваем
+      if (ok) void equip(slot, s.item.id)
       return
     }
     showToast(s.lockLabel ? `Откроется: ${s.lockLabel}` : 'Этот предмет закрыт 🔒')
@@ -47,14 +51,14 @@ export function Style() {
   return (
     <div className="tab-page stagger">
       <div className="topbar">
-        <div className="hello"><div className="hi">Хаб</div><div className="nm">Стиль</div></div>
-        <span className="coin-chip" style={{ cursor: 'default' }}><span className="coin">G</span>{coins.toLocaleString('ru')}</span>
+        <div className="hello"><div className="hi">Хаб</div><div className="nm">Аватар</div></div>
+        <button className="coin-chip" onClick={() => setTab('shop')} aria-label="Магазин"><span className="coin">G</span>{coins.toLocaleString('ru')}</button>
       </div>
 
-      {/* live preview — весь образ целиком */}
+      {/* живое превью всего образа */}
       <div className="banner preview" style={{ background: bannerBg(profile.banner) || undefined }}>
         <div className="banner-top">
-          <Avatar look={profileLook(profile)} seed={profile.id} size={62} ring={false} />
+          <Avatar look={look} seed={profile.id} size={64} ring={false} />
           <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
             <div className="nm2">{profile.name}</div>
             <div className="tag2">{titleText}</div>
@@ -75,7 +79,7 @@ export function Style() {
         <div className="empty"><div className="em">✨</div><div className="t">Открываем гардероб…</div></div>
       ) : (
         <div className="cos-grid">
-          {items.map(s => <CosmeticCell key={s.item.id} state={s} look={profileLook(profile)} seed={profile.id} onPick={() => onPick(s)} />)}
+          {items.map(s => <CosmeticCell key={s.item.id} state={s} look={look} seed={profile.id} onPick={() => onPick(s)} />)}
         </div>
       )}
     </div>
@@ -105,14 +109,12 @@ function CosmeticCell({ state, look, seed, onPick }: { state: CosmeticState; loo
   )
 }
 
-const NONE_IDS = new Set(['frame_none', 'hat_none', 'eye_none', 'fx_none', 'comp_none'])
-
 // Свотч показывает предмет НА персонаже игрока, чтобы было видно, как он сидит.
-function Swatch({ item, look, seed }: { item: Cosmetic; look: Look; seed: number }) {
+export function Swatch({ item, look, seed }: { item: Cosmetic; look: Look; seed: number }) {
   if (NONE_IDS.has(item.id)) return <span className="sw-none">нет</span>
-  if (item.slot === 'avatar') return <Avatar avatar={item.id} seed={seed} size={50} />
+  if (item.slot === 'color') return <Avatar color={item.id} face={look.face} seed={seed} size={50} />
+  if (item.slot === 'face') return <Avatar color={look.color} face={item.id} seed={seed} size={50} />
   if (item.slot === 'banner') return <span className="sw-banner" style={{ background: (item as BannerItem).bg }} />
   if (item.slot === 'title') return <span className="sw-title">{(item as TitleItem).text}</span>
-  // надеваемые: показываем поверх текущего образа в этом слоте
   return <Avatar look={{ ...look, [item.slot]: item.id }} seed={seed} size={50} />
 }

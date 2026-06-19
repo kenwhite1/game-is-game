@@ -6,8 +6,10 @@ import type { Cosmetic, Slot, Look } from './cosmetics'
 export interface Profile {
   id: number
   name: string
-  /** id персонажа из каталога косметики. */
-  avatar: string
+  /** id цвета тела персонажа (c_*). */
+  color: string
+  /** id выражения лица (f_*). */
+  face: string
   /** id надетой рамки (frame_*). */
   frame: string
   /** id надетой шляпы (hat_*). */

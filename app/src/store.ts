@@ -8,7 +8,7 @@ import { playSfx, isSoundOn, setSoundOn } from './sound'
 // Статичный каталог на случай, если сервер недоступен (гость, офлайн).
 const STATIC_CATALOG: GameCard[] = GAMES.map(g => ({ ...g, link: defaultLink(g.bot) }))
 
-export type Tab = 'home' | 'friends' | 'activity' | 'style' | 'profile'
+export type Tab = 'home' | 'shop' | 'style' | 'friends' | 'profile'
 type Sheet = 'about' | 'help' | 'settings' | 'editProfile' | null
 
 interface S {
@@ -108,9 +108,9 @@ export const useStore = create<S>((set, get) => ({
     if (tab === get().tab) return
     haptic('select')
     set({ tab })
-    if ((tab === 'friends' || tab === 'activity') && !get().socialLoaded) void get().loadSocial()
+    if (tab === 'friends' && !get().socialLoaded) void get().loadSocial()
     if (tab === 'profile') void get().loadDetail()
-    if (tab === 'style' && !get().wardrobeLoaded) void get().loadWardrobe()
+    if ((tab === 'style' || tab === 'shop') && !get().wardrobeLoaded) void get().loadWardrobe()
   },
 
   launch(card) {

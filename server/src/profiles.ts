@@ -1,7 +1,7 @@
 import { db } from './db'
 import type { Profile, GameStat, ProfileDetail } from '../../shared/types'
 import { xpFromOpens, levelInfo, computeBadges } from '../../shared/progression'
-import { defaultAvatar, avatarOf } from '../../shared/avatars'
+import { defaultColor } from '../../shared/avatars'
 import { DEFAULT_EQUIP, type Slot } from '../../shared/cosmetics'
 import { GAMES } from '../../shared/games'
 
@@ -9,7 +9,8 @@ interface UserRow {
   id: number
   name: string
   username: string | null
-  avatar: string | null
+  color: string | null
+  face: string | null
   frame: string | null
   hat: string | null
   eyewear: string | null
@@ -64,17 +65,17 @@ export function getOrCreateUser(id: number, name: string, username?: string): Us
     db.prepare("UPDATE users SET name=?, last_seen=datetime('now') WHERE id=?").run(name, id)
     existing.name = name
     existing.friend_code = ensureFriendCode(id, existing.friend_code)
-    if (!existing.avatar) {
-      const a = defaultAvatar(id)
-      db.prepare('UPDATE users SET avatar=? WHERE id=?').run(a, id)
-      existing.avatar = a
+    if (!existing.color) {
+      const c = defaultColor(id)
+      db.prepare('UPDATE users SET color=? WHERE id=?').run(c, id)
+      existing.color = c
     }
     return existing
   }
-  const avatar = defaultAvatar(id)
+  const color = defaultColor(id)
   db.prepare(
-    "INSERT INTO users (id, name, username, avatar, coins, last_seen) VALUES (?,?,?,?,?,datetime('now'))",
-  ).run(id, name, username ?? null, avatar, STARTER_COINS)
+    "INSERT INTO users (id, name, username, color, coins, last_seen) VALUES (?,?,?,?,?,datetime('now'))",
+  ).run(id, name, username ?? null, color, STARTER_COINS)
   ensureFriendCode(id, null)
   return db.prepare('SELECT * FROM users WHERE id=?').get(id) as UserRow
 }
@@ -84,7 +85,8 @@ export function toProfile(u: UserRow): Profile {
   return {
     id: u.id,
     name: u.name,
-    avatar: avatarOf(u.avatar, u.id).id,
+    color: u.color || defaultColor(u.id),
+    face: u.face || DEFAULT_EQUIP.face,
     frame: u.frame || DEFAULT_EQUIP.frame,
     hat: u.hat || DEFAULT_EQUIP.hat,
     eyewear: u.eyewear || DEFAULT_EQUIP.eyewear,
@@ -115,10 +117,11 @@ export function badgeSet(id: number): Set<string> {
 /** Что надето сейчас, по всем слотам (с дефолтами для пустых). */
 export function equippedOf(id: number): Record<Slot, string> {
   const u = db
-    .prepare('SELECT avatar, frame, hat, eyewear, effect, companion, banner, title FROM users WHERE id=?')
+    .prepare('SELECT color, face, frame, hat, eyewear, effect, companion, banner, title FROM users WHERE id=?')
     .get(id) as Record<string, string | null> | undefined
   return {
-    avatar: avatarOf(u?.avatar, id).id,
+    color: u?.color || defaultColor(id),
+    face: u?.face || DEFAULT_EQUIP.face,
     frame: u?.frame || DEFAULT_EQUIP.frame,
     hat: u?.hat || DEFAULT_EQUIP.hat,
     eyewear: u?.eyewear || DEFAULT_EQUIP.eyewear,
@@ -134,9 +137,9 @@ export function getProfile(id: number): Profile | null {
   if (!u) return null
   // Старые записи могли появиться до миграции хаба — донастроим на лету.
   if (!u.friend_code) u.friend_code = ensureFriendCode(id, null)
-  if (!u.avatar) {
-    u.avatar = defaultAvatar(id)
-    db.prepare('UPDATE users SET avatar=? WHERE id=?').run(u.avatar, id)
+  if (!u.color) {
+    u.color = defaultColor(id)
+    db.prepare('UPDATE users SET color=? WHERE id=?').run(u.color, id)
   }
   return toProfile(u)
 }

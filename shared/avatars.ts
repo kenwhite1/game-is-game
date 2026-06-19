@@ -1,27 +1,23 @@
-// Аватары хаба выводятся из единого каталога косметики (shared/cosmetics).
-// Здесь — тонкая обёртка: список, дефолт по seed и резолвер эмодзи+кольца,
-// чтобы любой аватар (в т.ч. редкие скины) корректно рисовался везде.
-import { AVATAR_ITEMS } from './cosmetics'
+// Резолверы кастомизации персонажа (цвет тела + выражение лица).
+// Выводятся из единого каталога косметики, чтобы сервер и клиент совпадали.
+import { COLOR_ITEMS, FACE_ITEMS, DEFAULT_EQUIP, type ColorItem, type FaceItem } from './cosmetics'
 
-export interface AvatarDef {
-  id: string
-  emoji: string
-  ring: string
+const STARTER_COLORS = COLOR_ITEMS.filter(c => c.unlock.kind === 'starter').map(c => c.id)
+const colorById = new Map(COLOR_ITEMS.map(c => [c.id, c]))
+const faceById = new Map(FACE_ITEMS.map(f => [f.id, f]))
+
+/** Детерминированный стартовый цвет нового игрока (по id). */
+export function defaultColor(seed: number): string {
+  const pool = STARTER_COLORS.length ? STARTER_COLORS : COLOR_ITEMS.map(c => c.id)
+  return pool[Math.abs(Math.floor(seed)) % pool.length]
 }
 
-export const AVATARS: AvatarDef[] = AVATAR_ITEMS.map(a => ({ id: a.id, emoji: a.emoji, ring: a.ring }))
+export const defaultFace = DEFAULT_EQUIP.face
 
-// Стартовые аватары — только из них выбирается дефолт нового игрока.
-const STARTERS = AVATAR_ITEMS.filter(a => a.unlock.kind === 'starter').map(a => a.id)
-const byId = new Map(AVATARS.map(a => [a.id, a]))
-
-/** Детерминированный аватар по умолчанию из id пользователя. */
-export function defaultAvatar(seed: number): string {
-  const pool = STARTERS.length ? STARTERS : AVATARS.map(a => a.id)
-  const i = Math.abs(Math.floor(seed)) % pool.length
-  return pool[i]
+export function colorOf(id: string | null | undefined, seed = 0): ColorItem {
+  return (id && colorById.get(id)) || colorById.get(defaultColor(seed)) || COLOR_ITEMS[0]
 }
 
-export function avatarOf(id: string | null | undefined, seed = 0): AvatarDef {
-  return (id && byId.get(id)) || byId.get(defaultAvatar(seed)) || AVATARS[0]
+export function faceOf(id: string | null | undefined): FaceItem {
+  return (id && faceById.get(id)) || faceById.get(DEFAULT_EQUIP.face) || FACE_ITEMS[0]
 }

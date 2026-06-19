@@ -1,6 +1,7 @@
 // Косметика хаба Game is Game — «скины», которые НАДЕВАЮТСЯ на персонажа.
 // Слоты (как в Roblox-редакторе образа):
-//   avatar    — сам персонаж (эмодзи)
+//   color     — цвет тела персонажа «Бубл»
+//   face      — выражение лица
 //   frame     — кольцо-рамка вокруг аватара
 //   hat       — головной убор (поверх макушки)
 //   eyewear   — на лицо (очки/маски)
@@ -17,7 +18,9 @@
 //
 // Файл без браузерных/Node-зависимостей: импортируется отовсюду.
 
-export type Slot = 'avatar' | 'frame' | 'hat' | 'eyewear' | 'effect' | 'companion' | 'banner' | 'title'
+// Персонаж «Бубл» один на всех; кастомизируется цветом тела и выражением лица,
+// поверх — надеваемые аксессуары. Поэтому слоты «color» и «face» вместо emoji.
+export type Slot = 'color' | 'face' | 'frame' | 'hat' | 'eyewear' | 'effect' | 'companion' | 'banner' | 'title'
 export type Rarity = 'common' | 'rare' | 'epic' | 'legendary' | 'mythic'
 
 export type Unlock =
@@ -35,7 +38,8 @@ interface Base {
   collection: string
   unlock: Unlock
 }
-export interface AvatarItem extends Base { slot: 'avatar'; emoji: string; ring: string }
+export interface ColorItem extends Base { slot: 'color'; hex: string }
+export interface FaceItem extends Base { slot: 'face'; face: string }
 export interface FrameItem extends Base { slot: 'frame'; bg: string; glow?: string; anim?: 'spin' | 'pulse' | 'shimmer' }
 export interface HatItem extends Base { slot: 'hat'; emoji: string }
 export interface EyewearItem extends Base { slot: 'eyewear'; emoji: string }
@@ -44,11 +48,11 @@ export interface EffectItem extends Base { slot: 'effect'; particle: string; glo
 export interface BannerItem extends Base { slot: 'banner'; bg: string; anim?: 'shimmer' | 'drift' }
 export interface TitleItem extends Base { slot: 'title'; text: string }
 export type Cosmetic =
-  | AvatarItem | FrameItem | HatItem | EyewearItem | CompanionItem | EffectItem | BannerItem | TitleItem
+  | ColorItem | FaceItem | FrameItem | HatItem | EyewearItem | CompanionItem | EffectItem | BannerItem | TitleItem
 
-export const SLOTS: Slot[] = ['avatar', 'frame', 'hat', 'eyewear', 'effect', 'companion', 'banner', 'title']
+export const SLOTS: Slot[] = ['color', 'face', 'frame', 'hat', 'eyewear', 'effect', 'companion', 'banner', 'title']
 export const SLOT_RU: Record<Slot, string> = {
-  avatar: 'Персонаж', frame: 'Рамка', hat: 'Шляпа', eyewear: 'Очки',
+  color: 'Цвет', face: 'Лицо', frame: 'Рамка', hat: 'Шляпа', eyewear: 'Очки',
   effect: 'Эффект', companion: 'Питомец', banner: 'Баннер', title: 'Титул',
 }
 
@@ -65,64 +69,54 @@ export const RARITY: Record<Rarity, { label: string; color: string }> = {
 export const PRICE: Record<Rarity, number> = { common: 120, rare: 350, epic: 900, legendary: 2200, mythic: 6000 }
 const shop = (r: Rarity, price?: number): Unlock => ({ kind: 'shop', price: price ?? PRICE[r] })
 
-// ─── Персонажи ───────────────────────────────────────────────────────────
-const A = (id: string, name: string, emoji: string, ring: string, rarity: Rarity, collection: string, unlock: Unlock): AvatarItem =>
-  ({ id, slot: 'avatar', name, emoji, ring, rarity, collection, unlock })
+// ─── Цвет тела персонажа ───────────────────────────────────────────────────
+const CL = (id: string, name: string, hex: string, rarity: Rarity, collection: string, unlock: Unlock): ColorItem =>
+  ({ id, slot: 'color', name, hex, rarity, collection, unlock })
 
-export const AVATAR_ITEMS: AvatarItem[] = [
-  A('fox', 'Лис', '🦊', '#f2a93b', 'common', 'Базовые', { kind: 'starter' }),
-  A('owl', 'Сова', '🦉', '#3a82f7', 'common', 'Базовые', { kind: 'starter' }),
-  A('cat', 'Кот', '🐱', '#e2574c', 'common', 'Базовые', { kind: 'starter' }),
-  A('panda', 'Панда', '🐼', '#5c7cfa', 'common', 'Базовые', { kind: 'starter' }),
-  A('frog', 'Лягушка', '🐸', '#7fb069', 'common', 'Базовые', { kind: 'starter' }),
-  A('penguin', 'Пингвин', '🐧', '#4dabf7', 'common', 'Базовые', { kind: 'starter' }),
-  A('pig', 'Свин', '🐷', '#f783ac', 'common', 'Базовые', { kind: 'starter' }),
-  A('chick', 'Цыплёнок', '🐥', '#f7cf6f', 'common', 'Базовые', { kind: 'starter' }),
-  A('hamster', 'Хомяк', '🐹', '#e8a87c', 'common', 'Базовые', { kind: 'starter' }),
-  A('rabbit', 'Кролик', '🐰', '#dee2e6', 'common', 'Базовые', { kind: 'starter' }),
-  // Звери — уровни
-  A('tiger', 'Тигр', '🐯', '#f59f00', 'rare', 'Звери', { kind: 'level', level: 3 }),
-  A('bear', 'Мишка', '🐻', '#9c6644', 'rare', 'Звери', { kind: 'level', level: 4 }),
-  A('koala', 'Коала', '🐨', '#868e96', 'rare', 'Звери', { kind: 'level', level: 5 }),
-  A('wolf', 'Волк', '🐺', '#5c7cfa', 'rare', 'Звери', { kind: 'level', level: 6 }),
-  A('monkey', 'Обезьяна', '🐵', '#a8742f', 'rare', 'Звери', { kind: 'level', level: 7 }),
-  A('lion', 'Лев', '🦁', '#f59f00', 'rare', 'Звери', { kind: 'level', level: 8 }),
-  A('butterfly', 'Бабочка', '🦋', '#4dabf7', 'rare', 'Звери', { kind: 'level', level: 9 }),
-  A('octopus', 'Осьминог', '🐙', '#cc5de8', 'epic', 'Звери', { kind: 'level', level: 11 }),
-  A('eagle', 'Орёл', '🦅', '#8a5a33', 'epic', 'Звери', { kind: 'level', level: 13 }),
-  A('whale', 'Кит', '🐳', '#3a82f7', 'epic', 'Звери', { kind: 'level', level: 14 }),
-  A('trex', 'Ти-рекс', '🦖', '#5e8e4a', 'legendary', 'Звери', { kind: 'level', level: 22 }),
-  // Магазин — звери
-  A('shark', 'Акула', '🦈', '#4dabf7', 'rare', 'Звери', shop('rare')),
-  A('parrot', 'Попугай', '🦜', '#51cf66', 'rare', 'Звери', shop('rare')),
-  A('hedgehog', 'Ёжик', '🦔', '#b08968', 'rare', 'Звери', shop('rare')),
-  A('snake', 'Змея', '🐍', '#69db7c', 'epic', 'Звери', shop('epic')),
-  A('peacock', 'Павлин', '🦚', '#22b8cf', 'epic', 'Звери', shop('epic')),
-  // Мифические / стихии
-  A('dragon', 'Дракон', '🐲', '#7fb069', 'epic', 'Мифические', { kind: 'level', level: 12 }),
-  A('unicorn', 'Единорог', '🦄', '#f06595', 'epic', 'Мифические', { kind: 'badge', badge: 'explorer' }),
-  A('ninja', 'Ниндзя', '🥷', '#495057', 'epic', 'Мифические', { kind: 'level', level: 17 }),
-  A('wizard', 'Маг', '🧙', '#9b6cff', 'legendary', 'Мифические', { kind: 'level', level: 19 }),
-  A('mermaid', 'Русалка', '🧜', '#22b8cf', 'epic', 'Мифические', shop('epic')),
-  A('fairy', 'Фея', '🧚', '#f783ac', 'epic', 'Мифические', shop('epic')),
-  A('vampire', 'Вампир', '🧛', '#a02c4a', 'legendary', 'Мифические', shop('legendary')),
-  A('fire', 'Огонёк', '🔥', '#e2574c', 'epic', 'Стихии', { kind: 'level', level: 16 }),
-  A('star', 'Звезда', '🌟', '#f7cf6f', 'rare', 'Стихии', { kind: 'level', level: 10 }),
-  A('crystal', 'Шар', '🔮', '#9b6cff', 'epic', 'Стихии', { kind: 'level', level: 15 }),
-  A('gem', 'Алмаз', '💎', '#22b8cf', 'legendary', 'Стихии', { kind: 'badge', badge: 'collector' }),
-  A('crown', 'Корона', '👑', '#f2a93b', 'legendary', 'Стихии', { kind: 'level', level: 20 }),
-  A('rocket', 'Ракета', '🚀', '#3a82f7', 'legendary', 'Космос', { kind: 'level', level: 18 }),
-  A('skull', 'Череп', '💀', '#868e96', 'epic', 'Тьма', { kind: 'level', level: 14 }),
-  A('demon', 'Демон', '👹', '#e2574c', 'epic', 'Тьма', { kind: 'badge', badge: 'veteran' }),
-  // Премиум — заперты (будущая монетизация)
-  A('genie', 'Джинн', '🧞', '#5c7cfa', 'mythic', 'Премиум', { kind: 'premium' }),
-  A('ufo', 'НЛО', '🛸', '#22b8cf', 'mythic', 'Топ', shop('mythic')),
-  A('alien', 'Пришелец', '👾', '#cc5de8', 'epic', 'Премиум', shop('epic')),
-  A('robot', 'Робот', '🤖', '#868e96', 'rare', 'Премиум', shop('rare')),
-  A('ghost', 'Призрак', '👻', '#adb5bd', 'rare', 'Премиум', shop('rare')),
-  A('clown', 'Клоун', '🤡', '#f06595', 'rare', 'Премиум', shop('rare')),
-  A('jackolantern', 'Тыква', '🎃', '#f2762a', 'epic', 'Сезон', shop('epic')),
-  A('snowman', 'Снеговик', '⛄', '#74c0fc', 'rare', 'Сезон', shop('rare')),
+export const COLOR_ITEMS: ColorItem[] = [
+  CL('c_cream', 'Крем', '#f3d9a4', 'common', 'Базовые', { kind: 'starter' }),
+  CL('c_butter', 'Масло', '#f7cf6f', 'common', 'Базовые', { kind: 'starter' }),
+  CL('c_sky', 'Небо', '#7cc6ff', 'common', 'Базовые', { kind: 'starter' }),
+  CL('c_mint', 'Мята', '#8fe3c4', 'common', 'Базовые', { kind: 'starter' }),
+  CL('c_coral', 'Коралл', '#ff9a8b', 'common', 'Базовые', { kind: 'starter' }),
+  CL('c_lavender', 'Лаванда', '#c5b3ff', 'common', 'Базовые', { kind: 'starter' }),
+  CL('c_peach', 'Персик', '#ffc299', 'common', 'Базовые', { kind: 'starter' }),
+  CL('c_rose', 'Роза', '#ff9ec7', 'common', 'Базовые', { kind: 'starter' }),
+  CL('c_sage', 'Шалфей', '#b6d39c', 'common', 'Базовые', { kind: 'starter' }),
+  CL('c_slate', 'Графит', '#aeb6c2', 'common', 'Базовые', { kind: 'starter' }),
+  CL('c_lime', 'Лайм', '#b9f06a', 'rare', 'Яркие', { kind: 'level', level: 3 }),
+  CL('c_aqua', 'Аква', '#5fe0e0', 'rare', 'Яркие', { kind: 'level', level: 5 }),
+  CL('c_tangerine', 'Мандарин', '#ff9f43', 'rare', 'Яркие', { kind: 'level', level: 7 }),
+  CL('c_peri', 'Барвинок', '#8ea2ff', 'rare', 'Яркие', shop('rare')),
+  CL('c_candy', 'Карамель', '#ff5ea8', 'rare', 'Яркие', shop('rare')),
+  CL('c_teal', 'Бирюза', '#2bb39a', 'epic', 'Глубокие', { kind: 'level', level: 10 }),
+  CL('c_violet', 'Фиолет', '#b06bff', 'epic', 'Глубокие', { kind: 'level', level: 12 }),
+  CL('c_crimson', 'Багрянец', '#ff5d5d', 'epic', 'Глубокие', shop('epic')),
+  CL('c_midnight', 'Полночь', '#3a3f5c', 'epic', 'Глубокие', shop('epic')),
+  CL('c_emerald', 'Изумруд', '#2ecf73', 'epic', 'Глубокие', { kind: 'badge', badge: 'collector' }),
+  CL('c_gold', 'Золото', '#f5c542', 'legendary', 'Роскошь', { kind: 'level', level: 15 }),
+  CL('c_obsidian', 'Обсидиан', '#23252e', 'legendary', 'Роскошь', shop('legendary')),
+  CL('c_rosegold', 'Розовое золото', '#f0a6a6', 'legendary', 'Роскошь', shop('legendary')),
+  CL('c_iris', 'Ирис', '#7a5cff', 'mythic', 'Топ', shop('mythic')),
+]
+
+// ─── Лицо (выражение) ──────────────────────────────────────────────────────
+const FC = (id: string, name: string, face: string, rarity: Rarity, collection: string, unlock: Unlock): FaceItem =>
+  ({ id, slot: 'face', name, face, rarity, collection, unlock })
+
+export const FACE_ITEMS: FaceItem[] = [
+  FC('f_smile', 'Улыбка', 'smile', 'common', 'Базовые', { kind: 'starter' }),
+  FC('f_happy', 'Радость', 'happy', 'common', 'Базовые', { kind: 'starter' }),
+  FC('f_cute', 'Милашка', 'cute', 'common', 'Базовые', { kind: 'starter' }),
+  FC('f_wink', 'Подмигивание', 'wink', 'rare', 'Эмоции', { kind: 'level', level: 4 }),
+  FC('f_cool', 'Крутыш', 'cool', 'rare', 'Эмоции', { kind: 'level', level: 6 }),
+  FC('f_surprised', 'Удивление', 'surprised', 'rare', 'Эмоции', shop('rare')),
+  FC('f_sleepy', 'Сонный', 'sleepy', 'rare', 'Эмоции', shop('rare')),
+  FC('f_uwu', 'Uwu', 'uwu', 'epic', 'Эмоции', shop('epic')),
+  FC('f_angry', 'Грозный', 'angry', 'epic', 'Эмоции', shop('epic')),
+  FC('f_dizzy', 'Кружится', 'dizzy', 'epic', 'Эмоции', shop('epic')),
+  FC('f_starry', 'Звёздные глаза', 'starry', 'legendary', 'Топ', { kind: 'level', level: 9 }),
+  FC('f_love', 'Влюблён', 'love', 'legendary', 'Топ', { kind: 'badge', badge: 'popular' }),
 ]
 
 // ─── Рамки ─────────────────────────────────────────────────────────────
@@ -300,7 +294,7 @@ export const TITLE_ITEMS: TitleItem[] = [
 ]
 
 export const COSMETICS: Cosmetic[] = [
-  ...AVATAR_ITEMS, ...FRAME_ITEMS, ...HAT_ITEMS, ...EYEWEAR_ITEMS,
+  ...COLOR_ITEMS, ...FACE_ITEMS, ...FRAME_ITEMS, ...HAT_ITEMS, ...EYEWEAR_ITEMS,
   ...EFFECT_ITEMS, ...COMPANION_ITEMS, ...BANNER_ITEMS, ...TITLE_ITEMS,
 ]
 
@@ -314,7 +308,8 @@ export function itemsForSlot(slot: Slot): Cosmetic[] {
 
 /** Слот → дефолтный (стартовый) предмет, когда у игрока ничего не надето. */
 export const DEFAULT_EQUIP: Record<Slot, string> = {
-  avatar: 'fox',
+  color: 'c_cream',
+  face: 'f_smile',
   frame: 'frame_none',
   hat: 'hat_none',
   eyewear: 'eye_none',
@@ -326,7 +321,8 @@ export const DEFAULT_EQUIP: Record<Slot, string> = {
 
 /** Полный «образ» игрока — что надето во всех визуальных слотах. */
 export interface Look {
-  avatar: string
+  color: string
+  face: string
   frame: string
   hat: string
   eyewear: string
@@ -335,7 +331,8 @@ export interface Look {
 }
 
 export const EMPTY_LOOK: Look = {
-  avatar: DEFAULT_EQUIP.avatar,
+  color: DEFAULT_EQUIP.color,
+  face: DEFAULT_EQUIP.face,
   frame: DEFAULT_EQUIP.frame,
   hat: DEFAULT_EQUIP.hat,
   eyewear: DEFAULT_EQUIP.eyewear,

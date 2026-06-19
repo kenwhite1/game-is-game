@@ -6,10 +6,10 @@ import { getOrCreateUser } from './profiles'
 // запуски игр и дружба с локальным игроком (id=1), чтобы соц-вкладки были живыми
 // на скриншотах. В продакшене не выполняется никогда.
 const DEMO = [
-  { id: 9001, name: 'Аня', avatar: 'tiger', frame: 'frame_sakura', hat: 'hat_bow', eyewear: 'eye_shades', effect: 'fx_hearts', companion: 'comp_cat', banner: 'banner_sunset', opens: ['croco', 'pet', 'croco', 'uno', 'pet', 'croco'] },
-  { id: 9002, name: 'Миша', avatar: 'wolf', frame: 'frame_neon', hat: 'hat_cap', eyewear: 'eye_goggles', effect: 'fx_bolt', companion: 'comp_robot', banner: 'banner_matrix', opens: ['mafia', 'uno', 'mafia', 'mafia'] },
-  { id: 9003, name: 'Лена', avatar: 'unicorn', frame: 'frame_rainbow', hat: 'hat_crownhat', eyewear: 'eye_star', effect: 'fx_rainbow', companion: 'comp_unicorn', banner: 'banner_galaxy', opens: ['pet', 'pet', 'pet', 'pet', 'pet', 'croco', 'uno', 'mafia', 'pet'] },
-  { id: 9004, name: 'Костя', avatar: 'dragon', frame: 'frame_gold', hat: 'hat_tophat', eyewear: 'eye_monocle', effect: 'fx_flame', companion: 'comp_dragon', banner: 'banner_volcano', opens: ['uno', 'uno'] },
+  { id: 9001, name: 'Аня', color: 'c_coral', face: 'f_cute', frame: 'frame_sakura', hat: 'hat_bow', eyewear: 'eye_shades', effect: 'fx_hearts', companion: 'comp_cat', banner: 'banner_sunset', opens: ['croco', 'pet', 'croco', 'uno', 'pet', 'croco'] },
+  { id: 9002, name: 'Миша', color: 'c_sky', face: 'f_cool', frame: 'frame_neon', hat: 'hat_cap', eyewear: 'eye_goggles', effect: 'fx_bolt', companion: 'comp_robot', banner: 'banner_matrix', opens: ['mafia', 'uno', 'mafia', 'mafia'] },
+  { id: 9003, name: 'Лена', color: 'c_lavender', face: 'f_starry', frame: 'frame_rainbow', hat: 'hat_crownhat', eyewear: 'eye_star', effect: 'fx_rainbow', companion: 'comp_unicorn', banner: 'banner_galaxy', opens: ['pet', 'pet', 'pet', 'pet', 'pet', 'croco', 'uno', 'mafia', 'pet'] },
+  { id: 9004, name: 'Костя', color: 'c_emerald', face: 'f_angry', frame: 'frame_gold', hat: 'hat_tophat', eyewear: 'eye_monocle', effect: 'fx_flame', companion: 'comp_dragon', banner: 'banner_volcano', opens: ['uno', 'uno'] },
 ]
 
 export function seedDev(): void {
@@ -30,8 +30,8 @@ export function seedDev(): void {
   db.transaction(() => {
     for (const d of DEMO) {
       getOrCreateUser(d.id, d.name)
-      db.prepare('UPDATE users SET avatar=?, frame=?, hat=?, eyewear=?, effect=?, companion=?, banner=?, opens=? WHERE id=?')
-        .run(d.avatar, d.frame, d.hat, d.eyewear, d.effect, d.companion, d.banner, d.opens.length, d.id)
+      db.prepare('UPDATE users SET color=?, face=?, frame=?, hat=?, eyewear=?, effect=?, companion=?, banner=?, opens=? WHERE id=?')
+        .run(d.color, d.face, d.frame, d.hat, d.eyewear, d.effect, d.companion, d.banner, d.opens.length, d.id)
       for (const g of d.opens) addOpen.run(d.id, g)
       addFriend.run(1, d.id)
       addFriend.run(d.id, 1)

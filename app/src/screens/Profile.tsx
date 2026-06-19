@@ -45,11 +45,11 @@ export function Profile() {
       {/* identity card */}
       <div className="banner" style={{ background: bannerBg(profile.banner) }}>
         <div className="banner-top">
-          <button onClick={() => setTab('style')} style={{ border: 'none', background: 'none', padding: 0, cursor: 'pointer' }} aria-label="Открыть стиль">
+          <button onClick={() => setTab('style')} style={{ border: 'none', background: 'none', padding: 0, cursor: 'pointer' }} aria-label="Открыть аватар">
             <Avatar
-              avatar={profile.avatar} frame={profile.frame} hat={profile.hat}
+              color={profile.color} face={profile.face} frame={profile.frame} hat={profile.hat}
               eyewear={profile.eyewear} effect={profile.effect} companion={profile.companion}
-              seed={profile.id} size={62} ring={false}
+              seed={profile.id} size={64} ring={false}
             />
           </button>
           <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>

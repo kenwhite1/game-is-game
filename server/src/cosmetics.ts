@@ -54,7 +54,7 @@ export function wardrobeOf(uid: number): Wardrobe | null {
 }
 
 const SLOT_COLUMN: Record<Slot, string> = {
-  avatar: 'avatar', frame: 'frame', hat: 'hat', eyewear: 'eyewear',
+  color: 'color', face: 'face', frame: 'frame', hat: 'hat', eyewear: 'eyewear',
   effect: 'effect', companion: 'companion', banner: 'banner', title: 'title',
 }
 

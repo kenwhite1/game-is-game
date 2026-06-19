@@ -10,7 +10,7 @@ import { buildCatalog, GAMES } from '../../shared/games'
 export const api = new Hono<Env>()
 
 const VALID_IDS = new Set(GAMES.map(g => g.id))
-const SLOTS = ['avatar', 'frame', 'hat', 'eyewear', 'effect', 'companion', 'banner', 'title'] as const
+const SLOTS = ['color', 'face', 'frame', 'hat', 'eyewear', 'effect', 'companion', 'banner', 'title'] as const
 const catalog = () => buildCatalog(gameOverrides())
 
 api.get('/health', c => c.json({ ok: true }))

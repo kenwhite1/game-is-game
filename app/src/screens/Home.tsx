@@ -113,9 +113,9 @@ function PlayerBanner({ onOpen }: { onOpen(): void }) {
     <button className="banner" onClick={onOpen} style={{ border: 'none', cursor: 'pointer', background: bannerBg(profile.banner) }}>
       <div className="banner-top">
         <Avatar
-          avatar={profile.avatar} frame={profile.frame} hat={profile.hat}
+          color={profile.color} face={profile.face} frame={profile.frame} hat={profile.hat}
           eyewear={profile.eyewear} effect={profile.effect} companion={profile.companion}
-          seed={profile.id} size={56} ring={false}
+          seed={profile.id} size={58} ring={false}
         />
         <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
           <div className="nm2">{profile.name}</div>

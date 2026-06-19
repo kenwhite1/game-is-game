@@ -1,7 +1,7 @@
 import { db } from './db'
 import type { Friend, ActivityItem, LeaderRow } from '../../shared/types'
 import { xpFromOpens, levelInfo } from '../../shared/progression'
-import { avatarOf } from '../../shared/avatars'
+import { defaultColor } from '../../shared/avatars'
 import { DEFAULT_EQUIP, type Look } from '../../shared/cosmetics'
 import { getProfile } from './profiles'
 import { GAMES } from '../../shared/games'
@@ -9,14 +9,15 @@ import { GAMES } from '../../shared/games'
 const VALID_GAME_IDS = new Set(GAMES.map(g => g.id))
 
 // Колонки образа, которые тянем во всех соц-выборках.
-const LOOK_COLS = 'u.avatar, u.frame, u.hat, u.eyewear, u.effect, u.companion'
+const LOOK_COLS = 'u.color, u.face, u.frame, u.hat, u.eyewear, u.effect, u.companion'
 interface LookRow {
-  avatar: string | null; frame: string | null; hat: string | null
+  color: string | null; face: string | null; frame: string | null; hat: string | null
   eyewear: string | null; effect: string | null; companion: string | null
 }
 function lookOf(r: LookRow, seed: number): Look {
   return {
-    avatar: avatarOf(r.avatar, seed).id,
+    color: r.color || defaultColor(seed),
+    face: r.face || DEFAULT_EQUIP.face,
     frame: r.frame || DEFAULT_EQUIP.frame,
     hat: r.hat || DEFAULT_EQUIP.hat,
     eyewear: r.eyewear || DEFAULT_EQUIP.eyewear,
