@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useStore } from './store'
 import { Home } from './screens/Home'
 import { BrandLogo } from './screens/Logo'
-import { GameIcon } from './art/GameIcon'
+import { GameTileIcon } from './art/GameTileIcon'
 
 type IconId = 'uno' | 'croco' | 'mafia' | 'pet'
 
@@ -56,7 +56,7 @@ function Sheets() {
             <div className="about-list">
               {catalog.map(g => (
                 <div className="about-row" key={g.id}>
-                  <GameIcon id={g.id as IconId} size={42} />
+                  <GameTileIcon id={g.id as IconId} size={42} />
                   <div className="tx">
                     <div className="tt">{g.name}</div>
                     <div className="bb">{g.blurb}</div>

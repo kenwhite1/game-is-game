@@ -3,12 +3,12 @@
 // мягкая контактная тень. Без жёсткого бейджа, как маскоты в TT.
 type IconId = 'uno' | 'croco' | 'mafia' | 'pet'
 
-export function GameIcon({ id, size = 64 }: { id: IconId; size?: number }) {
+export function GameIcon({ id, size = 64, onBadge = false }: { id: IconId; size?: number; onBadge?: boolean }) {
   const u = `gi_${id}`
   return (
     <svg width={size} height={size} viewBox="0 0 80 80" className="game-icon" aria-hidden>
       <defs>{DEFS[id](u)}</defs>
-      <ellipse cx="40" cy="73" rx="23" ry="5" fill="rgba(74,46,16,.16)" />
+      {!onBadge && <ellipse cx="40" cy="73" rx="23" ry="5" fill="rgba(74,46,16,.16)" />}
       {ART[id](u)}
     </svg>
   )

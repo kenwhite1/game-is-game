@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react'
 import { useStore } from '../store'
 import { BrandLogo } from './Logo'
-import { GameIcon } from '../art/GameIcon'
+import { GameTileIcon } from '../art/GameTileIcon'
 import { SoundOnIcon, SoundOffIcon, InfoIcon, HelpIcon, ChevronIcon } from '../art/icons'
 import { APP_TAG } from '../brand'
 import type { GameCard } from '@shared/types'
@@ -60,7 +60,7 @@ function GameRow({ game, recent }: { game: GameCard; recent: boolean }) {
   const style = { '--a': game.accent, '--glow': hexGlow(game.accent) } as CSSProperties
   return (
     <button className="game-row" style={style} onClick={() => launch(game)} aria-label={`Открыть: ${game.name}`}>
-      <span className="gi-wrap"><GameIcon id={game.id as IconId} size={60} /></span>
+      <span className="gi-wrap"><GameTileIcon id={game.id as IconId} size={62} /></span>
       <span className="gr-text">
         <span className="gr-title">{game.name}{recent && <span className="recent-chip">Недавнее</span>}</span>
         <span className="gr-sub">{game.tagline}</span>
