@@ -32,8 +32,7 @@ export function Home() {
 
       <div className="brand">
         <HeroFan />
-        <div className="brand-name">Game<span className="sm"> is </span>Game</div>
-        <div className="brand-rule" />
+        <div className="brand-name">Game<span className="sm">is</span>Game</div>
         <div className="brand-tag">{APP_TAG}</div>
       </div>
 

@@ -1,146 +1,170 @@
-// Авторские иконки игр: каждая это маленькая премиальная «иконка-приложение»,
-// собранная вручную в SVG. Бейдж со скруглением, мягкий свет, глянец и сцена внутри.
+// Иконки игр в стиле «Шарика»: мягкие глянцевые 3D-персонажи и предметы.
+// Объёмные радиальные градиенты, блик, румяные щёчки, большие блестящие глаза,
+// мягкая контактная тень. Без жёсткого бейджа, как маскоты в TT.
 type IconId = 'uno' | 'croco' | 'mafia' | 'pet'
 
-const PAL: Record<IconId, { from: string; to: string; rim: string; glow: string }> = {
-  uno: { from: '#f5897f', to: '#bb352b', rim: 'rgba(255,200,194,.9)', glow: 'rgba(225,85,75,.55)' },
-  croco: { from: '#83d588', to: '#368741', rim: 'rgba(196,240,198,.9)', glow: 'rgba(84,177,90,.5)' },
-  mafia: { from: '#a094f6', to: '#4637bd', rim: 'rgba(205,196,255,.9)', glow: 'rgba(108,92,224,.55)' },
-  pet: { from: '#ffce74', to: '#d6850f', rim: 'rgba(255,224,170,.95)', glow: 'rgba(242,169,59,.5)' },
-}
-
 export function GameIcon({ id, size = 64 }: { id: IconId; size?: number }) {
-  const p = PAL[id]
   const u = `gi_${id}`
   return (
     <svg width={size} height={size} viewBox="0 0 80 80" className="game-icon" aria-hidden>
-      <defs>
-        <linearGradient id={`${u}_bg`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor={p.from} />
-          <stop offset="1" stopColor={p.to} />
-        </linearGradient>
-        <linearGradient id={`${u}_gloss`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#fff" stopOpacity="0.5" />
-          <stop offset="0.55" stopColor="#fff" stopOpacity="0" />
-        </linearGradient>
-        <radialGradient id={`${u}_glow`} cx="0.5" cy="0.42" r="0.6">
-          <stop offset="0" stopColor="#fff" stopOpacity="0.35" />
-          <stop offset="1" stopColor="#fff" stopOpacity="0" />
-        </radialGradient>
-      </defs>
-
-      {/* бейдж */}
-      <rect x="3" y="3" width="74" height="74" rx="21" fill={p.to} opacity="0.55" />
-      <rect x="3" y="2" width="74" height="74" rx="21" fill={`url(#${u}_bg)`} />
-      <rect x="3" y="2" width="74" height="74" rx="21" fill={`url(#${u}_glow)`} />
-      {/* верхняя световая кромка */}
-      <rect x="4" y="3" width="72" height="72" rx="20" fill="none" stroke={p.rim} strokeWidth="1.1" strokeOpacity="0.7" />
-      {/* сцена */}
-      <g>{ART[id](u)}</g>
-      {/* глянец сверху */}
-      <rect x="3" y="2" width="74" height="40" rx="21" fill={`url(#${u}_gloss)`} />
+      <defs>{DEFS[id](u)}</defs>
+      <ellipse cx="40" cy="73" rx="23" ry="5" fill="rgba(74,46,16,.16)" />
+      {ART[id](u)}
     </svg>
   )
 }
 
-const ART: Record<IconId, (u: string) => JSX.Element> = {
-  // Веер карт
-  uno: () => (
-    <g transform="translate(40 43)">
-      <Card x={-3} rot={-20} fill="#2f93cf" pip="#bfe4f6" />
-      <Card x={3} rot={20} fill="#54b15a" pip="#cdeccf" />
-      <g transform="rotate(0)">
-        <rect x="-15" y="-21" width="30" height="42" rx="6" fill="#fff" />
-        <rect x="-15" y="-21" width="30" height="42" rx="6" fill="none" stroke="rgba(20,20,30,.06)" strokeWidth="1" />
-        <circle cx="0" cy="0" r="11.5" fill="#e1554b" />
-        <circle cx="0" cy="0" r="11.5" fill="none" stroke="#fff" strokeWidth="2.4" />
-        <text x="0" y="6.5" textAnchor="middle" fontFamily="Nunito, sans-serif" fontWeight="900" fontSize="17" fill="#fff">1</text>
-      </g>
-    </g>
-  ),
-  // Мордочка крокодила
-  croco: () => (
-    <g transform="translate(40 41)">
-      {/* нижняя челюсть */}
-      <path d="M-22 6 Q-24 16 -10 17 L18 17 Q24 16 23 8 L23 4 Q10 12 -10 8 Z" fill="#2f7a39" />
-      {/* верхняя часть головы и морда */}
-      <path d="M-23 2 Q-25 -10 -12 -12 Q-4 -13 2 -9 L22 0 Q26 2 24 7 Q22 11 14 10 L-12 7 Q-22 6 -23 2 Z" fill="#5fbf64" />
-      <path d="M-23 2 Q-25 -10 -12 -12 Q-4 -13 2 -9 L10 -5 Q-8 -7 -18 0 Q-22 2 -23 2 Z" fill="#7cd281" opacity="0.8" />
-      {/* зубы */}
-      <path d="M-8 8 l3 5 l3 -5 Z M0 9 l3 5 l3 -5 Z M9 9 l2.5 4.5 l2.5 -4.5 Z" fill="#fff" />
-      {/* глаза (на одной высоте) */}
-      <circle cx="-13.5" cy="-14" r="6.8" fill="#5fbf64" />
-      <circle cx="-2.5" cy="-14" r="6.8" fill="#5fbf64" />
-      <circle cx="-13.5" cy="-14" r="4.4" fill="#fff" />
-      <circle cx="-2.5" cy="-14" r="4.4" fill="#fff" />
-      <circle cx="-12.6" cy="-13.6" r="2.2" fill="#23341f" />
-      <circle cx="-1.6" cy="-13.6" r="2.2" fill="#23341f" />
-      {/* ноздря */}
-      <circle cx="21" cy="2.5" r="1.7" fill="#2f7a39" />
-    </g>
-  ),
-  // Луна и звёзды (серп вырезан маской, чтобы сквозь него был виден сам бейдж)
-  mafia: u => (
-    <g transform="translate(41 40)">
-      <defs>
-        <mask id={`${u}_moon`} maskUnits="userSpaceOnUse" x="-20" y="-22" width="42" height="42">
-          <circle cx="0" cy="0" r="16" fill="#fff" />
-          <circle cx="7.5" cy="-3" r="14" fill="#000" />
-        </mask>
-      </defs>
-      <circle cx="0" cy="0" r="16" fill="#fdeec2" mask={`url(#${u}_moon)`} />
-      {/* кратеры на освещённой части */}
-      <circle cx="-7" cy="3" r="2.1" fill="#e7cd8e" opacity="0.6" />
-      <circle cx="-9.5" cy="-4" r="1.4" fill="#e7cd8e" opacity="0.5" />
-      {/* звёзды */}
-      <Star x={15} y={-12} r={3.1} />
-      <Star x={17.5} y={3} r={2} />
-      <Star x={8} y={14} r={1.6} />
-    </g>
-  ),
-  // Питомец-шарик
-  pet: () => (
-    <g transform="translate(40 42)">
-      {/* ушки */}
-      <path d="M-16 -10 Q-22 -22 -10 -20 Q-9 -14 -12 -9 Z" fill="#fff4e2" />
-      <path d="M16 -10 Q22 -22 10 -20 Q9 -14 12 -9 Z" fill="#fff4e2" />
-      <path d="M-15 -12 Q-18 -19 -11 -18 Z" fill="#f4b06a" />
-      <path d="M15 -12 Q18 -19 11 -18 Z" fill="#f4b06a" />
-      {/* голова */}
-      <circle cx="0" cy="2" r="18" fill="#fff4e2" />
-      <ellipse cx="0" cy="9" rx="12" ry="9" fill="#fff" opacity="0.55" />
-      {/* щёчки */}
-      <circle cx="-11" cy="7" r="3.2" fill="#ffc59b" opacity="0.85" />
-      <circle cx="11" cy="7" r="3.2" fill="#ffc59b" opacity="0.85" />
-      {/* глаза */}
-      <circle cx="-6.5" cy="-1" r="2.7" fill="#5a3d22" />
-      <circle cx="6.5" cy="-1" r="2.7" fill="#5a3d22" />
-      <circle cx="-5.7" cy="-1.9" r="0.9" fill="#fff" />
-      <circle cx="7.3" cy="-1.9" r="0.9" fill="#fff" />
-      {/* носик и улыбка */}
-      <path d="M-2.4 4 h4.8 l-2.4 2.6 Z" fill="#c97b3c" />
-      <path d="M-4 8 Q0 12 4 8" fill="none" stroke="#c97b3c" strokeWidth="1.8" strokeLinecap="round" />
-    </g>
-  ),
-}
-
-function Card({ x, rot, fill, pip }: { x: number; rot: number; fill: string; pip: string }) {
+function Eye({ cx, cy, r = 5 }: { cx: number; cy: number; r?: number }) {
   return (
-    <g transform={`rotate(${rot}) translate(${x} 0)`}>
-      <rect x="-14" y="-20" width="28" height="40" rx="6" fill="#fff" />
-      <rect x="-14" y="-20" width="28" height="40" rx="6" fill="none" stroke="rgba(20,20,30,.06)" strokeWidth="1" />
-      <rect x="-8" y="-13" width="16" height="26" rx="5" fill={fill} />
-      <ellipse cx="0" cy="-6" rx="6" ry="4" fill={pip} opacity="0.7" />
+    <g>
+      <ellipse cx={cx} cy={cy} rx={r} ry={r * 1.15} fill="#2a2017" />
+      <circle cx={cx - r * 0.32} cy={cy - r * 0.4} r={r * 0.34} fill="#fff" />
+      <circle cx={cx + r * 0.28} cy={cy + r * 0.42} r={r * 0.15} fill="#fff" opacity="0.7" />
     </g>
   )
 }
-
+function Gloss() {
+  return (
+    <g>
+      <ellipse cx="33" cy="24" rx="15" ry="10" fill="#fff" opacity="0.26" />
+      <ellipse cx="27" cy="19" rx="5.5" ry="3.4" fill="#fff" opacity="0.55" />
+    </g>
+  )
+}
 function Star({ x, y, r }: { x: number; y: number; r: number }) {
   const pts: string[] = []
   for (let i = 0; i < 10; i++) {
     const ang = (Math.PI / 5) * i - Math.PI / 2
-    const rad = i % 2 === 0 ? r : r * 0.42
+    const rad = i % 2 === 0 ? r : r * 0.45
     pts.push(`${(x + Math.cos(ang) * rad).toFixed(2)},${(y + Math.sin(ang) * rad).toFixed(2)}`)
   }
-  return <polygon points={pts.join(' ')} fill="#fff3cf" />
+  return <polygon points={pts.join(' ')} fill="#fff6d8" />
+}
+
+const DEFS: Record<IconId, (u: string) => JSX.Element> = {
+  pet: u => (
+    <>
+      <radialGradient id={`${u}_body`} cx="0.4" cy="0.3" r="0.85">
+        <stop offset="0" stopColor="#ffe39a" /><stop offset="0.62" stopColor="#fcc24f" /><stop offset="1" stopColor="#f0a32c" />
+      </radialGradient>
+      <radialGradient id={`${u}_ear`} cx="0.5" cy="0.3" r="0.9">
+        <stop offset="0" stopColor="#f4ad42" /><stop offset="1" stopColor="#e08a22" />
+      </radialGradient>
+    </>
+  ),
+  croco: u => (
+    <>
+      <radialGradient id={`${u}_body`} cx="0.4" cy="0.28" r="0.9">
+        <stop offset="0" stopColor="#a3e69f" /><stop offset="0.6" stopColor="#69c46e" /><stop offset="1" stopColor="#3f9a49" />
+      </radialGradient>
+      <radialGradient id={`${u}_snout`} cx="0.4" cy="0.3" r="0.9">
+        <stop offset="0" stopColor="#bdeeb3" /><stop offset="1" stopColor="#7cc96f" />
+      </radialGradient>
+    </>
+  ),
+  mafia: u => (
+    <radialGradient id={`${u}_moon`} cx="0.38" cy="0.3" r="0.85">
+      <stop offset="0" stopColor="#fff6d8" /><stop offset="0.6" stopColor="#ffe7a6" /><stop offset="1" stopColor="#f3c969" />
+    </radialGradient>
+  ),
+  uno: u => (
+    <>
+      <linearGradient id={`${u}_red`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#f06a60" /><stop offset="1" stopColor="#cf3f34" /></linearGradient>
+      <linearGradient id={`${u}_white`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#ffffff" /><stop offset="1" stopColor="#f1e9dc" /></linearGradient>
+    </>
+  ),
+}
+
+const ART: Record<IconId, (u: string) => JSX.Element> = {
+  // Щенок (как Шарик)
+  pet: u => (
+    <g>
+      <path d="M18 30 Q8 30 11 46 Q14 56 24 50 Q22 40 26 33 Z" fill={`url(#${u}_ear)`} />
+      <path d="M62 30 Q72 30 69 46 Q66 56 56 50 Q58 40 54 33 Z" fill={`url(#${u}_ear)`} />
+      <ellipse cx="30" cy="64" rx="8" ry="7" fill="#fcc24f" />
+      <ellipse cx="50" cy="64" rx="8" ry="7" fill="#fcc24f" />
+      <path d="M27 64 v4 M30 65 v4 M33 64 v4" stroke="#e79a2a" strokeWidth="1.2" strokeLinecap="round" />
+      <path d="M47 64 v4 M50 65 v4 M53 64 v4" stroke="#e79a2a" strokeWidth="1.2" strokeLinecap="round" />
+      <ellipse cx="40" cy="38" rx="26" ry="24" fill={`url(#${u}_body)`} />
+      <Gloss />
+      <ellipse cx="22" cy="44" rx="5.5" ry="4" fill="#ff8f6e" opacity="0.55" />
+      <ellipse cx="58" cy="44" rx="5.5" ry="4" fill="#ff8f6e" opacity="0.55" />
+      <path d="M28 28 q4 -3 8 -0.5 M52 28 q-4 -3 -8 -0.5" stroke="#c47a1e" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+      <Eye cx={31} cy={36} /><Eye cx={49} cy={36} />
+      <ellipse cx="40" cy="45" rx="4.2" ry="3.4" fill="#3a2a1e" />
+      <ellipse cx="38.6" cy="43.8" rx="1.4" ry="1" fill="#fff" opacity="0.6" />
+      <path d="M40 48 q-5 6 -10 2 M40 48 q5 6 10 2" stroke="#3a2a1e" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+      <path d="M36.5 49 q3.5 4.5 7 0 q0 4 -3.5 4 q-3.5 0 -3.5 -4 Z" fill="#e8607a" />
+      <path d="M30 58 q10 6 20 0" stroke="#b58fd0" strokeWidth="3.4" fill="none" strokeLinecap="round" />
+      <path d="M40 60 l3 3 l-3 3 l-3 -3 Z" fill="#f4c64a" />
+    </g>
+  ),
+
+  // Крокодильчик
+  croco: u => (
+    <g>
+      <ellipse cx="29" cy="63" rx="7.5" ry="6.5" fill="#5bb45f" />
+      <ellipse cx="51" cy="63" rx="7.5" ry="6.5" fill="#5bb45f" />
+      <ellipse cx="40" cy="40" rx="25" ry="22" fill={`url(#${u}_body)`} />
+      <Gloss />
+      <ellipse cx="40" cy="50" rx="15" ry="9" fill={`url(#${u}_snout)`} />
+      <path d="M31 52 l2.5 4 l2.5 -4 Z M38 53 l2.5 4 l2.5 -4 Z M45 52 l2.5 4 l2.5 -4 Z" fill="#fff" />
+      <path d="M30 49 q10 7 20 0" stroke="#2f7a39" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+      <circle cx="35" cy="45" r="1.5" fill="#2f7a39" /><circle cx="45" cy="45" r="1.5" fill="#2f7a39" />
+      <circle cx="29" cy="26" r="9" fill={`url(#${u}_body)`} />
+      <circle cx="51" cy="26" r="9" fill={`url(#${u}_body)`} />
+      <Eye cx={29} cy={26} r={5.2} /><Eye cx={51} cy={26} r={5.2} />
+      <ellipse cx="20" cy="43" rx="4.5" ry="3.2" fill="#ff8f6e" opacity="0.45" />
+      <ellipse cx="60" cy="43" rx="4.5" ry="3.2" fill="#ff8f6e" opacity="0.45" />
+      <path d="M30 60 q10 5 20 0" stroke="#b58fd0" strokeWidth="3.2" fill="none" strokeLinecap="round" />
+      <path d="M40 62 l3 3 l-3 3 l-3 -3 Z" fill="#f4c64a" />
+    </g>
+  ),
+
+  // Сонный месяц со звёздами
+  mafia: u => (
+    <g>
+      <defs>
+        <mask id={`${u}_crescent`} maskUnits="userSpaceOnUse" x="6" y="14" width="56" height="56">
+          <circle cx="36" cy="42" r="24" fill="#fff" />
+          <circle cx="50" cy="35" r="21" fill="#000" />
+        </mask>
+      </defs>
+      <circle cx="36" cy="42" r="24" fill={`url(#${u}_moon)`} mask={`url(#${u}_crescent)`} />
+      <ellipse cx="26" cy="28" rx="8" ry="5" fill="#fff" opacity="0.35" mask={`url(#${u}_crescent)`} />
+      {/* сонное личико */}
+      <path d="M22 40 q3 3 6 0" stroke="#c79a3e" strokeWidth="2" fill="none" strokeLinecap="round" />
+      <path d="M30 41 q3 3 6 0" stroke="#c79a3e" strokeWidth="2" fill="none" strokeLinecap="round" />
+      <ellipse cx="24" cy="48" rx="3" ry="2.2" fill="#ff9d7e" opacity="0.5" />
+      <path d="M27 51 q2.5 2.5 5 0" stroke="#c79a3e" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+      {/* звёзды */}
+      <Star x={58} y={24} r={3.4} /><Star x={21} y={21} r={2.4} /><Star x={62} y={45} r={2} />
+    </g>
+  ),
+
+  // Глянцевый веер карт
+  uno: u => (
+    <g transform="translate(40 42)">
+      <Card u={u} x={-4} rot={-22} fill="#2f93cf" />
+      <Card u={u} x={4} rot={22} fill="#54b15a" />
+      <g>
+        <rect x="-15" y="-22" width="30" height="44" rx="7" fill={`url(#${u}_white)`} />
+        <rect x="-15" y="-22" width="30" height="44" rx="7" fill="none" stroke="rgba(20,20,30,.06)" />
+        <circle cx="0" cy="0" r="12" fill={`url(#${u}_red)`} />
+        <circle cx="0" cy="0" r="12" fill="none" stroke="#fff" strokeWidth="2.6" />
+        <text x="0" y="6.5" textAnchor="middle" fontFamily="Nunito, sans-serif" fontWeight="900" fontSize="18" fill="#fff">1</text>
+        <ellipse cx="-5" cy="-13" rx="7" ry="4" fill="#fff" opacity="0.5" />
+      </g>
+    </g>
+  ),
+}
+
+function Card({ u, x, rot, fill }: { u: string; x: number; rot: number; fill: string }) {
+  return (
+    <g transform={`rotate(${rot}) translate(${x} 0)`}>
+      <rect x="-14" y="-20" width="28" height="40" rx="6" fill={`url(#${u}_white)`} />
+      <rect x="-8" y="-13" width="16" height="26" rx="5" fill={fill} />
+      <ellipse cx="0" cy="-6" rx="5.5" ry="3.5" fill="#fff" opacity="0.45" />
+    </g>
+  )
 }
