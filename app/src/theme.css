@@ -78,18 +78,10 @@ h1, h2, h3 { margin: 0; font-weight: 800; color: inherit; letter-spacing: -.01em
 
 /* -- hero ----------------------------------------------------- */
 .brand { position: relative; display: flex; flex-direction: column; align-items: center; margin-top: 8px; }
-.hero-fan { position: relative; width: 250px; height: 116px; margin-bottom: 12px; animation: float 5.4s ease-in-out infinite; }
-.hero-tile { position: absolute; left: 50%; bottom: 4px; width: 76px; height: 76px; margin-left: -38px; transform-origin: 50% 140%; }
-.hero-tile .game-icon { width: 76px; height: 76px; display: block; }
-.hero-tile.t0 { transform: rotate(-20deg) translate(-58px, 8px); z-index: 1; }
-.hero-tile.t1 { transform: rotate(-7deg) translate(-20px, -6px); z-index: 3; }
-.hero-tile.t2 { transform: rotate(7deg) translate(20px, -6px); z-index: 2; }
-.hero-tile.t3 { transform: rotate(20deg) translate(58px, 8px); z-index: 1; }
-
-.brand-name { font-size: 39px; font-weight: 800; line-height: 1; letter-spacing: -.02em; margin-top: 14px; color: var(--brown-deep); }
-.brand-name .sm { font-size: .56em; font-weight: 800; font-style: italic; color: var(--accent-deep); margin: 0 .04em; }
-.brand-rule { display: none; }
-.brand-tag { color: var(--ink-soft); font-weight: 700; font-size: 15px; margin-top: 8px; }
+.brand-logo { width: 268px; max-width: 74vw; height: auto; display: block; margin-top: 2px;
+  filter: drop-shadow(0 16px 22px rgba(74,46,16,.26)); animation: float 5.4s ease-in-out infinite; }
+.brand-logo--sm { width: 128px; margin: 2px 0; animation: none; filter: drop-shadow(0 8px 12px rgba(74,46,16,.2)); }
+.brand-tag { color: var(--ink-soft); font-weight: 700; font-size: 15px; margin-top: 6px; }
 .greet { color: var(--brown); font-weight: 800; font-size: 15px; margin-top: 9px; }
 .greet b { color: var(--brown-deep); }
 
@@ -150,8 +142,7 @@ h1, h2, h3 { margin: 0; font-weight: 800; color: inherit; letter-spacing: -.01em
   box-shadow: 0 -10px 40px rgba(50,32,12,.22); animation: up .34s cubic-bezier(.2,.8,.3,1.03);
   max-height: 88vh; overflow-y: auto; }
 .sheet-grip { width: 40px; height: 5px; border-radius: 999px; background: var(--lip); margin: 0 auto 14px; }
-.sheet-hero { display: flex; flex-direction: column; align-items: center; gap: 0; margin-bottom: 2px; }
-.sheet-hero .hero-fan { transform: scale(.5); margin: -24px 0 -20px; animation: none; }
+.sheet-hero { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-bottom: 2px; }
 .sheet h2 { color: var(--brown-deep); font-size: 23px; font-weight: 900; }
 .sheet p { color: var(--ink); font-weight: 600; font-size: 14px; line-height: 1.5; margin: 8px 0; }
 .sheet p.soft { color: var(--ink-soft); }

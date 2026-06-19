@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useStore } from './store'
 import { Home } from './screens/Home'
-import { HeroFan } from './screens/Logo'
+import { BrandLogo } from './screens/Logo'
 import { GameIcon } from './art/GameIcon'
 
 type IconId = 'uno' | 'croco' | 'mafia' | 'pet'
@@ -17,8 +17,7 @@ export function App() {
       <div className="app">
         <div className="launcher" style={{ justifyContent: 'center' }}>
           <div className="brand" style={{ animation: 'pop .6s ease both' }}>
-            <HeroFan />
-            <div className="brand-name">Game<span className="sm">is</span>Game</div>
+            <BrandLogo />
             <div className="brand-tag">Открываем игровую…</div>
           </div>
         </div>
@@ -49,8 +48,7 @@ function Sheets() {
         {sheet === 'about' && (
           <>
             <div className="sheet-hero">
-              <HeroFan />
-              <h2>Game is Game</h2>
+              <BrandLogo size="small" />
             </div>
             <p className="soft" style={{ textAlign: 'center' }}>
               Одно приложение со всеми нашими играми. Выбираешь игру и она открывается сразу.
@@ -73,7 +71,7 @@ function Sheets() {
         {sheet === 'help' && (
           <>
             <div className="sheet-hero">
-              <HeroFan />
+              <BrandLogo size="small" />
               <h2>Как это работает</h2>
             </div>
             <p className="soft" style={{ textAlign: 'center' }}>

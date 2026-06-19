@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react'
 import { useStore } from '../store'
-import { HeroFan } from './Logo'
+import { BrandLogo } from './Logo'
 import { GameIcon } from '../art/GameIcon'
 import { SoundOnIcon, SoundOffIcon, InfoIcon, HelpIcon, ChevronIcon } from '../art/icons'
 import { APP_TAG } from '../brand'
@@ -31,8 +31,7 @@ export function Home() {
       </div>
 
       <div className="brand">
-        <HeroFan />
-        <div className="brand-name">Game<span className="sm">is</span>Game</div>
+        <BrandLogo />
         <div className="brand-tag">{APP_TAG}</div>
       </div>
 
