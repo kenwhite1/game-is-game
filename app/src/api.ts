@@ -1,7 +1,7 @@
 import { getInitData } from './telegram'
 import type {
-  AuthResponse, GameCard, Profile, ProfileDetail,
-  Friend, ActivityItem, LeaderRow, Wardrobe, Slot,
+  AuthResponse, GameCard, GameMeta, Profile, ProfileDetail,
+  Friend, ActivityItem, LeaderRow, Wardrobe, Slot, RatingValue, Quest,
 } from '@shared/types'
 
 let token: string | null = sessionStorage.getItem('gg_jwt')
@@ -35,8 +35,14 @@ export const api = {
     sessionStorage.setItem('gg_jwt', r.token)
     return r
   },
-  catalog: () => req<{ catalog: GameCard[] }>('/catalog'),
+  catalog: () => req<{ catalog: GameCard[]; meta: Record<string, GameMeta> }>('/catalog'),
   open: (gameId: string) => req<{ profile: Profile; recent: string[] }>('/open', { gameId }),
+  toggleFavorite: (gameId: string) => req<{ favorite: boolean; favorites: string[] }>('/favorites/toggle', { gameId }),
+  rate: (gameId: string, value: RatingValue | 0) =>
+    req<{ ratings: Record<string, RatingValue>; meta: Record<string, GameMeta> }>('/rate', { gameId, value }),
+  quests: () => req<{ quests: Quest[] }>('/quests'),
+  claimQuest: (questId: string) => req<{ reward: number; profile: Profile; quests: Quest[] }>('/quests/claim', { questId }),
+  gift: (friendId: number, amount: number) => req<{ amount: number; profile: Profile; friends: Friend[] }>('/gift', { friendId, amount }),
 
   profileDetail: () => req<ProfileDetail>('/profile/detail'),
   updateProfile: (patch: { name: string }) => req<{ profile: Profile }>('/profile/update', patch),

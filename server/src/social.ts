@@ -133,6 +133,42 @@ export function leaderboard(uid: number, limit = 20): LeaderRow[] {
   })
 }
 
+// ─── Подарки ─────────────────────────────────────────────────────────────
+
+export const GIFT_MIN = 10
+export const GIFT_MAX = 1000
+export const GIFTS_PER_DAY = 5
+
+export type GiftResult =
+  | { ok: true; amount: number }
+  | { ok: false; reason: 'bad_amount' | 'not_friends' | 'too_poor' | 'limit' }
+
+/** Подарить Game другу. Перевод, а не эмиссия: монеты списываются у дарителя. */
+export function giftCoins(uid: number, friendId: number, amount: number): GiftResult {
+  if (!Number.isInteger(amount) || amount < GIFT_MIN || amount > GIFT_MAX) {
+    return { ok: false, reason: 'bad_amount' }
+  }
+  const isFriend = db.prepare('SELECT 1 FROM friendships WHERE user_id=? AND friend_id=?').get(uid, friendId)
+  if (!isFriend) return { ok: false, reason: 'not_friends' }
+  const sentToday = (db
+    .prepare("SELECT COUNT(*) AS n FROM gifts WHERE from_id=? AND date(ts)=date('now')")
+    .get(uid) as { n: number }).n
+  if (sentToday >= GIFTS_PER_DAY) return { ok: false, reason: 'limit' }
+
+  let result: GiftResult = { ok: true, amount }
+  db.transaction(() => {
+    // Списание с проверкой баланса одним UPDATE: без гонки двух запросов.
+    const r = db.prepare('UPDATE users SET coins=coins-? WHERE id=? AND coins>=?').run(amount, uid, amount)
+    if (r.changes === 0) {
+      result = { ok: false, reason: 'too_poor' }
+      return
+    }
+    db.prepare('UPDATE users SET coins=coins+? WHERE id=?').run(amount, friendId)
+    db.prepare('INSERT INTO gifts (from_id, to_id, amount) VALUES (?,?,?)').run(uid, friendId, amount)
+  })()
+  return result
+}
+
 /** Сводка для соц-вкладок одним запросом. */
 export function socialSnapshot(uid: number) {
   getProfile(uid) // гарантируем код друга и аватар у текущего игрока

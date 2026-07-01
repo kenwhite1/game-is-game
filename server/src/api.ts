@@ -3,10 +3,13 @@ import { z } from 'zod'
 import { validateInitData, issueToken, verifyToken } from './auth'
 import { BOT_USERNAME, gameOverrides, type Env } from './env'
 import { getOrCreateUser, getProfile, recordOpen, recentGames, profileDetail, updateProfile, userExists } from './profiles'
-import { addFriendByCode, removeFriend, friendsOf, activityFeed, leaderboard, socialSnapshot } from './social'
+import { addFriendByCode, removeFriend, friendsOf, activityFeed, leaderboard, socialSnapshot, giftCoins } from './social'
+import { questsOf, claimQuest } from './quests'
+import { bot } from './bot'
 import { applyReferral } from './referrals'
 import { REF_PREFIX } from '../../shared/referrals'
 import { wardrobeOf, equip, buy } from './cosmetics'
+import { gameMeta, favoritesOf, toggleFavorite, ratingsOf, rate } from './catalog'
 import { buildCatalog, GAMES } from '../../shared/games'
 
 export const api = new Hono<Env>()
@@ -18,7 +21,8 @@ const catalog = () => buildCatalog(gameOverrides())
 api.get('/health', c => c.json({ ok: true }))
 
 // Public catalog, so the menu still renders if a guest opens the URL directly.
-api.get('/catalog', c => c.json({ catalog: catalog() }))
+// meta = global opens/likes per game, so charts work for guests too.
+api.get('/catalog', c => c.json({ catalog: catalog(), meta: gameMeta() }))
 
 api.post('/auth', async c => {
   const body = await c.req.json<{ initData: string }>().catch(() => null)
@@ -42,6 +46,10 @@ api.post('/auth', async c => {
     botUsername: BOT_USERNAME,
     catalog: catalog(),
     recent: recentGames(v.user.id),
+    favorites: favoritesOf(v.user.id),
+    ratings: ratingsOf(v.user.id),
+    meta: gameMeta(),
+    quests: questsOf(v.user.id),
     referral,
   })
 })
@@ -113,6 +121,56 @@ api.post('/open', async c => {
   const uid = c.get('uid')
   const profile = recordOpen(uid, parsed.data.gameId)
   return c.json({ profile, recent: recentGames(uid) })
+})
+
+// ─── Catalog: favorites + ratings ────────────────────────────────────────
+
+const favSchema = z.object({ gameId: z.string().min(1).max(32) })
+api.post('/favorites/toggle', async c => {
+  const parsed = favSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success || !VALID_IDS.has(parsed.data.gameId)) return c.json({ error: 'bad_request' }, 400)
+  return c.json(toggleFavorite(c.get('uid'), parsed.data.gameId))
+})
+
+const rateSchema = z.object({ gameId: z.string().min(1).max(32), value: z.union([z.literal(1), z.literal(-1), z.literal(0)]) })
+api.post('/rate', async c => {
+  const parsed = rateSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success || !VALID_IDS.has(parsed.data.gameId)) return c.json({ error: 'bad_request' }, 400)
+  const ratings = rate(c.get('uid'), parsed.data.gameId, parsed.data.value)
+  return c.json({ ratings, meta: gameMeta() })
+})
+
+// ─── Quests: задания дня ─────────────────────────────────────────────────
+
+api.get('/quests', c => c.json({ quests: questsOf(c.get('uid')) }))
+
+const claimSchema = z.object({ questId: z.string().min(1).max(48) })
+api.post('/quests/claim', async c => {
+  const parsed = claimSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'bad_request' }, 400)
+  const uid = c.get('uid')
+  const r = claimQuest(uid, parsed.data.questId)
+  if (!r.ok) return c.json({ error: r.reason }, r.reason === 'claimed' ? 409 : 400)
+  return c.json({ reward: r.reward, profile: getProfile(uid), quests: questsOf(uid) })
+})
+
+// ─── Gifts: подарить Game другу ──────────────────────────────────────────
+
+const giftSchema = z.object({ friendId: z.number().int().positive(), amount: z.number().int() })
+api.post('/gift', async c => {
+  const parsed = giftSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'bad_request' }, 400)
+  const uid = c.get('uid')
+  const r = giftCoins(uid, parsed.data.friendId, parsed.data.amount)
+  if (!r.ok) return c.json({ error: r.reason }, r.reason === 'too_poor' ? 402 : 400)
+  // Дружеский пинг в личку получателю; молча пропускаем, если бот не запущен.
+  const sender = getProfile(uid)
+  if (bot && sender) {
+    void bot.api
+      .sendMessage(parsed.data.friendId, `🎁 ${sender.name} подарил(а) тебе ${r.amount} Game! Загляни в приложение.`)
+      .catch(() => {})
+  }
+  return c.json({ amount: r.amount, profile: sender, friends: friendsOf(uid) })
 })
 
 // ─── Social: friends, activity, leaderboard ──────────────────────────────

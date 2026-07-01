@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useStore } from '../store'
 import { Avatar } from '../art/Avatar'
@@ -6,9 +7,10 @@ import { SoundOnIcon, SoundOffIcon, HelpIcon, PlayIcon } from '../art/icons'
 import { levelInfo } from '@shared/progression'
 import { cosmeticById } from '@shared/cosmetics'
 import type { BannerItem, TitleItem } from '@shared/cosmetics'
+import { CATEGORIES, categoryRu, type Category } from '@shared/games'
 import type { GameCard } from '@shared/types'
-
-type IconId = 'uno' | 'croco' | 'mafia' | 'pet'
+import { shareInvite } from '../telegram'
+import { isOnline } from '../util'
 
 export function bannerBg(id: string): string | undefined {
   const c = cosmeticById(id)
@@ -28,20 +30,61 @@ function gameStyle(card: GameCard): CSSProperties {
   return { '--a': card.accent, '--ad': card.accentDeep, '--glow': glow(card.accent) } as CSSProperties
 }
 
+/** «5 игр», «31 игра», «2 игры» — русские формы множественного числа. */
+function ruGames(n: number): string {
+  const d10 = n % 10, d100 = n % 100
+  const word = d10 === 1 && d100 !== 11 ? 'игра'
+    : d10 >= 2 && d10 <= 4 && (d100 < 12 || d100 > 14) ? 'игры'
+    : 'игр'
+  return `${n} ${word}`
+}
+
+type Filter = Category | 'all' | 'fav'
+
 export function Home() {
   const catalog = useStore(s => s.catalog)
   const profile = useStore(s => s.profile)
   const recent = useStore(s => s.recent)
+  const favorites = useStore(s => s.favorites)
+  const friends = useStore(s => s.friends)
+  const quests = useStore(s => s.quests)
+  const meta = useStore(s => s.meta)
   const soundOn = useStore(s => s.soundOn)
   const toggleSound = useStore(s => s.toggleSound)
+  const toggleFavorite = useStore(s => s.toggleFavorite)
   const openSheet = useStore(s => s.openSheet)
+  const openGameSheet = useStore(s => s.openGameSheet)
   const setTab = useStore(s => s.setTab)
   const launch = useStore(s => s.launch)
 
+  const [query, setQuery] = useState('')
+  const [filter, setFilter] = useState<Filter>('all')
+
   const firstName = profile?.name ? profile.name.split(' ')[0] : null
   const recentCards = recent.map(id => catalog.find(g => g.id === id)).filter(Boolean) as GameCard[]
+
+  // Глобальные чарты: топ по запускам всех игроков (пустые в новых инсталляциях).
+  const popular = useMemo(() => {
+    return catalog
+      .map(g => ({ g, n: meta[g.id]?.opens ?? 0 }))
+      .filter(x => x.n > 0)
+      .sort((a, b) => b.n - a.n)
+      .slice(0, 8)
+      .map(x => x.g)
+  }, [catalog, meta])
+
+  const q = query.trim().toLowerCase()
+  const browsing = q !== '' || filter !== 'all'
+  const filtered = catalog.filter(g => {
+    if (filter === 'fav' && !favorites.includes(g.id)) return false
+    if (filter !== 'all' && filter !== 'fav' && g.category !== filter) return false
+    if (q && !g.name.toLowerCase().includes(q) && !g.tagline.toLowerCase().includes(q)) return false
+    return true
+  })
+
   const featured = recentCards[0] ?? catalog[0]
-  const rest = catalog.filter(g => g.id !== featured?.id)
+  const grid = browsing ? filtered : catalog.filter(g => g.id !== featured?.id)
+  const onlineFriends = friends.filter(f => isOnline(f.lastSeen)).slice(0, 8)
 
   return (
     <div className="tab-page stagger">
@@ -59,13 +102,61 @@ export function Home() {
 
       {profile && <PlayerBanner onOpen={() => setTab('profile')} />}
 
-      {recentCards.length > 0 && (
+      {profile && quests.length > 0 && <QuestsCard />}
+
+      <div className="search-row">
+        <span className="search-ic">🔍</span>
+        <input
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          placeholder="Найти игру…"
+          aria-label="Поиск по играм"
+          enterKeyHint="search"
+        />
+        {query && <button className="search-x" onClick={() => setQuery('')} aria-label="Очистить">✕</button>}
+      </div>
+
+      <div className="cat-chips">
+        <button className={`chip-cat ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>Все</button>
+        <button className={`chip-cat ${filter === 'fav' ? 'active' : ''}`} onClick={() => setFilter('fav')}>⭐ Избранное</button>
+        {CATEGORIES.map(c => (
+          <button key={c.id} className={`chip-cat ${filter === c.id ? 'active' : ''}`} onClick={() => setFilter(c.id)}>
+            {c.emoji} {c.ru}
+          </button>
+        ))}
+      </div>
+
+      {!browsing && onlineFriends.length > 0 && (
+        <>
+          <div className="sec"><h2>Друзья в сети 🟢</h2></div>
+          <div className="strip">
+            {onlineFriends.map(f => {
+              const game = f.lastGame ? catalog.find(g => g.id === f.lastGame) : null
+              return (
+                <button
+                  key={f.id} className="chip-game chip-friend" style={game ? gameStyle(game) : undefined}
+                  onClick={() => { if (game) launch(game); else setTab('friends') }}
+                  aria-label={game ? `${f.name} в ${game.name}: зайти` : f.name}
+                >
+                  <Avatar look={f.look} seed={f.id} size={34} />
+                  <span className="of-tx">
+                    <span className="nm">{f.name.split(' ')[0]}</span>
+                    <span className="of-sub">{game ? `в ${game.name} · зайти` : 'в сети'}</span>
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </>
+      )}
+
+      {!browsing && recentCards.length > 0 && (
         <>
           <div className="sec"><h2>Продолжить</h2></div>
           <div className="strip">
             {recentCards.map(g => (
               <button key={g.id} className="chip-game" style={gameStyle(g)} onClick={() => launch(g)}>
-                <GameTileIcon id={g.id as IconId} size={36} />
+                <GameTileIcon id={g.id} emoji={g.emoji} size={36} />
                 <span className="nm">{g.name}</span>
               </button>
             ))}
@@ -73,11 +164,25 @@ export function Home() {
         </>
       )}
 
-      {featured && (
+      {!browsing && popular.length > 0 && (
+        <>
+          <div className="sec"><h2>Популярное 🔥</h2></div>
+          <div className="strip">
+            {popular.map(g => (
+              <button key={g.id} className="chip-game" style={gameStyle(g)} onClick={() => launch(g)}>
+                <GameTileIcon id={g.id} emoji={g.emoji} size={36} />
+                <span className="nm">{g.name}</span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+
+      {!browsing && featured && (
         <>
           <div className="sec"><h2>{recentCards.length ? 'Снова в деле' : 'Начни здесь'}</h2></div>
           <button className="feature" style={gameStyle(featured)} onClick={() => launch(featured)}>
-            <GameTileIcon id={featured.id as IconId} size={76} />
+            <GameTileIcon id={featured.id} emoji={featured.emoji} size={76} />
             <span className="ft">
               <span className="t">{featured.name}</span>
               <span className="s">{featured.tagline}</span>
@@ -87,21 +192,141 @@ export function Home() {
         </>
       )}
 
-      <div className="sec"><h2>Все игры</h2><span className="sub">{catalog.length} игры</span></div>
-      {catalog.length === 0 && (
-        <div className="empty"><div className="em">🎮</div><div className="t">Игры скоро появятся</div><div className="s">Загружаем игровую — загляни через минуту.</div></div>
+      <div className="sec">
+        <h2>{browsing ? 'Найдено' : 'Все игры'}</h2>
+        <span className="sub">{ruGames(browsing ? filtered.length : catalog.length)}</span>
+      </div>
+      {grid.length === 0 && (
+        <div className="empty">
+          <div className="em">{filter === 'fav' ? '⭐' : '🔎'}</div>
+          <div className="t">{filter === 'fav' ? 'В избранном пусто' : 'Ничего не нашлось'}</div>
+          <div className="s">{filter === 'fav' ? 'Отмечай игры звёздочкой, и они соберутся здесь.' : 'Попробуй другое название или сними фильтры.'}</div>
+        </div>
       )}
       <div className="game-grid">
-        {rest.map(g => (
-          <button key={g.id} className="game-card" style={gameStyle(g)} onClick={() => launch(g)} aria-label={`Открыть ${g.name}`}>
-            {recent[0] === g.id && <span className="gc-flag">Недавнее</span>}
-            <span className="gc-icon"><GameTileIcon id={g.id as IconId} size={58} /></span>
+        {grid.map(g => (
+          <div key={g.id} className="game-card" style={gameStyle(g)} onClick={() => launch(g)} role="button" tabIndex={0}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') launch(g) }} aria-label={`Открыть ${g.name}`}>
+            <button
+              className={`gc-star ${favorites.includes(g.id) ? 'on' : ''}`}
+              onClick={e => { e.stopPropagation(); void toggleFavorite(g.id) }}
+              aria-label={favorites.includes(g.id) ? 'Убрать из избранного' : 'В избранное'}
+            >★</button>
+            {recent[0] === g.id ? <span className="gc-flag">Недавнее</span>
+              : g.adult ? <span className="gc-flag gc-flag--18">18+</span> : null}
+            <span className="gc-icon"><GameTileIcon id={g.id} emoji={g.emoji} size={58} /></span>
             <span className="gc-title">{g.name}</span>
             <span className="gc-sub">{g.tagline}</span>
-            <span className="gc-play"><PlayIcon /> Играть</span>
-          </button>
+            <span className="gc-foot">
+              <span className="gc-play"><PlayIcon /> Играть</span>
+              <button className="gc-info" onClick={e => { e.stopPropagation(); openGameSheet(g.id) }} aria-label={`Об игре ${g.name}`}>i</button>
+            </span>
+          </div>
         ))}
       </div>
+
+      <GameSheet />
+    </div>
+  )
+}
+
+/** Карточка игры: описание, статистика, оценка, избранное, запуск. */
+function GameSheet() {
+  const id = useStore(s => s.gameSheet)
+  const catalog = useStore(s => s.catalog)
+  const meta = useStore(s => s.meta)
+  const ratings = useStore(s => s.ratings)
+  const favorites = useStore(s => s.favorites)
+  const botUsername = useStore(s => s.botUsername)
+  const rate = useStore(s => s.rate)
+  const toggleFavorite = useStore(s => s.toggleFavorite)
+  const openGameSheet = useStore(s => s.openGameSheet)
+  const launch = useStore(s => s.launch)
+
+  const g = id ? catalog.find(x => x.id === id) : null
+  if (!g) return null
+
+  const m = meta[g.id] ?? { opens: 0, likes: 0, dislikes: 0 }
+  const votes = m.likes + m.dislikes
+  const likePct = votes > 0 ? Math.round((m.likes / votes) * 100) : null
+  const my = ratings[g.id]
+  const fav = favorites.includes(g.id)
+  const playersRu = g.players === 'solo' ? 'Одиночная' : g.players === 'multi' ? 'С друзьями' : 'Один и с друзьями'
+
+  return (
+    <div className="scrim" onClick={() => openGameSheet(null)}>
+      <div className="sheet" onClick={e => e.stopPropagation()} style={gameStyle(g)}>
+        <div className="grip" />
+        <div className="gsheet-head">
+          <GameTileIcon id={g.id} emoji={g.emoji} size={64} />
+          <div className="tx">
+            <h2>{g.name}</h2>
+            <div className="s">{g.tagline}</div>
+          </div>
+        </div>
+        <div className="gsheet-tags">
+          <span className="tag-pill">{categoryRu(g.category)}</span>
+          <span className="tag-pill">{playersRu}</span>
+          {g.adult && <span className="tag-pill warn">18+</span>}
+        </div>
+        <p className="soft">{g.blurb}</p>
+        <div className="gsheet-stats">
+          <span>🚀 {m.opens.toLocaleString('ru')} {m.opens === 1 ? 'запуск' : 'запусков'}</span>
+          <span>{likePct !== null ? `👍 ${likePct}% (${votes})` : '👍 Оцени первым'}</span>
+        </div>
+        <div className="rate-row">
+          <button className={`rate-btn ${my === 1 ? 'on-like' : ''}`} onClick={() => void rate(g.id, my === 1 ? 0 : 1)}>
+            👍 Нравится{m.likes > 0 ? ` · ${m.likes}` : ''}
+          </button>
+          <button className={`rate-btn ${my === -1 ? 'on-dislike' : ''}`} onClick={() => void rate(g.id, my === -1 ? 0 : -1)}>
+            👎 Не очень{m.dislikes > 0 ? ` · ${m.dislikes}` : ''}
+          </button>
+        </div>
+        <div className="rate-row" style={{ marginTop: 10 }}>
+          <button className={`rate-btn ${fav ? 'on-fav' : ''}`} onClick={() => void toggleFavorite(g.id)}>
+            {fav ? '⭐ В избранном' : '☆ В избранное'}
+          </button>
+          <button
+            className="rate-btn"
+            onClick={() => shareInvite(
+              `https://t.me/${botUsername}?startapp=${g.id}`,
+              `Играю в «${g.name}» в Game is Game — залетай! 🎮`,
+            )}
+          >📤 Поделиться</button>
+        </div>
+        <button className="btn accent" style={{ width: '100%', marginTop: 10 }} onClick={() => { openGameSheet(null); launch(g) }}>
+          <PlayIcon /> Играть
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/** Задания дня: три квеста, прогресс и кнопка «Забрать» за выполненные. */
+function QuestsCard() {
+  const quests = useStore(s => s.quests)
+  const claimQuest = useStore(s => s.claimQuest)
+  const unclaimed = quests.filter(q => q.done && !q.claimed).length
+  return (
+    <div className="card quests">
+      <div className="q-head">
+        <span className="q-title-main">Задания дня</span>
+        <span className="q-sub">{unclaimed > 0 ? `можно забрать: ${unclaimed}` : 'новые каждый день'}</span>
+      </div>
+      {quests.map(q => (
+        <div className="q-row" key={q.id}>
+          <span className="q-emoji">{q.emoji}</span>
+          <div className="q-tx">
+            <div className="q-name">{q.title}</div>
+            <div className="q-bar"><div className="q-fill" style={{ width: `${Math.round((q.progress / q.target) * 100)}%` }} /></div>
+          </div>
+          {q.claimed
+            ? <span className="q-done">✓</span>
+            : q.done
+              ? <button className="q-claim" onClick={() => void claimQuest(q.id)}>+{q.reward} G</button>
+              : <span className="q-prog">{q.progress}/{q.target}</span>}
+        </div>
+      ))}
     </div>
   )
 }

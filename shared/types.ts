@@ -44,6 +44,31 @@ export interface GameStat {
   opens: number
 }
 
+/** Глобальные агрегаты по игре: запуски и оценки всех игроков. */
+export interface GameMeta {
+  opens: number
+  likes: number
+  dislikes: number
+}
+
+/** Личная оценка игры: нравится или нет. */
+export type RatingValue = 1 | -1
+
+/** Задание дня с прогрессом игрока. */
+export interface Quest {
+  id: string
+  title: string
+  emoji: string
+  target: number
+  progress: number
+  /** Награда в Game. */
+  reward: number
+  /** Прогресс достиг цели. */
+  done: boolean
+  /** Награда уже получена сегодня. */
+  claimed: boolean
+}
+
 /** Профиль + статистика по играм + значки для экрана «Профиль». */
 export interface ProfileDetail {
   profile: Profile
@@ -125,6 +150,14 @@ export interface AuthResponse {
   catalog: GameCard[]
   /** Идентификаторы недавно открытых игр, свежие первыми. */
   recent: string[]
+  /** Игры в избранном, свежие первыми. */
+  favorites: string[]
+  /** Мои оценки игр. */
+  ratings: Record<string, RatingValue>
+  /** Глобальные агрегаты по играм (запуски, лайки). */
+  meta: Record<string, GameMeta>
+  /** Задания дня. */
+  quests: Quest[]
   /** Заполнено, если этот вход засчитан как приход по приглашению. */
   referral: ReferralApplied | null
 }

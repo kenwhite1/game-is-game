@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { GameCard, Profile, ProfileDetail, Friend, ActivityItem, LeaderRow, Wardrobe, Slot } from '@shared/types'
+import type { GameCard, GameMeta, Profile, ProfileDetail, Friend, ActivityItem, LeaderRow, Wardrobe, Slot, RatingValue, Quest } from '@shared/types'
 import { GAMES, defaultLink } from '@shared/games'
 import { api } from './api'
 import { haptic, openGame as openGameLink, getStartParam, inTelegram } from './telegram'
@@ -17,6 +17,12 @@ interface S {
   profile: Profile | null
   catalog: GameCard[]
   recent: string[]
+  favorites: string[]
+  ratings: Record<string, RatingValue>
+  meta: Record<string, GameMeta>
+  quests: Quest[]
+  /** id игры, открытой в карточке-шторке (null = закрыто). */
+  gameSheet: string | null
   detail: ProfileDetail | null
   friends: Friend[]
   activity: ActivityItem[]
@@ -34,6 +40,12 @@ interface S {
   init(): Promise<void>
   setTab(t: Tab): void
   launch(card: GameCard): void
+  openGameSheet(id: string | null): void
+  toggleFavorite(id: string): Promise<void>
+  rate(id: string, value: RatingValue | 0): Promise<void>
+  refreshQuests(): Promise<void>
+  claimQuest(id: string): Promise<void>
+  gift(friendId: number, amount: number): Promise<{ ok: boolean; error?: string }>
   openSheet(s: Sheet): void
   toggleSound(): void
   showToast(msg: string): void
@@ -56,6 +68,11 @@ export const useStore = create<S>((set, get) => ({
   profile: null,
   catalog: STATIC_CATALOG,
   recent: [],
+  favorites: [],
+  ratings: {},
+  meta: {},
+  quests: [],
+  gameSheet: null,
   detail: null,
   friends: [],
   activity: [],
@@ -78,16 +95,22 @@ export const useStore = create<S>((set, get) => ({
         profile: r.profile,
         catalog: r.catalog?.length ? r.catalog : STATIC_CATALOG,
         recent: r.recent ?? [],
+        favorites: r.favorites ?? [],
+        ratings: r.ratings ?? {},
+        meta: r.meta ?? {},
+        quests: r.quests ?? [],
         botUsername: r.botUsername || get().botUsername,
         ready: true,
       })
       startParam = r.startParam
       referral = r.referral ?? null
+      // Друзья нужны уже на «Доме» (полка «Друзья в сети»), грузим сразу.
+      void get().loadSocial()
     } catch {
       // гость или офлайн: показываем меню из публичного каталога или статики
       try {
         const r = await api.catalog()
-        set({ catalog: r.catalog?.length ? r.catalog : STATIC_CATALOG, ready: true })
+        set({ catalog: r.catalog?.length ? r.catalog : STATIC_CATALOG, meta: r.meta ?? {}, ready: true })
       } catch {
         set({ ready: true })
       }
@@ -137,7 +160,82 @@ export const useStore = create<S>((set, get) => ({
     // Фиксируем открытие на сервере в фоне, не блокируя запуск.
     api.open(card.id).then(r => {
       set({ profile: r.profile, recent: r.recent, socialLoaded: false, detail: null })
+      // Запуск мог продвинуть задания дня.
+      void get().refreshQuests()
     }).catch(() => {})
+  },
+
+  async refreshQuests() {
+    try {
+      const r = await api.quests()
+      set({ quests: r.quests })
+    } catch { /* офлайн */ }
+  },
+
+  async claimQuest(id) {
+    try {
+      const r = await api.claimQuest(id)
+      set({ profile: r.profile, quests: r.quests })
+      haptic('success')
+      if (get().soundOn) playSfx('open')
+      get().showToast(`Задание выполнено: +${r.reward} Game 🎉`)
+    } catch (e) {
+      haptic('warn')
+      const reason = (e as { message?: string }).message
+      get().showToast(reason === 'claimed' ? 'Награда уже получена' : 'Задание ещё не выполнено')
+      void get().refreshQuests()
+    }
+  },
+
+  async gift(friendId, amount) {
+    try {
+      const r = await api.gift(friendId, amount)
+      set({ profile: r.profile, friends: r.friends })
+      haptic('success')
+      return { ok: true }
+    } catch (e) {
+      haptic('warn')
+      return { ok: false, error: (e as { message?: string }).message ?? 'request_failed' }
+    }
+  },
+
+  openGameSheet(id) {
+    if (id) {
+      haptic('tap')
+      if (get().soundOn) playSfx('tap')
+    }
+    set({ gameSheet: id })
+  },
+
+  async toggleFavorite(id) {
+    // Оптимистично: звёздочка должна отзываться мгновенно.
+    const was = get().favorites
+    const next = was.includes(id) ? was.filter(f => f !== id) : [id, ...was]
+    set({ favorites: next })
+    haptic('select')
+    try {
+      const r = await api.toggleFavorite(id)
+      set({ favorites: r.favorites })
+    } catch {
+      set({ favorites: was })
+      get().showToast('Не удалось обновить избранное')
+    }
+  },
+
+  async rate(id, value) {
+    const wasRatings = get().ratings
+    const nextRatings = { ...wasRatings }
+    if (value === 0) delete nextRatings[id]
+    else nextRatings[id] = value
+    set({ ratings: nextRatings })
+    haptic('select')
+    try {
+      const r = await api.rate(id, value)
+      set({ ratings: r.ratings, meta: r.meta })
+    } catch {
+      set({ ratings: wasRatings })
+      get().showToast('Не удалось сохранить оценку')
+    }
   },
 
   openSheet(sheet) {

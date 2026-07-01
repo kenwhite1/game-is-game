@@ -6,9 +6,17 @@ import { CopyIcon, ShareIcon, PlusIcon, CloseIcon } from '../art/icons'
 import { copyText, shareInvite } from '../telegram'
 import { timeAgo, isOnline, gameById } from '../util'
 import { REFERRER_REWARD, REFERRED_BONUS, inviteLink } from '@shared/referrals'
+import type { Friend } from '@shared/types'
 
-type IconId = 'uno' | 'croco' | 'mafia' | 'pet'
 type Seg = 'friends' | 'board' | 'feed'
+const GIFT_PRESETS = [50, 100, 250, 500]
+
+const GIFT_ERRORS: Record<string, string> = {
+  too_poor: 'Не хватает Game',
+  limit: 'Лимит: 5 подарков в день',
+  not_friends: 'Вы не в друзьях',
+  bad_amount: 'От 10 до 1000 Game',
+}
 const MEDALS = ['🥇', '🥈', '🥉']
 
 const ADD_ERRORS: Record<string, string> = {
@@ -33,6 +41,7 @@ export function Friends() {
   const [code, setCode] = useState('')
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
+  const [giftFor, setGiftFor] = useState<Friend | null>(null)
 
   const myCode = profile?.friendCode ?? '------'
   // Одна ссылка на всё: новому игроку засчитает приглашение (+Game обоим),
@@ -122,6 +131,7 @@ export function Friends() {
                   </div>
                 </div>
                 <span className="lvl-badge">Ур. {f.level}</span>
+                <button className="iconbtn" style={{ width: 36, height: 36, fontSize: 17 }} onClick={() => setGiftFor(f)} aria-label={`Подарить Game: ${f.name}`}>🎁</button>
                 <button className="iconbtn" style={{ width: 36, height: 36, color: 'var(--red)' }} onClick={() => removeFriend(f.id)} aria-label="Удалить из друзей"><CloseIcon /></button>
               </div>
             )
@@ -159,13 +169,64 @@ export function Friends() {
                     <div className="t"><b>{a.name}</b> открыл(а) {game ? game.name : 'игру'}</div>
                     <div className="when">{timeAgo(a.ts)}</div>
                   </div>
-                  {game && <GameTileIcon id={game.id as IconId} size={34} />}
+                  {game && <GameTileIcon id={game.id} emoji={game.emoji} size={34} />}
                 </div>
               )
             })}
           </div>
         )
       )}
+
+      {giftFor && <GiftSheet friend={giftFor} onClose={() => setGiftFor(null)} />}
+    </div>
+  )
+}
+
+/** Шторка «Подарить Game»: пресеты суммы, перевод с баланса дарителя. */
+function GiftSheet({ friend, onClose }: { friend: Friend; onClose(): void }) {
+  const profile = useStore(s => s.profile)
+  const gift = useStore(s => s.gift)
+  const showToast = useStore(s => s.showToast)
+  const [amount, setAmount] = useState(100)
+  const [busy, setBusy] = useState(false)
+  const coins = profile?.coins ?? 0
+
+  const send = async () => {
+    if (busy) return
+    setBusy(true)
+    const r = await gift(friend.id, amount)
+    setBusy(false)
+    if (r.ok) {
+      showToast(`Подарок отправлен: ${friend.name} +${amount} Game 🎁`)
+      onClose()
+    } else {
+      showToast(GIFT_ERRORS[r.error ?? ''] ?? 'Не получилось отправить')
+    }
+  }
+
+  return (
+    <div className="scrim" onClick={onClose}>
+      <div className="sheet" onClick={e => e.stopPropagation()}>
+        <div className="grip" />
+        <div className="gsheet-head">
+          <Avatar look={friend.look} seed={friend.id} size={52} />
+          <div className="tx">
+            <h2>Подарить Game</h2>
+            <div className="s">{friend.name} обрадуется 🎁</div>
+          </div>
+        </div>
+        <div className="gift-presets">
+          {GIFT_PRESETS.map(v => (
+            <button key={v} className={`chip-cat ${amount === v ? 'active' : ''}`} onClick={() => setAmount(v)} disabled={v > coins}>
+              {v} G
+            </button>
+          ))}
+        </div>
+        <p className="soft" style={{ marginTop: 8 }}>У тебя {coins.toLocaleString('ru')} Game. Подарок спишется с твоего баланса, до 5 подарков в день.</p>
+        <button className="btn accent" style={{ width: '100%', marginTop: 6 }} onClick={() => void send()} disabled={busy || amount > coins}>
+          🎁 Подарить {amount} Game
+        </button>
+      </div>
     </div>
   )
 }
