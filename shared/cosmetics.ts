@@ -174,6 +174,7 @@ export const HAT_ITEMS: HatItem[] = [
   H('hat_unicornhorn', 'Рог', '🦄', 'legendary', 'Мифические', shop('legendary')),
   H('hat_propeller', 'Пропеллер', '🚁', 'epic', 'Ретро', shop('epic')),
   H('hat_galaxy', 'Галактика', '🌌', 'mythic', 'Топ', shop('mythic')),
+  H('hat_megaphone', 'Рупор', '📣', 'epic', 'Достижения', { kind: 'badge', badge: 'inviter' }),
 ]
 
 // ─── Очки / на лицо ─────────────────────────────────────────────────────
@@ -273,6 +274,7 @@ export const TITLE_ITEMS: TitleItem[] = [
   T('title_explorer', 'Исследователь', 'rare', 'Достижения', { kind: 'badge', badge: 'explorer' }),
   T('title_collector', 'Коллекционер', 'epic', 'Достижения', { kind: 'badge', badge: 'collector' }),
   T('title_soul', 'Душа компании', 'epic', 'Достижения', { kind: 'badge', badge: 'popular' }),
+  T('title_ambassador', 'Амбассадор', 'legendary', 'Достижения', { kind: 'badge', badge: 'ambassador' }),
   T('title_nightowl', 'Ночная сова', 'rare', 'Стиль', { kind: 'level', level: 5 }),
   T('title_petkeeper', 'Хранитель Шарика', 'rare', 'Игры', { kind: 'level', level: 6 }),
   T('title_lucky', 'Везунчик', 'rare', 'Стиль', shop('rare')),

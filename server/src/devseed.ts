@@ -36,6 +36,9 @@ export function seedDev(): void {
       addFriend.run(1, d.id)
       addFriend.run(d.id, 1)
     }
+    // Двое демодрузей «пришли по ссылке» локального игрока: карточка
+    // приглашения и значок «Зазывала» видны сразу.
+    db.prepare('UPDATE users SET referred_by=1 WHERE id IN (9001, 9002)').run()
   })()
   console.log(`dev seed: ${DEMO.length} demo friends for local user`)
 }

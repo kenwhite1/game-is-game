@@ -24,6 +24,8 @@ export interface SocialSnapshot {
   friends: Friend[]
   activity: ActivityItem[]
   leaderboard: LeaderRow[]
+  /** Сколько новых игроков пришло по моей реферальной ссылке. */
+  invited: number
 }
 
 export const api = {

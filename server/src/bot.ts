@@ -1,7 +1,9 @@
 import { Bot, webhookCallback } from 'grammy'
 import { BOT_TOKEN } from './auth'
-import { APP_URL, gameOverrides } from './env'
+import { APP_URL, BOT_USERNAME, gameOverrides } from './env'
 import { buildCatalog } from '../../shared/games'
+import { REFERRER_REWARD, REFERRED_BONUS, REF_PREFIX, inviteLink } from '../../shared/referrals'
+import { getOrCreateUser } from './profiles'
 
 export const bot = BOT_TOKEN ? new Bot(BOT_TOKEN) : null
 
@@ -33,6 +35,7 @@ const HELP =
   '/start  открыть меню игр\n' +
   '/play  открыть меню игр\n' +
   '/games  список игр\n' +
+  `/invite  позвать друга (+${REFERRER_REWARD} Game тебе)\n` +
   '/about  об этом приложении\n' +
   '/help  это сообщение\n\n' +
   'Жми кнопку ниже, чтобы открыть меню 👇'
@@ -58,6 +61,7 @@ if (bot) {
       { command: 'start', description: 'Открыть меню игр' },
       { command: 'play', description: 'Открыть меню игр' },
       { command: 'games', description: 'Список игр' },
+      { command: 'invite', description: `Позвать друга: +${REFERRER_REWARD} Game` },
       { command: 'about', description: 'Об этом приложении' },
       { command: 'help', description: 'Помощь' },
     ])
@@ -65,14 +69,37 @@ if (bot) {
 
   bot.command('start', async ctx => {
     const name = ctx.from?.first_name || 'друг'
+    // Полезная нагрузка /start (например ref_<КОД> из t.me/бот?start=...)
+    // прокидывается в кнопку Mini App, чтобы приглашение засчиталось в /auth.
+    const payload = typeof ctx.match === 'string' ? ctx.match.trim() : ''
+    const invited = payload.startsWith(REF_PREFIX)
     await ctx.reply(
-      `Привет, ${name}! Это Game is Game 🎮\n\n` +
+      (invited
+        ? `Привет, ${name}! Тебя пригласили в Game is Game 🎁\n\n` +
+          `Открой приложение по кнопке ниже — приглашение засчитается, и ты получишь +${REFERRED_BONUS} Game на старте.\n\n`
+        : `Привет, ${name}! Это Game is Game 🎮\n\n`) +
         'Если совсем просто, это одно приложение со всеми нашими играми. Открываешь меню и выбираешь, ' +
         'во что сыграть: Однушечка про карты, Крокоша про слова, Секрет ночи про тайные роли и Шарик про питомца.\n\n' +
         'Нажми на игру и она запустится сразу, без чатов и лишних шагов. Можно играть одному против ботов ' +
         'или позвать друзей в общую комнату по коду.\n\n' +
         'Жми кнопку ниже и выбирай игру по настроению. Хорошего вечера! 🎮',
-      { reply_markup: appKeyboard() },
+      { reply_markup: appKeyboard(payload || undefined) },
+    )
+  })
+
+  bot.command('invite', async ctx => {
+    if (!ctx.from) return
+    const name = [ctx.from.first_name, ctx.from.last_name].filter(Boolean).join(' ').slice(0, 40) || 'Игрок'
+    const user = getOrCreateUser(ctx.from.id, name, ctx.from.username)
+    const link = inviteLink(BOT_USERNAME, user.friend_code ?? '')
+    const shareText = `Залетай в Game is Game — все наши игры в одном месте! Получишь +${REFERRED_BONUS} Game на старте 🎁`
+    const share = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(shareText)}`
+    await ctx.reply(
+      'Зови друзей — получай Game! 🎁\n\n' +
+        `За каждого нового игрока, который зайдёт по твоей ссылке, ты получишь +${REFERRER_REWARD} Game, ` +
+        `а друг +${REFERRED_BONUS} Game на старте. Вы сразу окажетесь друг у друга в друзьях.\n\n` +
+        `Твоя ссылка:\n${link}`,
+      { reply_markup: { inline_keyboard: [[{ text: 'Отправить другу 📨', url: share }]] } },
     )
   })
 

@@ -21,6 +21,8 @@ interface S {
   friends: Friend[]
   activity: ActivityItem[]
   leaderboard: LeaderRow[]
+  /** Сколько новых игроков пришло по моей ссылке-приглашению. */
+  invited: number
   socialLoaded: boolean
   wardrobe: Wardrobe | null
   wardrobeLoaded: boolean
@@ -58,6 +60,7 @@ export const useStore = create<S>((set, get) => ({
   friends: [],
   activity: [],
   leaderboard: [],
+  invited: 0,
   socialLoaded: false,
   wardrobe: null,
   wardrobeLoaded: false,
@@ -68,6 +71,7 @@ export const useStore = create<S>((set, get) => ({
 
   async init() {
     let startParam: string | null = null
+    let referral: { by: string; bonus: number } | null = null
     try {
       const r = await api.auth()
       set({
@@ -78,6 +82,7 @@ export const useStore = create<S>((set, get) => ({
         ready: true,
       })
       startParam = r.startParam
+      referral = r.referral ?? null
     } catch {
       // гость или офлайн: показываем меню из публичного каталога или статики
       try {
@@ -89,10 +94,19 @@ export const useStore = create<S>((set, get) => ({
       startParam = getStartParam()
     }
 
-    // Диплинк-приглашение в друзья: ?startapp=add_<CODE>
-    if (startParam?.startsWith('add_') && get().profile) {
-      const code = startParam.slice(4)
-      const res = await get().addFriend(code)
+    // Код из диплинка: add_<CODE> (в друзья) или ref_<CODE> (приглашение).
+    const inviteCode = startParam?.startsWith('add_') || startParam?.startsWith('ref_')
+      ? startParam.slice(4)
+      : null
+
+    if (referral) {
+      // Сервер уже засчитал приглашение: бонус начислен, дружба создана.
+      set({ tab: 'friends' })
+      void get().loadSocial()
+      get().showToast(`${referral.by} пригласил(а) тебя: +${referral.bonus} Game 🎁`)
+    } else if (inviteCode && get().profile) {
+      // Старый игрок пришёл по ссылке: бонуса нет, но в друзья добавим.
+      const res = await get().addFriend(inviteCode)
       if (res.ok) {
         set({ tab: 'friends' })
         get().showToast(`${res.name ?? 'Друг'} теперь в друзьях 🎉`)
@@ -148,7 +162,7 @@ export const useStore = create<S>((set, get) => ({
   async loadSocial() {
     try {
       const r = await api.social()
-      set({ friends: r.friends, activity: r.activity, leaderboard: r.leaderboard, socialLoaded: true })
+      set({ friends: r.friends, activity: r.activity, leaderboard: r.leaderboard, invited: r.invited ?? 0, socialLoaded: true })
     } catch { /* офлайн — оставляем что есть */ }
   },
 

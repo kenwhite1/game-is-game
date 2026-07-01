@@ -50,6 +50,16 @@ export interface ProfileDetail {
   stats: GameStat[]
   badges: Badge[]
   friendCount: number
+  /** Сколько новых игроков пришло по реферальной ссылке. */
+  invited: number
+}
+
+/** Итог сработавшего приглашения (для приветственного тоста новичку). */
+export interface ReferralApplied {
+  /** Имя пригласившего. */
+  by: string
+  /** Сколько Game начислено новичку. */
+  bonus: number
 }
 
 export interface Friend {
@@ -115,6 +125,8 @@ export interface AuthResponse {
   catalog: GameCard[]
   /** Идентификаторы недавно открытых игр, свежие первыми. */
   recent: string[]
+  /** Заполнено, если этот вход засчитан как приход по приглашению. */
+  referral: ReferralApplied | null
 }
 
 export type { GameCard, GameDef } from './games'

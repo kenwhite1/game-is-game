@@ -1,6 +1,7 @@
 import { db } from './db'
 import type { Profile, GameStat, ProfileDetail } from '../../shared/types'
 import { xpFromOpens, levelInfo, computeBadges } from '../../shared/progression'
+import { invitedCount } from './referrals'
 import { defaultColor } from '../../shared/avatars'
 import { DEFAULT_EQUIP, type Slot } from '../../shared/cosmetics'
 import { GAMES } from '../../shared/games'
@@ -59,6 +60,10 @@ function ensureFriendCode(id: number, existing: string | null): string {
   return fallback
 }
 
+export function userExists(id: number): boolean {
+  return !!db.prepare('SELECT 1 FROM users WHERE id=?').get(id)
+}
+
 export function getOrCreateUser(id: number, name: string, username?: string): UserRow {
   const existing = db.prepare('SELECT * FROM users WHERE id=?').get(id) as UserRow | undefined
   if (existing) {
@@ -110,7 +115,8 @@ export function badgeSet(id: number): Set<string> {
   const stats = gameStats(id)
   const distinctGames = stats.filter(s => s.opens > 0).length
   const friends = friendCount(id)
-  const badges = computeBadges({ opens: profile.opens, distinctGames, friends, level: profile.level })
+  const invited = invitedCount(id)
+  const badges = computeBadges({ opens: profile.opens, distinctGames, friends, level: profile.level, invited })
   return new Set(badges.filter(b => b.earned).map(b => b.id))
 }
 
@@ -193,7 +199,8 @@ export function profileDetail(id: number): ProfileDetail | null {
   if (!profile) return null
   const stats = gameStats(id)
   const friends = friendCount(id)
+  const invited = invitedCount(id)
   const distinctGames = stats.filter(s => s.opens > 0).length
-  const badges = computeBadges({ opens: profile.opens, distinctGames, friends, level: profile.level })
-  return { profile, stats, badges, friendCount: friends }
+  const badges = computeBadges({ opens: profile.opens, distinctGames, friends, level: profile.level, invited })
+  return { profile, stats, badges, friendCount: friends, invited }
 }

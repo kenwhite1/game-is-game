@@ -5,6 +5,7 @@ import { GameTileIcon } from '../art/GameTileIcon'
 import { CopyIcon, ShareIcon, PlusIcon, CloseIcon } from '../art/icons'
 import { copyText, shareInvite } from '../telegram'
 import { timeAgo, isOnline, gameById } from '../util'
+import { REFERRER_REWARD, REFERRED_BONUS, inviteLink } from '@shared/referrals'
 
 type IconId = 'uno' | 'croco' | 'mafia' | 'pet'
 type Seg = 'friends' | 'board' | 'feed'
@@ -18,6 +19,7 @@ const ADD_ERRORS: Record<string, string> = {
 
 export function Friends() {
   const profile = useStore(s => s.profile)
+  const invited = useStore(s => s.invited)
   const friends = useStore(s => s.friends)
   const leaderboard = useStore(s => s.leaderboard)
   const activity = useStore(s => s.activity)
@@ -33,9 +35,12 @@ export function Friends() {
   const [err, setErr] = useState<string | null>(null)
 
   const myCode = profile?.friendCode ?? '------'
-  const inviteUrl = `https://t.me/${botUsername}?startapp=add_${myCode}`
+  // Одна ссылка на всё: новому игроку засчитает приглашение (+Game обоим),
+  // уже играющего просто добавит в друзья.
+  const inviteUrl = inviteLink(botUsername, myCode)
+  const shareText = `Залетай в Game is Game — все наши игры в одном месте! Получишь +${REFERRED_BONUS} Game на старте 🎁 Мой код: ${myCode}`
   const onCopy = async () => { const ok = await copyText(myCode); showToast(ok ? 'Код скопирован ✨' : myCode) }
-  const onShare = () => shareInvite(inviteUrl, `Залетай в Game is Game — все наши игры в одном месте! Мой код: ${myCode}`)
+  const onShare = () => shareInvite(inviteUrl, shareText)
 
   const onAdd = async () => {
     const c = code.trim().toUpperCase()
@@ -61,6 +66,22 @@ export function Friends() {
 
       {seg === 'friends' && (
         <>
+          <div className="invite-card">
+            <div className="ic-top">
+              <span className="ic-gift">🎁</span>
+              <div>
+                <div className="ic-head">Зови друзей — получай Game</div>
+                <div className="ic-sub">+{REFERRER_REWARD} тебе и +{REFERRED_BONUS} другу за каждого нового игрока по твоей ссылке</div>
+              </div>
+            </div>
+            {invited > 0 && (
+              <div className="ic-stats">
+                Приглашено: <b>{invited}</b> · Заработано: <b>{invited * REFERRER_REWARD} Game</b>
+              </div>
+            )}
+            <button className="cbtn" onClick={onShare}><ShareIcon /> Пригласить друга</button>
+          </div>
+
           <div className="code-card">
             <div className="lab">Твой код друга</div>
             <div className="code">{myCode}</div>

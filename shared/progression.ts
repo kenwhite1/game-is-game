@@ -42,6 +42,8 @@ export interface BadgeStat {
   distinctGames: number
   friends: number
   level: number
+  /** Сколько новых игроков пришло по реферальной ссылке игрока. */
+  invited: number
 }
 
 export interface BadgeDef {
@@ -61,6 +63,8 @@ export const BADGES: BadgeDef[] = [
   { id: 'friendly', emoji: '🤝', name: 'Не один', desc: 'Добавлен первый друг', test: s => s.friends >= 1 },
   { id: 'popular', emoji: '🌟', name: 'Душа компании', desc: '5 друзей в хабе', test: s => s.friends >= 5 },
   { id: 'level5', emoji: '⚡', name: '5 уровень', desc: 'Достигнут 5 уровень', test: s => s.level >= 5 },
+  { id: 'inviter', emoji: '📣', name: 'Зазывала', desc: 'Первый друг пришёл по твоей ссылке', test: s => s.invited >= 1 },
+  { id: 'ambassador', emoji: '🏅', name: 'Амбассадор', desc: '5 друзей пришли по твоей ссылке', test: s => s.invited >= 5 },
 ]
 
 export interface Badge {

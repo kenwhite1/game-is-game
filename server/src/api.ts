@@ -2,8 +2,10 @@ import { Hono } from 'hono'
 import { z } from 'zod'
 import { validateInitData, issueToken, verifyToken } from './auth'
 import { BOT_USERNAME, gameOverrides, type Env } from './env'
-import { getOrCreateUser, getProfile, recordOpen, recentGames, profileDetail, updateProfile } from './profiles'
+import { getOrCreateUser, getProfile, recordOpen, recentGames, profileDetail, updateProfile, userExists } from './profiles'
 import { addFriendByCode, removeFriend, friendsOf, activityFeed, leaderboard, socialSnapshot } from './social'
+import { applyReferral } from './referrals'
+import { REF_PREFIX } from '../../shared/referrals'
 import { wardrobeOf, equip, buy } from './cosmetics'
 import { buildCatalog, GAMES } from '../../shared/games'
 
@@ -24,7 +26,14 @@ api.post('/auth', async c => {
   const v = validateInitData(body.initData ?? '')
   if (!v) return c.json({ error: 'invalid_init_data' }, 401)
   const name = [v.user.first_name, v.user.last_name].filter(Boolean).join(' ').slice(0, 40) || 'Игрок'
+  // Приглашение засчитываем только НОВЫМ игрокам: start_param подписан
+  // Telegram (не подделать), а «только при первом входе» закрывает повторный
+  // фарм наград с одного аккаунта.
+  const isNew = !userExists(v.user.id)
   getOrCreateUser(v.user.id, name, v.user.username)
+  const referral = isNew && v.startParam?.startsWith(REF_PREFIX)
+    ? applyReferral(v.user.id, v.startParam.slice(REF_PREFIX.length))
+    : null
   const token = await issueToken(v.user.id)
   return c.json({
     token,
@@ -33,6 +42,7 @@ api.post('/auth', async c => {
     botUsername: BOT_USERNAME,
     catalog: catalog(),
     recent: recentGames(v.user.id),
+    referral,
   })
 })
 

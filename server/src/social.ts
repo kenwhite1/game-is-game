@@ -4,6 +4,7 @@ import { xpFromOpens, levelInfo } from '../../shared/progression'
 import { defaultColor } from '../../shared/avatars'
 import { DEFAULT_EQUIP, type Look } from '../../shared/cosmetics'
 import { getProfile } from './profiles'
+import { invitedCount } from './referrals'
 import { GAMES } from '../../shared/games'
 
 const VALID_GAME_IDS = new Set(GAMES.map(g => g.id))
@@ -139,5 +140,6 @@ export function socialSnapshot(uid: number) {
     friends: friendsOf(uid),
     activity: activityFeed(uid),
     leaderboard: leaderboard(uid),
+    invited: invitedCount(uid),
   }
 }
