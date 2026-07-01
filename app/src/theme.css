@@ -607,3 +607,20 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 
 .gift-presets { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; justify-content: center; }
 .gift-presets .chip-cat:disabled { opacity: .45; cursor: default; }
+
+/* ─── Пакеты Game за Stars ──────────────────────────────────────────── */
+
+.pack-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
+.pack { position: relative; border: none; cursor: pointer; background: var(--card);
+  border-radius: var(--radius-lg); padding: 14px 8px 12px; display: flex; flex-direction: column;
+  align-items: center; gap: 4px; box-shadow: var(--shadow-lip), inset 0 0 0 1px rgba(255,255,255,.5);
+  transition: transform .08s ease; }
+.pack:active { transform: translateY(2px); }
+.pack-emoji { font-size: 30px; line-height: 1; }
+.pack-coins { display: inline-flex; align-items: center; gap: 4px; font-size: 14.5px; font-weight: 900;
+  color: var(--brown-deep); margin-top: 3px; }
+.pack-stars { font-size: 12.5px; font-weight: 900; color: #fff; background: var(--accent);
+  border-radius: 999px; padding: 5px 11px; margin-top: 5px; box-shadow: 0 3px 0 var(--accent-deep); }
+.pack-tag { position: absolute; top: -7px; right: -4px; font-size: 9.5px; font-weight: 900;
+  background: #54b15a; color: #fff; border-radius: 999px; padding: 3px 7px;
+  box-shadow: 0 2px 5px rgba(40,90,40,.3); }

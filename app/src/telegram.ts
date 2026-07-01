@@ -11,6 +11,7 @@ interface TgWebApp {
   setHeaderColor(c: string): void
   setBackgroundColor(c: string): void
   openTelegramLink?(url: string): void
+  openInvoice?(url: string, callback?: (status: 'paid' | 'cancelled' | 'failed' | 'pending') => void): void
   HapticFeedback?: {
     impactOccurred(style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft'): void
     notificationOccurred(type: 'error' | 'success' | 'warning'): void
@@ -72,6 +73,18 @@ export function openGame(link: string): void {
     else window.open(link, '_blank')
   } catch {
     window.open(link, '_blank')
+  }
+}
+
+// Открыть счёт Stars. Статус придёт в колбэк ('paid' = успех); вне Telegram
+// счёт открыть нельзя — вернём false, чтобы экран показал подсказку.
+export function openInvoice(url: string, cb: (status: string) => void): boolean {
+  if (!tg?.openInvoice) return false
+  try {
+    tg.openInvoice(url, cb)
+    return true
+  } catch {
+    return false
   }
 }
 

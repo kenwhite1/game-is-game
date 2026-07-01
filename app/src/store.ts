@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import type { GameCard, GameMeta, Profile, ProfileDetail, Friend, ActivityItem, LeaderRow, Wardrobe, Slot, RatingValue, Quest } from '@shared/types'
 import { GAMES, defaultLink } from '@shared/games'
 import { api } from './api'
-import { haptic, openGame as openGameLink, getStartParam, inTelegram } from './telegram'
+import { haptic, openGame as openGameLink, openInvoice, getStartParam, inTelegram } from './telegram'
 import { playSfx, isSoundOn, setSoundOn } from './sound'
 
 // Статичный каталог на случай, если сервер недоступен (гость, офлайн).
@@ -47,6 +47,7 @@ interface S {
   rate(id: string, value: RatingValue | 0): Promise<void>
   refreshQuests(): Promise<void>
   claimQuest(id: string): Promise<void>
+  buyCoins(packId: string): Promise<void>
   gift(friendId: number, amount: number): Promise<{ ok: boolean; error?: string }>
   openSheet(s: Sheet): void
   toggleSound(): void
@@ -188,6 +189,24 @@ export const useStore = create<S>((set, get) => ({
       const reason = (e as { message?: string }).message
       get().showToast(reason === 'claimed' ? 'Награда уже получена' : 'Задание ещё не выполнено')
       void get().refreshQuests()
+    }
+  },
+
+  async buyCoins(packId) {
+    try {
+      const { link } = await api.walletInvoice(packId)
+      const opened = openInvoice(link, status => {
+        if (status !== 'paid') return
+        haptic('success')
+        get().showToast('Оплата прошла: Game уже на балансе 🎉')
+        // Баланс обновил бот по вебхуку; забираем свежий профиль.
+        api.profile().then(r => set({ profile: r.profile, wardrobeLoaded: false })).catch(() => {})
+      })
+      if (!opened) get().showToast('Пополнение работает внутри Telegram')
+    } catch (e) {
+      haptic('warn')
+      const reason = (e as { message?: string }).message
+      get().showToast(reason === 'unavailable' ? 'Пополнение работает внутри Telegram' : 'Не получилось открыть счёт')
     }
   },
 

@@ -53,6 +53,9 @@ export const api = {
   addFriend: (code: string) => req<{ friend: Friend; friends: Friend[] }>('/friends/add', { code }),
   removeFriend: (friendId: number) => req<{ friends: Friend[] }>('/friends/remove', { friendId }),
 
+  profile: () => req<{ profile: Profile; recent: string[] }>('/profile'),
+  walletInvoice: (packId: string) => req<{ link: string }>('/wallet/invoice', { packId }),
+
   cosmetics: () => req<Wardrobe>('/cosmetics'),
   equip: (slot: Slot, itemId: string) => req<{ profile: Profile; wardrobe: Wardrobe }>('/cosmetics/equip', { slot, itemId }),
   buy: (itemId: string) => req<{ profile: Profile; wardrobe: Wardrobe }>('/cosmetics/buy', { itemId }),

@@ -5,6 +5,7 @@ import { buildCatalog, GAMES, CATEGORIES } from '../../shared/games'
 import { REFERRER_REWARD, REFERRED_BONUS, REF_PREFIX, inviteLink } from '../../shared/referrals'
 import { getOrCreateUser } from './profiles'
 import { followerIds } from './catalog'
+import { recordPayment, paymentByCharge, markRefunded, packById } from './wallet'
 
 export const bot = BOT_TOKEN ? new Bot(BOT_TOKEN) : null
 
@@ -41,6 +42,7 @@ const HELP =
   '/games  список игр\n' +
   `/invite  позвать друга (+${REFERRER_REWARD} Game тебе)\n` +
   '/about  об этом приложении\n' +
+  '/paysupport  поддержка по оплатам\n' +
   '/help  это сообщение\n\n' +
   'Жми кнопку ниже, чтобы открыть меню 👇'
 
@@ -74,6 +76,7 @@ if (bot) {
       { command: 'invite', description: `Позвать друга: +${REFERRER_REWARD} Game` },
       { command: 'about', description: 'Об этом приложении' },
       { command: 'help', description: 'Помощь' },
+      { command: 'paysupport', description: 'Поддержка по оплатам' },
     ])
     .catch(() => {})
 
@@ -164,6 +167,79 @@ if (bot) {
 
   bot.command('help', async ctx => {
     await ctx.reply(HELP, { reply_markup: appKeyboard() })
+  })
+
+  // ─── Оплаты Stars: пакеты Game ─────────────────────────────────────────
+
+  // Telegram требует ответить на pre_checkout за 10 секунд, иначе платёж падает.
+  bot.on('pre_checkout_query', async ctx => {
+    const payload = ctx.preCheckoutQuery.invoice_payload
+    let ok = false
+    try {
+      ok = !!packById(JSON.parse(payload).packId)
+    } catch { /* чужой или битый payload — отклоняем */ }
+    await ctx.answerPreCheckoutQuery(ok, ok ? undefined : 'Этот товар больше недоступен. Попробуй ещё раз из приложения.')
+  })
+
+  bot.on('message:successful_payment', async ctx => {
+    if (!ctx.from) return
+    const sp = ctx.message.successful_payment
+    let packId = ''
+    try {
+      packId = JSON.parse(sp.invoice_payload).packId ?? ''
+    } catch { /* ниже отработает как неизвестный пакет */ }
+    const pack = packById(packId)
+    if (!pack) return
+    // Монеты получает тот, кто заплатил; charge_id делает зачисление идемпотентным.
+    const credited = recordPayment(ctx.from.id, pack, sp.telegram_payment_charge_id)
+    if (credited) {
+      await ctx.reply(
+        `Готово! ${pack.emoji} «${pack.title}» куплен: +${pack.coins.toLocaleString('ru')} Game на балансе 🎉\n\n` +
+          `Квитанция: ${sp.telegram_payment_charge_id}\n` +
+          'Если что-то не так с оплатой, команда /paysupport всегда рядом.',
+        { reply_markup: appKeyboard() },
+      )
+    }
+  })
+
+  // Обязательная точка поддержки по платежам (требование Telegram).
+  bot.command('paysupport', async ctx => {
+    if (!ctx.from) return
+    await ctx.reply(
+      'Поддержка по оплатам 💬\n\n' +
+        'Опиши проблему прямо здесь одним сообщением: что покупал(а), когда и что пошло не так. ' +
+        'Приложи номер квитанции из чека (он приходит сообщением после оплаты).\n\n' +
+        'Ошибочные списания возвращаем в Stars. Покупки за Game (косметика) внутри приложения не возвращаются, ' +
+        'но если монеты не пришли, мы всё починим и начислим.',
+    )
+    const who = `${[ctx.from.first_name, ctx.from.last_name].filter(Boolean).join(' ')} (@${ctx.from.username ?? 'нет'}, id ${ctx.from.id})`
+    for (const admin of ADMIN_IDS) {
+      void ctx.api.sendMessage(admin, `⚠️ /paysupport: ${who} просит помощи с оплатой.`).catch(() => {})
+    }
+  })
+
+  // Возврат платежа админом: /refund <charge_id>.
+  bot.command('refund', async ctx => {
+    if (!ctx.from || !ADMIN_IDS.has(ctx.from.id)) return
+    const chargeId = (typeof ctx.match === 'string' ? ctx.match : '').trim()
+    const p = chargeId ? paymentByCharge(chargeId) : undefined
+    if (!p) {
+      await ctx.reply('Так: /refund <charge_id из квитанции>. Платёж не найден.')
+      return
+    }
+    if (p.status !== 'paid') {
+      await ctx.reply('Этот платёж уже возвращён.')
+      return
+    }
+    try {
+      await ctx.api.refundStarPayment(p.user_id, chargeId)
+    } catch (e) {
+      await ctx.reply(`Telegram отклонил возврат: ${(e as Error).message}`)
+      return
+    }
+    markRefunded(chargeId)
+    await ctx.reply(`Возврат сделан: ${p.stars} Stars игроку ${p.user_id}, ${p.coins} Game списаны с баланса.`)
+    void ctx.api.sendMessage(p.user_id, `Возврат по покупке оформлен: ${p.stars} Stars вернутся на твой счёт Telegram. ${p.coins} Game списаны.`).catch(() => {})
   })
 }
 

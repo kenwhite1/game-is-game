@@ -3,6 +3,7 @@ import { useStore } from '../store'
 import { Swatch, profileLook } from './Style'
 import { CheckIcon, LockIcon } from '../art/icons'
 import { RARITY, SLOT_RU, SLOTS } from '@shared/cosmetics'
+import { PACKS } from '@shared/wallet'
 import type { Slot } from '@shared/cosmetics'
 import type { CosmeticState, Look } from '@shared/types'
 
@@ -49,6 +50,10 @@ export function Shop() {
         <div className="shop-hero-s">Зарабатывай Game в играх и собирай редкие образы</div>
       </div>
 
+      <TopUp />
+
+      <div className="sec"><h2>Косметика</h2></div>
+
       <div className="slot-strip">
         <button className={`slot-chip ${filter === 'all' ? 'on' : ''}`} onClick={() => setFilter('all')}>Всё</button>
         {SLOTS.map(s => (
@@ -66,6 +71,26 @@ export function Shop() {
         </div>
       )}
     </div>
+  )
+}
+
+/** Пакеты Game за Telegram Stars: счёт открывается прямо в Mini App. */
+function TopUp() {
+  const buyCoins = useStore(s => s.buyCoins)
+  return (
+    <>
+      <div className="sec"><h2>Пополнить баланс</h2><span className="sub">за Telegram Stars</span></div>
+      <div className="pack-row">
+        {PACKS.map(p => (
+          <button key={p.id} className="pack" onClick={() => void buyCoins(p.id)} aria-label={`${p.title}: ${p.coins} Game за ${p.stars} Stars`}>
+            <span className="pack-emoji">{p.emoji}</span>
+            <span className="pack-coins"><span className="coin">G</span>{p.coins.toLocaleString('ru')}</span>
+            <span className="pack-stars">⭐ {p.stars}</span>
+            {p.tag && <span className="pack-tag">{p.tag}</span>}
+          </button>
+        ))}
+      </div>
+    </>
   )
 }
 

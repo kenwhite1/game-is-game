@@ -5,6 +5,7 @@ import { BOT_USERNAME, gameOverrides, type Env } from './env'
 import { getOrCreateUser, getProfile, recordOpen, recentGames, profileDetail, updateProfile, userExists } from './profiles'
 import { addFriendByCode, removeFriend, friendsOf, activityFeed, leaderboard, socialSnapshot, giftCoins } from './social'
 import { questsOf, claimQuest } from './quests'
+import { packById } from '../../shared/wallet'
 import { bot } from './bot'
 import { applyReferral } from './referrals'
 import { REF_PREFIX } from '../../shared/referrals'
@@ -148,6 +149,31 @@ api.post('/rate', async c => {
 })
 
 // ─── Quests: задания дня ─────────────────────────────────────────────────
+
+// ─── Wallet: счёт Stars за пакет Game ────────────────────────────────────
+
+const invoiceSchema = z.object({ packId: z.string().min(1).max(32) })
+api.post('/wallet/invoice', async c => {
+  const parsed = invoiceSchema.safeParse(await c.req.json().catch(() => null))
+  const pack = parsed.success ? packById(parsed.data.packId) : undefined
+  if (!pack) return c.json({ error: 'bad_request' }, 400)
+  if (!bot) return c.json({ error: 'unavailable' }, 503)
+  try {
+    // Stars: валюта XTR, provider_token пустой, сумма прямо в звёздах.
+    const link = await bot.api.createInvoiceLink(
+      pack.title,
+      `${pack.coins.toLocaleString('ru')} Game на баланс Game is Game`,
+      JSON.stringify({ packId: pack.id, uid: c.get('uid') }),
+      '',
+      'XTR',
+      [{ label: pack.title, amount: pack.stars }],
+    )
+    return c.json({ link })
+  } catch (e) {
+    console.error('createInvoiceLink failed', e)
+    return c.json({ error: 'invoice_failed' }, 502)
+  }
+})
 
 api.get('/quests', c => c.json({ quests: questsOf(c.get('uid')) }))
 
