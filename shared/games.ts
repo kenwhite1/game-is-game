@@ -59,6 +59,18 @@ export const GAMES: GameDef[] = [
     players: 'both',
   },
   {
+    id: 'neontide',
+    name: 'Неон-Тайд',
+    tagline: '3D лодка из блоков против реки ловушек',
+    blurb: 'Строй лодку из дерева, металла и золота, запускай по неоновой реке сквозь пилы, пушки и водопад — и забирай сундук с золотом. Соло или с друзьями по коду комнаты.',
+    emoji: '🚤',
+    accent: '#66e0ff',
+    accentDeep: '#1c86a8',
+    bot: 'lodkabuildbot',
+    category: 'arcade',
+    players: 'both',
+  },
+  {
     id: 'chekharda',
     name: 'Чехарда',
     tagline: '3D шоу на вылет за короной',
