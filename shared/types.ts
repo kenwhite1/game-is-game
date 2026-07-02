@@ -2,6 +2,7 @@
 import type { GameCard } from './games'
 import type { Badge } from './progression'
 import type { Cosmetic, Slot, Look } from './cosmetics'
+import type { DailyDeal } from './shop'
 
 export interface Profile {
   id: number
@@ -155,6 +156,8 @@ export interface Wardrobe {
   totalCount: number
   /** Баланс Game (дублируем для удобства экрана стиля). */
   coins: number
+  /** Витрина дня: 4 товара со скидками (§10.4). */
+  daily: DailyDeal[]
 }
 
 export interface AuthResponse {

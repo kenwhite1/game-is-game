@@ -46,10 +46,21 @@ Each phase is committed + deployed (Railway) before the next. Updated as the
     completion bonus fires exactly once. UI renders, no console errors.
   - Co-op friend quests deferred (needs pairing).
 
+- **Phase 3 — Cosmetics retail** (this commit, no migration):
+  - New `Unlock` kinds (achievement / streak / season / ranked / event /
+    prestige) + `OwnerCtx.achTiers`/`streakBest`; `isOwned`/`unlockLabel` handle
+    them. Server `ownerCtx` reads `user_achievements` + `users.streak_best`.
+  - Earned cosmetics: titles «Универсал», «Легенда GG», «Преданный»; frames
+    «Каталог» (catalogue platinum), «Огонь-30» (streak 30).
+  - Rotating daily shop (`shared/shop.ts`, deterministic by UTC day): 4 deals,
+    0/15/30% discounts, last slot "уходит скоро"; `buy()` charges the deal price;
+    Wardrobe carries `daily`; Shop UI "Витрина дня" strip.
+  - Verified: streak-30 unlock on threshold; achievement-gated stay locked;
+    discounted buy charged the deal price (−300 for 350→300). No console errors.
+  - Deferred: slot price multipliers, collections/set bonuses, recolor sink.
+
 ## Next (bible build order §17.2)
 
-- **Phase 3 — Cosmetics retail**: rotating daily shop, new `Unlock` kinds,
-  collections/set bonuses, recolor sink; apply remaining §4 balance.
 - **Phase 4 — Season Pass**; **5 — Events/Tokens**; **6 — Ranked/Glicko-2**;
   **7 — Social (referral-on-qualify, challenges, clans)**; **8 — Marketplace**.
 

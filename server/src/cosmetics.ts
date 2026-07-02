@@ -7,6 +7,7 @@ import {
 import { BADGES } from '../../shared/progression'
 import { getProfile, badgeSet, equippedOf } from './profiles'
 import { debit } from './ledger'
+import { dailyShop, dealFor, shopDayKey } from '../../shared/shop'
 
 const badgeName = (id: string) => BADGES.find(b => b.id === id)?.name ?? id
 
@@ -16,9 +17,17 @@ function ownedSet(uid: number): Set<string> {
   )
 }
 
-/** Контекст владения: уровень, заработанные значки и явные покупки/гранты. */
+function achTiersOf(uid: number): Map<string, number> {
+  return new Map(
+    (db.prepare('SELECT ach_id, tier_reached FROM user_achievements WHERE user_id=?').all(uid) as { ach_id: string; tier_reached: number }[])
+      .map(r => [r.ach_id, r.tier_reached]),
+  )
+}
+
+/** Контекст владения: уровень, значки, достижения, серия и явные покупки/гранты. */
 function ownerCtx(uid: number, level: number): OwnerCtx {
-  return { level, badges: badgeSet(uid), owned: ownedSet(uid) }
+  const streakBest = (db.prepare('SELECT streak_best AS n FROM users WHERE id=?').get(uid) as { n: number } | undefined)?.n ?? 0
+  return { level, badges: badgeSet(uid), owned: ownedSet(uid), achTiers: achTiersOf(uid), streakBest }
 }
 
 /** Гардероб игрока: весь каталог со статусом владения/надетости/цены. */
@@ -51,6 +60,7 @@ export function wardrobeOf(uid: number): Wardrobe | null {
     ownedCount: items.filter(i => i.owned).length,
     totalCount: items.length,
     coins: profile.coins,
+    daily: dailyShop(shopDayKey()),
   }
 }
 
@@ -81,8 +91,10 @@ export type BuyResult =
 export function buy(uid: number, itemId: string): BuyResult {
   const item = cosmeticById(itemId)
   if (!item) return { ok: false, reason: 'not_found' }
-  const price = shopPrice(item)
-  if (price == null) return { ok: false, reason: 'not_for_sale' }
+  const base = shopPrice(item)
+  if (base == null) return { ok: false, reason: 'not_for_sale' }
+  // Если товар сегодня на витрине со скидкой — берём цену дня.
+  const price = dealFor(shopDayKey(), itemId)?.price ?? base
 
   const profile = getProfile(uid)
   if (!profile) return { ok: false, reason: 'not_found' }

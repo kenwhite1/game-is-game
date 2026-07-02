@@ -29,6 +29,13 @@ export type Unlock =
   | { kind: 'badge'; badge: string }
   | { kind: 'shop'; price: number }
   | { kind: 'premium' }
+  // Мета-источники (§10.3): «громкие» флексы приходят за ДЕЛА, а не за деньги.
+  | { kind: 'achievement'; achId: string; tierIndex: number }
+  | { kind: 'streak'; days: number }
+  | { kind: 'season'; season: string; tier: number }
+  | { kind: 'ranked'; division: string }
+  | { kind: 'event'; event: string }
+  | { kind: 'prestige'; stars: number }
 
 interface Base {
   id: string
@@ -145,6 +152,9 @@ export const FRAME_ITEMS: FrameItem[] = [
   F('frame_glitch', 'Глитч', 'mythic', 'Топ', shop('mythic'), 'linear-gradient(135deg,#ff00e6,#00fff0,#ff00e6)', 'rgba(255,0,230,.6)', 'shimmer'),
   F('frame_void', 'Бездна', 'mythic', 'Премиум', { kind: 'premium' }, 'radial-gradient(circle,#2a2540,#0d0b16)', 'rgba(155,108,255,.7)', 'pulse'),
   F('frame_electric', 'Электро', 'epic', 'Кибер', shop('epic'), 'linear-gradient(135deg,#fff95c,#3a82f7,#9b6cff)', 'rgba(58,130,247,.7)', 'shimmer'),
+  // Заслуженные рамки (§10.3): открываются за достижения/серию, не покупаются.
+  F('frame_catalog', 'Каталог', 'legendary', 'Заслуги', { kind: 'achievement', achId: 'catalogue', tierIndex: 3 }, 'conic-gradient(from 0deg,#ff5d5d,#ffb24d,#5ad06e,#3a82f7,#9b6cff,#ff5d5d)', 'rgba(90,208,110,.6)', 'spin'),
+  F('frame_streak30', 'Огонь-30', 'epic', 'Заслуги', { kind: 'streak', days: 30 }, 'conic-gradient(from 0deg,#ffd166,#f2762a,#e2574c,#ffd166)', 'rgba(242,118,42,.8)', 'pulse'),
 ]
 
 // ─── Шляпы ─────────────────────────────────────────────────────────────
@@ -294,6 +304,10 @@ export const TITLE_ITEMS: TitleItem[] = [
   T('title_mythic', 'Мифический', 'mythic', 'Топ', shop('mythic')),
   T('title_founder', 'Основатель', 'mythic', 'Премиум', { kind: 'premium' }),
   T('title_whale', 'Кит', 'mythic', 'Премиум', { kind: 'premium' }),
+  // Заслуженные (§10.3): открываются за достижения/серию, не покупаются.
+  T('title_universal', 'Универсал', 'epic', 'Заслуги', { kind: 'achievement', achId: 'category_conqueror', tierIndex: 2 }),
+  T('title_legend', 'Легенда GG', 'legendary', 'Заслуги', { kind: 'achievement', achId: 'centurion', tierIndex: 3 }),
+  T('title_devoted', 'Преданный', 'epic', 'Заслуги', { kind: 'streak', days: 30 }),
 ]
 
 export const COSMETICS: Cosmetic[] = [
@@ -348,6 +362,10 @@ export interface OwnerCtx {
   badges: Set<string>
   /** Явно полученные/купленные предметы. */
   owned: Set<string>
+  /** Взятые тиры достижений: achId -> индекс тира (для achievement-анлоков). */
+  achTiers: Map<string, number>
+  /** Рекорд серии (для streak-анлоков). */
+  streakBest: number
 }
 
 /** Открыт ли предмет игроку (доступен для надевания). */
@@ -357,6 +375,10 @@ export function isOwned(item: Cosmetic, ctx: OwnerCtx): boolean {
     case 'starter': return true
     case 'level': return ctx.level >= item.unlock.level
     case 'badge': return ctx.badges.has(item.unlock.badge)
+    case 'achievement': return (ctx.achTiers.get(item.unlock.achId) ?? -1) >= item.unlock.tierIndex
+    case 'streak': return ctx.streakBest >= item.unlock.days
+    // Сезон/ранг/событие/престиж выдаются явно (в owned) своей системой.
+    case 'season': case 'ranked': case 'event': case 'prestige': return false
     case 'shop': return false
     case 'premium': return false
   }
@@ -375,5 +397,11 @@ export function unlockLabel(item: Cosmetic, badgeName: (id: string) => string): 
     case 'badge': return `Значок «${badgeName(item.unlock.badge)}»`
     case 'shop': return `${item.unlock.price} Game`
     case 'premium': return 'Скоро'
+    case 'achievement': return 'За достижение'
+    case 'streak': return `Серия ${item.unlock.days} дней`
+    case 'season': return 'Сезонный пропуск'
+    case 'ranked': return `Ранг: ${item.unlock.division}`
+    case 'event': return 'Событие'
+    case 'prestige': return `Престиж ${item.unlock.stars}`
   }
 }

@@ -506,6 +506,23 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 .cos-price .coin { width: 15px; height: 15px; font-size: 9px; }
 .cos-owned { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 900; color: var(--green-deep); }
 .cos-owned svg { width: 13px; height: 13px; }
+
+/* -- rotating daily shop -------------------------------------- */
+.deal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; width: 100%; }
+.deal { position: relative; cursor: pointer; border: none; background: var(--card); border-radius: var(--radius);
+  box-shadow: var(--shadow-lip), inset 0 0 0 1.5px var(--rar, rgba(255,255,255,.5)); padding: 12px 10px 10px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.deal:active { transform: translateY(2px); }
+.deal .cos-art { width: 58px; height: 58px; display: grid; place-items: center; }
+.deal .cos-name { font-size: 12.5px; font-weight: 900; color: var(--brown-deep); }
+.deal-tag { position: absolute; top: 8px; left: 8px; font-size: 8.5px; font-weight: 900; color: #fff;
+  background: var(--red); padding: 3px 7px; border-radius: 999px; letter-spacing: .2px; }
+.deal-off { position: absolute; top: 8px; right: 8px; font-size: 10px; font-weight: 900; color: #fff;
+  background: #bf00ff; padding: 3px 7px; border-radius: 999px; }
+.deal-price { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 900; color: #fff;
+  background: var(--green); padding: 4px 11px 4px 6px; border-radius: 999px; box-shadow: 0 2px 0 var(--green-deep); }
+.deal-price s { color: rgba(255,255,255,.7); font-size: 10.5px; }
+.deal-price .coin { width: 15px; height: 15px; font-size: 9px; }
 .cos-soon { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 900; color: var(--ink-soft); }
 .cos-soon svg { width: 13px; height: 13px; }
 .cos.locked .cos-art { filter: grayscale(.5) opacity(.65); }

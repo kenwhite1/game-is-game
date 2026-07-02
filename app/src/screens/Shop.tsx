@@ -6,6 +6,7 @@ import { RARITY, SLOT_RU, SLOTS } from '@shared/cosmetics'
 import { PACKS } from '@shared/wallet'
 import type { Slot } from '@shared/cosmetics'
 import type { CosmeticState, Look } from '@shared/types'
+import type { DailyDeal } from '@shared/shop'
 
 type Filter = 'all' | Slot
 
@@ -38,6 +39,16 @@ export function Shop() {
     if (ok) void equip(s.item.slot, s.item.id)
   }
 
+  const byId = new Map((wardrobe?.items ?? []).map(i => [i.item.id, i]))
+  const onDeal = async (d: DailyDeal) => {
+    const s = byId.get(d.itemId)
+    if (!s) return
+    if (s.owned) { showToast('Уже куплено — надень во вкладке «Аватар»'); return }
+    if (coins < d.price) { showToast('Не хватает Game 💰'); return }
+    const ok = await buy(s.item.id, s.item.name)
+    if (ok) void equip(s.item.slot, s.item.id)
+  }
+
   return (
     <div className="tab-page stagger">
       <div className="topbar">
@@ -49,6 +60,35 @@ export function Shop() {
         <div className="shop-hero-t">Магазин стиля</div>
         <div className="shop-hero-s">Зарабатывай Game в играх и собирай редкие образы</div>
       </div>
+
+      {wardrobe && wardrobe.daily.length > 0 && (
+        <>
+          <div className="sec"><h2>Витрина дня</h2><span className="sub">новое каждый день</span></div>
+          <div className="deal-row">
+            {wardrobe.daily.map(d => {
+              const s = byId.get(d.itemId)
+              if (!s) return null
+              const rc = RARITY[s.item.rarity]
+              return (
+                <button key={d.itemId} className={`deal ${s.owned ? 'owned' : ''}`} style={{ ['--rar' as string]: rc.color }} onClick={() => void onDeal(d)} aria-label={s.item.name}>
+                  {d.leaving && <span className="deal-tag">уходит скоро</span>}
+                  {d.discountPct > 0 && <span className="deal-off">−{d.discountPct}%</span>}
+                  <span className="cos-art"><Swatch item={s.item} look={look} seed={profile.id} /></span>
+                  <span className="cos-name">{s.item.name}</span>
+                  {s.owned ? (
+                    <span className="cos-owned"><CheckIcon /> Куплено</span>
+                  ) : (
+                    <span className="deal-price">
+                      {d.discountPct > 0 && <s>{d.base}</s>}
+                      <span className="coin">G</span>{d.price}
+                    </span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        </>
+      )}
 
       <TopUp />
 
