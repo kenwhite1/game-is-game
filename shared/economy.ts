@@ -11,6 +11,39 @@ export const LAUNCH_BREADTH_REWARD = 10
 /** Сколько РАЗНЫХ игр в день оплачиваются широтой (дальше — 0). Итог ≤100🪙/день. */
 export const LAUNCH_BREADTH_CAP = 10
 
+// ─── Награды за матчи (Results SDK, §4.2) ─────────────────────────────────
+// Игра рапортует ЧТО произошло; сколько это стоит — решает хаб (эти числа).
+export const MATCH_PLAYED_SOLO = 5
+export const MATCH_PLAYED_HUMAN = 10
+export const MATCH_WON_SOLO = 10
+export const MATCH_WON_HUMAN = 20
+/** Бонус за первую победу дня в конкретной игре (once per game/day). */
+export const FIRST_WIN_OF_DAY = 25
+/** Потолок монет с матчей за день (анти-инфляция). */
+export const MATCH_COIN_CAP = 500
+
+/** Считается ли матч «против людей» (иначе — соло/против ботов, платит меньше). */
+export function isVsHumans(humanPlayers?: number): boolean {
+  return (humanPlayers ?? 1) >= 2
+}
+
+export interface MatchReward {
+  played: number
+  won: number
+  firstWin: number
+  total: number
+}
+
+/** Награда за матч ДО применения дневного потолка (потолок — на сервере). */
+export function matchReward(opts: { result: string; humanPlayers?: number; firstWinToday: boolean }): MatchReward {
+  const human = isVsHumans(opts.humanPlayers)
+  const played = human ? MATCH_PLAYED_HUMAN : MATCH_PLAYED_SOLO
+  const isWin = opts.result === 'win'
+  const won = isWin ? (human ? MATCH_WON_HUMAN : MATCH_WON_SOLO) : 0
+  const firstWin = isWin && opts.firstWinToday ? FIRST_WIN_OF_DAY : 0
+  return { played, won, firstWin, total: played + won + firstWin }
+}
+
 // ─── Серия (streak) ───────────────────────────────────────────────────────
 /** Максимум «заморозок» серии на руках. */
 export const FREEZE_CAP = 5
@@ -54,3 +87,6 @@ export type CoinReason =
   | 'purchase'
   | 'refund'
   | 'cosmetic'
+  | 'match_played'
+  | 'match_won'
+  | 'match_firstwin'

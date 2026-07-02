@@ -36,7 +36,7 @@ export const api = {
     return r
   },
   catalog: () => req<{ catalog: GameCard[]; meta: Record<string, GameMeta> }>('/catalog'),
-  open: (gameId: string) => req<{ profile: Profile; recent: string[] }>('/open', { gameId }),
+  open: (gameId: string) => req<{ profile: Profile; recent: string[]; launchToken?: string }>('/open', { gameId }),
   toggleFavorite: (gameId: string) => req<{ favorite: boolean; favorites: string[] }>('/favorites/toggle', { gameId }),
   rate: (gameId: string, value: RatingValue | 0) =>
     req<{ ratings: Record<string, RatingValue>; meta: Record<string, GameMeta> }>('/rate', { gameId, value }),

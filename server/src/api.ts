@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
-import { validateInitData, issueToken, verifyToken, DEV_MODE } from './auth'
+import { validateInitData, issueToken, verifyToken, signLaunch, verifyLaunch, DEV_MODE } from './auth'
+import { handleResult } from './sdk'
 import { BOT_USERNAME, PRESENCE_KEY, gameOverrides, type Env } from './env'
 import { touchPresence, clearPresence } from './presence'
 import { getOrCreateUser, getProfile, recordOpen, recentGames, profileDetail, setUsername, userExists } from './profiles'
@@ -74,10 +75,21 @@ api.post('/presence/ping', async c => {
   return c.json({ ok: true })
 })
 
+// Results SDK (§2): игра рапортует исход матча. Аутентификация — токеном
+// запуска (подписан хабом), а не пользовательским JWT, поэтому маршрут стоит
+// ДО auth-гейта. Хаб сам считает награду; игра не может начислить валюту.
+api.post('/sdk/result', async c => {
+  const launch = c.req.header('x-gg-launch')
+  const claims = launch ? await verifyLaunch(launch) : null
+  if (!claims) return c.json({ ok: false, rewarded: false, coins: 0, error: 'bad_launch' }, 401)
+  const out = handleResult(launch, await c.req.json().catch(() => null), claims)
+  return c.json(out.body, out.status as 200 | 400 | 401)
+})
+
 // auth gate for everything below
 api.use('/*', async (c, next) => {
   const p = c.req.path
-  if (p.endsWith('/auth') || p.endsWith('/health') || p.endsWith('/catalog') || p.endsWith('/presence/ping')) return next()
+  if (p.endsWith('/auth') || p.endsWith('/health') || p.endsWith('/catalog') || p.endsWith('/presence/ping') || p.endsWith('/sdk/result')) return next()
   const token = c.req.header('authorization')?.replace(/^Bearer /, '')
   const uid = token ? await verifyToken(token) : null
   if (!uid) return c.json({ error: 'unauthorized' }, 401)
@@ -144,7 +156,9 @@ api.post('/open', async c => {
   const profile = recordOpen(uid, parsed.data.gameId)
   // Запуск из хаба = игрок сейчас в игре (пока сама игра не начнёт пинговать).
   touchPresence(uid, parsed.data.gameId)
-  return c.json({ profile, recent: recentGames(uid) })
+  // Токен запуска для Results SDK: игра вернёт его в /sdk/result (§2.3).
+  const launchToken = await signLaunch(uid, parsed.data.gameId)
+  return c.json({ profile, recent: recentGames(uid), launchToken })
 })
 
 // ─── Catalog: favorites + ratings ────────────────────────────────────────

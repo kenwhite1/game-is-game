@@ -60,3 +60,25 @@ export async function verifyToken(token: string): Promise<number | null> {
     return null
   }
 }
+
+// ─── Launch token (Results SDK, §2.3) ─────────────────────────────────────
+// Хаб подписывает короткоживущий токен при запуске игры и передаёт его игре
+// через startapp. Игра возвращает его в /api/sdk/result — так результат
+// привязан к реальному запуску этим игроком именно этой игры. Подделать нельзя
+// (подпись секретом хаба), поэтому играм не нужен отдельный общий ключ.
+export async function signLaunch(userId: number, gameId: string): Promise<string> {
+  return new SignJWT({ uid: userId, gid: gameId, scope: 'launch' })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setExpirationTime('2h')
+    .sign(secret)
+}
+
+export async function verifyLaunch(token: string): Promise<{ uid: number; gid: string } | null> {
+  try {
+    const { payload } = await jwtVerify(token, secret)
+    if (payload.scope !== 'launch' || typeof payload.uid !== 'number' || typeof payload.gid !== 'string') return null
+    return { uid: payload.uid, gid: payload.gid }
+  } catch {
+    return null
+  }
+}
