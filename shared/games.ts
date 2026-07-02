@@ -47,6 +47,18 @@ export interface GameDef {
 // Порядок здесь = порядок плиток в меню (флагманы первыми).
 export const GAMES: GameDef[] = [
   {
+    id: 'nitroliga',
+    name: 'Нитро-лига',
+    tagline: '3D ракетный футбол на тачках',
+    blurb: 'Реактивные тачки играют в футбол: буст, сальто и голы. Матч против бота или 1×1 с другом по коду комнаты.',
+    emoji: '🚀',
+    accent: '#2f9dff',
+    accentDeep: '#1560c4',
+    bot: 'racketlegbot',
+    category: 'arcade',
+    players: 'both',
+  },
+  {
     id: 'chekharda',
     name: 'Чехарда',
     tagline: '3D шоу на вылет за короной',
