@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { z } from 'zod'
 import { validateInitData, issueToken, verifyToken, signLaunch, verifyLaunch, DEV_MODE } from './auth'
 import { handleResult } from './sdk'
+import { achievementsView } from './achievements'
 import { BOT_USERNAME, PRESENCE_KEY, gameOverrides, type Env } from './env'
 import { touchPresence, clearPresence } from './presence'
 import { getOrCreateUser, getProfile, recordOpen, recentGames, profileDetail, setUsername, userExists } from './profiles'
@@ -98,6 +99,9 @@ api.use('/*', async (c, next) => {
 })
 
 api.get('/profile', c => c.json({ profile: getProfile(c.get('uid')), recent: recentGames(c.get('uid')) }))
+
+// Достижения игрока: полный список с прогрессом, GG Score и редкостью (§6–7).
+api.get('/achievements', c => c.json(achievementsView(c.get('uid'))))
 
 // Full profile screen: profile + per-game stats + badges.
 api.get('/profile/detail', c => {

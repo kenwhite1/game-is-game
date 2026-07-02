@@ -339,6 +339,24 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 .badge .bt { font-size: 13.5px; font-weight: 900; color: var(--brown-deep); }
 .badge .bd { font-size: 11px; font-weight: 700; color: var(--ink-soft); margin-top: 1px; line-height: 1.25; }
 
+/* -- achievements -------------------------------------------- */
+.ach-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; width: 100%; }
+.ach { display: flex; align-items: flex-start; gap: 10px; padding: 12px; border-radius: var(--radius); background: var(--card);
+  box-shadow: var(--shadow-lip), inset 0 0 0 1px rgba(255,255,255,.5); }
+.ach:not(.on) { opacity: .62; }
+.ach:not(.on) .ach-em { filter: grayscale(1); opacity: .85; }
+.ach.rare { box-shadow: var(--shadow-lip), inset 0 0 0 1.5px #bf00ff, 0 0 12px rgba(191,0,238,.32); }
+.ach-em { font-size: 24px; line-height: 1; flex-shrink: 0; }
+.ach-tx { min-width: 0; flex: 1; }
+.ach-top { display: flex; align-items: baseline; gap: 6px; }
+.ach-title { font-size: 13px; font-weight: 900; color: var(--brown-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ach-rare { font-size: 9px; font-weight: 900; color: #bf00ff; flex-shrink: 0; }
+.ach-desc { font-size: 10.5px; font-weight: 700; color: var(--ink-soft); margin-top: 1px; line-height: 1.25;
+  overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.ach-bar { height: 5px; border-radius: 999px; background: var(--card-2); margin-top: 6px; overflow: hidden; }
+.ach-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--blue), var(--blue-deep)); }
+.ach-n { font-size: 10px; font-weight: 900; color: var(--ink-soft); margin-top: 3px; }
+
 /* -- avatar picker grid -------------------------------------- */
 .av-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 .av-pick { cursor: pointer; border: none; background: var(--card-2); border-radius: 16px; padding: 10px 0; display: grid; place-items: center;

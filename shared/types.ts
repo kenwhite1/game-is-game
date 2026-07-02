@@ -89,6 +89,8 @@ export interface ProfileDetail {
   friendCount: number
   /** Сколько новых игроков пришло по реферальной ссылке. */
   invited: number
+  /** Сводка достижений: GG Score и сколько тиров открыто из всех. */
+  achievements: { score: number; unlocked: number; total: number }
 }
 
 /** Итог сработавшего приглашения (для приветственного тоста новичку). */

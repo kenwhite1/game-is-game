@@ -19,6 +19,14 @@ const logStmt = db.prepare('INSERT INTO event_log (user_id, kind, payload_json, 
 export function bumpProgress(uid: number, key: string, delta = 1): void {
   bumpStmt.run(uid, key, delta)
 }
+const setStmt = db.prepare(
+  `INSERT INTO user_progress (user_id, key, value) VALUES (?,?,?)
+   ON CONFLICT(user_id, key) DO UPDATE SET value = excluded.value`,
+)
+/** Абсолютная запись счётчика (для производных величин вроде gg_score). */
+export function setProgress(uid: number, key: string, value: number): void {
+  setStmt.run(uid, key, value)
+}
 export function getProgress(uid: number, key: string): number {
   return (readStmt.get(uid, key) as { value: number } | undefined)?.value ?? 0
 }

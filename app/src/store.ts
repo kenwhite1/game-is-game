@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { GameCard, GameMeta, Profile, ProfileDetail, Friend, ActivityItem, LeaderRow, Wardrobe, Slot, RatingValue, Quest } from '@shared/types'
+import type { AchievementsPayload } from '@shared/achievements'
 import { GAMES, defaultLink } from '@shared/games'
 import { api } from './api'
 import { haptic, openGame as openGameLink, openInvoice, getStartParam, inTelegram } from './telegram'
@@ -25,6 +26,7 @@ interface S {
   /** id игры, открытой в карточке-шторке (null = закрыто). */
   gameSheet: string | null
   detail: ProfileDetail | null
+  achievements: AchievementsPayload | null
   friends: Friend[]
   activity: ActivityItem[]
   leaderboard: LeaderRow[]
@@ -55,6 +57,7 @@ interface S {
 
   loadSocial(): Promise<void>
   loadDetail(): Promise<void>
+  loadAchievements(): Promise<void>
   loadWardrobe(): Promise<void>
   equip(slot: Slot, itemId: string): Promise<void>
   buy(itemId: string, name: string): Promise<boolean>
@@ -78,6 +81,7 @@ export const useStore = create<S>((set, get) => ({
   quests: [],
   gameSheet: null,
   detail: null,
+  achievements: null,
   friends: [],
   activity: [],
   leaderboard: [],
@@ -151,7 +155,7 @@ export const useStore = create<S>((set, get) => ({
     haptic('select')
     set({ tab })
     if (tab === 'friends' && !get().socialLoaded) void get().loadSocial()
-    if (tab === 'profile') void get().loadDetail()
+    if (tab === 'profile') { void get().loadDetail(); void get().loadAchievements() }
     if ((tab === 'style' || tab === 'shop') && !get().wardrobeLoaded) void get().loadWardrobe()
   },
 
@@ -306,6 +310,12 @@ export const useStore = create<S>((set, get) => ({
     try {
       const detail = await api.profileDetail()
       set({ detail, profile: detail.profile })
+    } catch { /* офлайн */ }
+  },
+
+  async loadAchievements() {
+    try {
+      set({ achievements: await api.achievements() })
     } catch { /* офлайн */ }
   },
 

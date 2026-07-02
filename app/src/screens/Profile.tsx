@@ -5,6 +5,8 @@ import { EditIcon, CopyIcon, SettingsIcon } from '../art/icons'
 import { copyText } from '../telegram'
 import { levelInfo } from '@shared/progression'
 import { bannerBg, titleText } from './Home'
+import { TIER_META } from '@shared/achievements'
+import type { AchView } from '@shared/achievements'
 import type { GameCard } from '@shared/types'
 
 function gameStyle(card?: GameCard): CSSProperties {
@@ -102,6 +104,8 @@ export function Profile() {
         </>
       )}
 
+      <Achievements />
+
       <div className="sec"><h2>Значки</h2><span className="sub">{earned} / {badges.length}</span></div>
       <div className="badge-grid">
         {badges.map(b => (
@@ -115,5 +119,57 @@ export function Profile() {
         ))}
       </div>
     </div>
+  )
+}
+
+/** Одна «лесенка» достижения: текущий тир, прогресс к следующему, редкость. */
+function AchievementCard({ a }: { a: AchView }) {
+  const done = a.tierReached >= 0
+  const nextIdx = Math.min(a.tierReached + 1, a.rungs.length - 1)
+  const maxed = a.tierReached >= a.rungs.length - 1
+  const next = a.rungs[nextIdx]
+  const cur = done ? a.rungs[a.tierReached] : null
+  const tierEmoji = done ? TIER_META[cur!.tier].emoji : '🔒'
+  const prevTarget = a.tierReached >= 0 ? a.rungs[a.tierReached].target : 0
+  const span = Math.max(1, next.target - (maxed ? 0 : prevTarget))
+  const into = Math.min(a.value, next.target) - (maxed ? 0 : prevTarget)
+  const pct = maxed ? 100 : Math.max(0, Math.min(100, Math.round((into / span) * 100)))
+  const rare = done && a.rarity > 0 && a.rarity < 0.05
+  return (
+    <div className={`ach ${done ? 'on' : ''} ${rare ? 'rare' : ''}`}>
+      <span className="ach-em">{tierEmoji}</span>
+      <div className="ach-tx">
+        <div className="ach-top">
+          <span className="ach-title">{done ? cur!.name : a.title}</span>
+          {rare && <span className="ach-rare">редкое · {Math.round(a.rarity * 100)}%</span>}
+        </div>
+        <div className="ach-desc">{maxed ? 'Максимум взят' : a.desc}</div>
+        <div className="ach-bar"><div className="ach-fill" style={{ width: `${pct}%` }} /></div>
+        <div className="ach-n">{maxed ? `${a.value}` : `${Math.min(a.value, next.target)} / ${next.target}`}</div>
+      </div>
+    </div>
+  )
+}
+
+function Achievements() {
+  const ach = useStore(s => s.achievements)
+  if (!ach || ach.items.length === 0) return null
+  // Взятые и близкие к цели — вперёд; затем по прогрессу.
+  const items = [...ach.items].sort((x, y) => {
+    if ((y.tierReached >= 0 ? 1 : 0) !== (x.tierReached >= 0 ? 1 : 0)) return (y.tierReached) - (x.tierReached)
+    const px = x.value / (x.rungs[Math.min(x.tierReached + 1, x.rungs.length - 1)].target || 1)
+    const py = y.value / (y.rungs[Math.min(y.tierReached + 1, y.rungs.length - 1)].target || 1)
+    return py - px
+  })
+  return (
+    <>
+      <div className="sec">
+        <h2>Достижения</h2>
+        <span className="sub">GG {ach.score.toLocaleString('ru')} · {ach.unlocked}/{ach.total}</span>
+      </div>
+      <div className="ach-grid">
+        {items.map(a => <AchievementCard key={a.id} a={a} />)}
+      </div>
+    </>
   )
 }

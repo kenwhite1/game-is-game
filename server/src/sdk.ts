@@ -4,6 +4,7 @@ import { credit } from './ledger'
 import { tickStreak } from './streak'
 import { progressMatch, logEvent } from './events'
 import { getProfile } from './profiles'
+import { syncAchievements } from './achievements'
 import { matchReward, MATCH_COIN_CAP, type CoinReason } from '../../shared/economy'
 import type { MatchReport, ReportResponse } from '../../shared/sdk'
 
@@ -82,6 +83,8 @@ export function handleResult(launchToken: string | undefined, rawBody: unknown, 
   progressMatch(uid, gameId, rep)
   logEvent(uid, 'match_result', { gameId, result: rep.result, players: rep.players, humanPlayers: rep.humanPlayers, mode: rep.mode })
   tickStreak(uid)
+  // Победы двигают достижения (Центурион, мастера категорий, «люди»…).
+  syncAchievements(uid)
 
   const p = getProfile(uid)
   return { status: 200, body: { ok: true, rewarded: reward.total > 0, coins: p?.coins ?? 0 } }

@@ -19,11 +19,22 @@ Each phase is committed + deployed (Railway) before the next. Updated as the
   - Outcome coin rewards (§4.2): played/won/first-win-of-day, via ledger.
   - `shared/sdk.ts` — `MatchReport` contract + `ggReport()` one-call helper.
 
+- **Phase 1 — Achievements & GG Score** (this commit):
+  - `shared/achievements.ts`: 12 cross-game ladders + 7 category-master ladders
+    (65 rungs), 5 tiers (points + coin reward), categories, rarity.
+  - `server/src/achievements.ts`: snapshot from `user_progress` + base stats,
+    two-pass sync (meta `gg_score`/`achievements_unlocked` after pass 1),
+    idempotent unlock, per-tier coin payout via ledger (`achievement` reason),
+    GG Score, rarity %. Wired into `recordOpen` + `/sdk/result`.
+  - `user_achievements` (migration 015); `GET /api/achievements`; GG Score +
+    counts in `profileDetail`.
+  - Profile UI: "Достижения" grid (tier medal, progress-to-next, rare glow) +
+    "GG N · unlocked/total" header. Badges kept (grandfathered alongside).
+  - Not yet: per-game 410 (needs `matches_game_*` + per-game skill stats from
+    the SDK); day-based ladders (⑤⑥⑦); friend-specific/hidden (⑱⑲).
+
 ## Next (bible build order §17.2)
 
-- **Phase 1 — Achievements & GG Score**: `shared/achievements.ts` (cross-game
-  ladders + per-game 10-archetype), `user_achievements`, GG Score + leaderboard,
-  rarity %, grandfather the 10 badges, progress off the event bus + UI.
 - **Phase 2 — Quests 2.0**: weighted daily pool, reroll, weeklies, co-op;
   `quest_assignments`. (Streaks already shipped.)
 - **Phase 3 — Cosmetics retail**: rotating daily shop, new `Unlock` kinds,

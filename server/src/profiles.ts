@@ -9,6 +9,7 @@ import { validUsername, normalizeUsername } from '../../shared/username'
 import { STARTER_COINS, LAUNCH_BREADTH_REWARD, LAUNCH_BREADTH_CAP } from '../../shared/economy'
 import { credit } from './ledger'
 import { tickStreak } from './streak'
+import { syncAchievements, achievementsSummary } from './achievements'
 
 interface UserRow {
   id: number
@@ -232,6 +233,8 @@ export function recordOpen(id: number, gameId: string): Profile {
   }
   // Серия дня: первый заход за день продвигает streak и платит награду/вехи.
   tickStreak(id)
+  // Достижения широты/коллекции могли продвинуться — синкаем (идемпотентно).
+  syncAchievements(id)
 
   return getProfile(id)!
 }
@@ -268,5 +271,5 @@ export function profileDetail(id: number): ProfileDetail | null {
   const invited = invitedCount(id)
   const distinctGames = stats.filter(s => s.opens > 0).length
   const badges = computeBadges({ opens: profile.opens, distinctGames, friends, level: profile.level, invited })
-  return { profile, stats, badges, friendCount: friends, invited }
+  return { profile, stats, badges, friendCount: friends, invited, achievements: achievementsSummary(id) }
 }

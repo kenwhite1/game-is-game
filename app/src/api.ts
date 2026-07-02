@@ -3,6 +3,7 @@ import type {
   AuthResponse, GameCard, GameMeta, Profile, ProfileDetail,
   Friend, ActivityItem, LeaderRow, Wardrobe, Slot, RatingValue, Quest,
 } from '@shared/types'
+import type { AchievementsPayload } from '@shared/achievements'
 
 let token: string | null = sessionStorage.getItem('gg_jwt')
 
@@ -47,6 +48,7 @@ export const api = {
   gift: (friendId: number, amount: number) => req<{ amount: number; profile: Profile; friends: Friend[] }>('/gift', { friendId, amount }),
 
   profileDetail: () => req<ProfileDetail>('/profile/detail'),
+  achievements: () => req<AchievementsPayload>('/achievements'),
   setUsername: (username: string) => req<{ profile: Profile }>('/profile/username', { username }),
 
   social: () => req<SocialSnapshot>('/social'),
