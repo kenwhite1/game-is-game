@@ -56,6 +56,7 @@ export function Profile() {
             <div className="nm2">{profile.username ? `@${profile.username}` : profile.name}</div>
             <div className="tag2">{titleText(profile.title)}</div>
           </div>
+          {profile.streak > 0 && <span className="streak-chip" title={`Серия: ${profile.streak} дн.`}>🔥 {profile.streak}</span>}
           <button className="banner-edit" onClick={() => openSheet('editProfile')} aria-label="Редактировать имя">
             <EditIcon />
           </button>
@@ -71,7 +72,7 @@ export function Profile() {
 
       <div className="stat-grid">
         <div className="stat"><div className="v">{lv.level}</div><div className="k">Уровень</div></div>
-        <div className="stat"><div className="v">{profile.opens}</div><div className="k">Запусков</div></div>
+        <div className="stat"><div className="v">🔥 {profile.streak}</div><div className="k">Серия{profile.streakBest > profile.streak ? ` · рек. ${profile.streakBest}` : ''}</div></div>
         <div className="stat"><div className="v">{detail?.friendCount ?? 0}</div><div className="k">Друзей</div></div>
       </div>
 

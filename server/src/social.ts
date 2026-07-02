@@ -6,6 +6,7 @@ import { DEFAULT_EQUIP, type Look } from '../../shared/cosmetics'
 import { getProfile } from './profiles'
 import { invitedCount } from './referrals'
 import { presenceOf } from './presence'
+import { credit, debit } from './ledger'
 import { GAMES } from '../../shared/games'
 
 const VALID_GAME_IDS = new Set(GAMES.map(g => g.id))
@@ -160,13 +161,12 @@ export function giftCoins(uid: number, friendId: number, amount: number): GiftRe
 
   let result: GiftResult = { ok: true, amount }
   db.transaction(() => {
-    // Списание с проверкой баланса одним UPDATE: без гонки двух запросов.
-    const r = db.prepare('UPDATE users SET coins=coins-? WHERE id=? AND coins>=?').run(amount, uid, amount)
-    if (r.changes === 0) {
+    // Списание с проверкой баланса через ledger: атомарно и с записью причины.
+    if (!debit(uid, amount, 'gift_out', `to:${friendId}`)) {
       result = { ok: false, reason: 'too_poor' }
       return
     }
-    db.prepare('UPDATE users SET coins=coins+? WHERE id=?').run(amount, friendId)
+    credit(friendId, amount, 'gift_in', `from:${uid}`)
     db.prepare('INSERT INTO gifts (from_id, to_id, amount) VALUES (?,?,?)').run(uid, friendId, amount)
   })()
   return result

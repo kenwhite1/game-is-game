@@ -1,6 +1,7 @@
 import { db } from './db'
 import { GAMES, CATEGORIES } from '../../shared/games'
 import type { Quest } from '../../shared/types'
+import { credit } from './ledger'
 
 // ─── Задания дня ─────────────────────────────────────────────────────────
 // Набор из трёх заданий, одинаковый для всех игроков, меняется раз в сутки
@@ -112,7 +113,7 @@ export function claimQuest(uid: number, questId: string): ClaimResult {
       result = { ok: false, reason: 'claimed' }
       return
     }
-    db.prepare('UPDATE users SET coins=coins+? WHERE id=?').run(q.reward, uid)
+    credit(uid, q.reward, 'quest', questId)
   })()
   return result
 }

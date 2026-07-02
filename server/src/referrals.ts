@@ -1,6 +1,7 @@
 import { db } from './db'
 import type { ReferralApplied } from '../../shared/types'
 import { REFERRER_REWARD, REFERRED_BONUS } from '../../shared/referrals'
+import { credit } from './ledger'
 
 /**
  * Засчитать приглашение: новичок uid пришёл по коду друга rawCode.
@@ -21,9 +22,8 @@ export function applyReferral(uid: number, rawCode: string): ReferralApplied | n
       .prepare('UPDATE users SET referred_by=? WHERE id=? AND referred_by IS NULL')
       .run(referrer.id, uid)
     if (claimed.changes === 0) return false
-    const pay = db.prepare('UPDATE users SET coins=coins+? WHERE id=?')
-    pay.run(REFERRER_REWARD, referrer.id)
-    pay.run(REFERRED_BONUS, uid)
+    credit(referrer.id, REFERRER_REWARD, 'referrer', `ref:${uid}`)
+    credit(uid, REFERRED_BONUS, 'referred', `by:${referrer.id}`)
     // Приглашение сразу делает игроков друзьями — новичок не видит пустой хаб.
     const befriend = db.prepare('INSERT OR IGNORE INTO friendships (user_id, friend_id) VALUES (?,?)')
     befriend.run(uid, referrer.id)

@@ -29,6 +29,12 @@ export interface Profile {
   title: string
   /** Баланс мягкой валюты Game. */
   coins: number
+  /** Текущая серия (сколько дней подряд играл). */
+  streak: number
+  /** Рекорд серии. */
+  streakBest: number
+  /** Заморозки серии на руках. */
+  freezes: number
   /** Сколько раз игрок открывал игры из хаба. */
   opens: number
   /** Накопленный опыт (выводится из opens). */

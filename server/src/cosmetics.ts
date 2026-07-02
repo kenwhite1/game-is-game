@@ -6,6 +6,7 @@ import {
 } from '../../shared/cosmetics'
 import { BADGES } from '../../shared/progression'
 import { getProfile, badgeSet, equippedOf } from './profiles'
+import { debit } from './ledger'
 
 const badgeName = (id: string) => BADGES.find(b => b.id === id)?.name ?? id
 
@@ -88,10 +89,10 @@ export function buy(uid: number, itemId: string): BuyResult {
   if (isOwned(item, ownerCtx(uid, profile.level))) return { ok: false, reason: 'already_owned' }
   if (profile.coins < price) return { ok: false, reason: 'too_poor' }
 
-  // Условное списание: WHERE coins>=price защищает от гонки/двойной покупки.
+  // Условное списание через ledger: debit проверяет баланс атомарно и пишет
+  // строку в coin_ledger. Владение выдаём в той же транзакции.
   const tx = db.transaction(() => {
-    const res = db.prepare('UPDATE users SET coins=coins-? WHERE id=? AND coins>=?').run(price, uid, price)
-    if (res.changes === 0) return false
+    if (!debit(uid, price, 'cosmetic', itemId)) return false
     db.prepare('INSERT OR IGNORE INTO cosmetics_owned (user_id, item_id) VALUES (?,?)').run(uid, itemId)
     return true
   })

@@ -6,6 +6,9 @@ import { defaultColor } from '../../shared/avatars'
 import { DEFAULT_EQUIP, type Slot } from '../../shared/cosmetics'
 import { GAMES } from '../../shared/games'
 import { validUsername, normalizeUsername } from '../../shared/username'
+import { STARTER_COINS, LAUNCH_BREADTH_REWARD, LAUNCH_BREADTH_CAP } from '../../shared/economy'
+import { credit } from './ledger'
+import { tickStreak } from './streak'
 
 interface UserRow {
   id: number
@@ -21,6 +24,9 @@ interface UserRow {
   banner: string | null
   title: string | null
   coins: number
+  streak_current: number
+  streak_best: number
+  streak_freezes: number
   friend_code: string | null
   opens: number
   created_at: string
@@ -45,13 +51,6 @@ function claimUsername(id: number, raw: string): void {
     // столкновение по UNIQUE — оставляем пустым
   }
 }
-
-/** Экономика Game: бонус за регистрацию и заработок за запуск игры. */
-export const STARTER_COINS = 300
-export const COINS_PER_OPEN = 25
-/** Столько запусков в день оплачиваются монетами: дальше играй бесплатно,
- *  но без начислений. Иначе монеты фармятся спамом по плиткам. */
-export const DAILY_PAID_OPENS = 20
 
 // ─── Код друга ───────────────────────────────────────────────────────────
 // Без похожих символов (0/O, 1/I), чтобы код легко диктовать и набирать.
@@ -108,10 +107,13 @@ export function getOrCreateUser(id: number, name: string, username?: string): Us
   const color = defaultColor(id)
   // Вставляем без ника, затем пытаемся занять @username из Telegram — так
   // конфликт по UNIQUE не роняет регистрацию (ник просто останется пустым).
+  // Вставляем с нулём монет, затем начисляем стартовый бонус через ledger,
+  // чтобы даже регистрационные монеты были аудируемой строкой в coin_ledger.
   db.prepare(
-    "INSERT INTO users (id, name, color, coins, last_seen) VALUES (?,?,?,?,datetime('now'))",
-  ).run(id, name, color, STARTER_COINS)
+    "INSERT INTO users (id, name, color, coins, last_seen) VALUES (?,?,?,0,datetime('now'))",
+  ).run(id, name, color)
   ensureFriendCode(id, null)
+  credit(id, STARTER_COINS, 'signup')
   if (username) claimUsername(id, username)
   return db.prepare('SELECT * FROM users WHERE id=?').get(id) as UserRow
 }
@@ -132,6 +134,9 @@ export function toProfile(u: UserRow): Profile {
     banner: u.banner || DEFAULT_EQUIP.banner,
     title: u.title || DEFAULT_EQUIP.title,
     coins: u.coins ?? 0,
+    streak: u.streak_current ?? 0,
+    streakBest: u.streak_best ?? 0,
+    freezes: u.streak_freezes ?? 0,
     opens: u.opens,
     xp,
     level: levelInfo(xp).level,
@@ -203,18 +208,31 @@ export function setUsername(id: number, raw: string): { profile: Profile } | { e
 
 // Record that a player launched a game and return their updated profile.
 export function recordOpen(id: number, gameId: string): Profile {
-  // Если игрок впервые появляется через /open (а не /auth), всё равно даём
-  // стартовый баланс — чтобы экономика была одинаковой на любом пути входа.
-  db.prepare("INSERT OR IGNORE INTO users (id, name, coins) VALUES (?, 'Игрок', ?)").run(id, STARTER_COINS)
-  const paidToday = (db
-    .prepare("SELECT COUNT(*) AS n FROM opens WHERE user_id=? AND date(ts)=date('now')")
+  // Если игрок впервые появляется через /open (а не /auth), заводим запись и
+  // начисляем стартовый бонус через ledger.
+  const created = db.prepare("INSERT OR IGNORE INTO users (id, name, coins) VALUES (?, 'Игрок', 0)").run(id)
+  if (created.changes > 0) credit(id, STARTER_COINS, 'signup')
+
+  // Награда за ШИРОТУ (§4.2 библии): монеты даём за первый за день запуск игры,
+  // которую сегодня ещё не открывали, и только пока не набрано LAUNCH_BREADTH_CAP
+  // РАЗНЫХ игр за день. Повторные запуски той же игры и запуск-спам не платят.
+  const openedThisGameToday = db
+    .prepare("SELECT 1 FROM opens WHERE user_id=? AND game_id=? AND date(ts)=date('now')")
+    .get(id, gameId)
+  const distinctToday = (db
+    .prepare("SELECT COUNT(DISTINCT game_id) AS n FROM opens WHERE user_id=? AND date(ts)=date('now')")
     .get(id) as { n: number }).n
+
   db.prepare('INSERT INTO opens (user_id, game_id) VALUES (?,?)').run(id, gameId)
   // last_seen must advance on every launch (friends ordering + «в сети»).
-  // Coins feed the cosmetics economy, but only the first launches of the day
-  // pay out: unlimited payouts would make the purchasable coin farmable.
-  const coins = paidToday < DAILY_PAID_OPENS ? COINS_PER_OPEN : 0
-  db.prepare("UPDATE users SET opens=opens+1, coins=coins+?, last_seen=datetime('now') WHERE id=?").run(coins, id)
+  db.prepare("UPDATE users SET opens=opens+1, last_seen=datetime('now') WHERE id=?").run(id)
+
+  if (!openedThisGameToday && distinctToday < LAUNCH_BREADTH_CAP) {
+    credit(id, LAUNCH_BREADTH_REWARD, 'launch_breadth', gameId)
+  }
+  // Серия дня: первый заход за день продвигает streak и платит награду/вехи.
+  tickStreak(id)
+
   return getProfile(id)!
 }
 
