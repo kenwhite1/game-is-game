@@ -5,6 +5,7 @@ import { invitedCount } from './referrals'
 import { defaultColor } from '../../shared/avatars'
 import { DEFAULT_EQUIP, type Slot } from '../../shared/cosmetics'
 import { GAMES } from '../../shared/games'
+import { validUsername, normalizeUsername } from '../../shared/username'
 
 interface UserRow {
   id: number
@@ -26,6 +27,24 @@ interface UserRow {
 }
 
 const VALID_GAME_IDS = new Set(GAMES.map(g => g.id))
+
+/** true, если ник свободен (регистронезависимо), не считая самого игрока. */
+function usernameFree(uname: string, selfId: number): boolean {
+  return !db.prepare('SELECT 1 FROM users WHERE lower(username)=lower(?) AND id<>?').get(uname, selfId)
+}
+
+/** Занять ник за игроком, если он валиден и свободен. Молча пропускает, если
+ *  занят или проигрывает гонку по UNIQUE-индексу — тогда ник останется пустым,
+ *  и игрок выберет свой. */
+function claimUsername(id: number, raw: string): void {
+  const uname = normalizeUsername(raw)
+  if (!validUsername(uname) || !usernameFree(uname, id)) return
+  try {
+    db.prepare('UPDATE users SET username=? WHERE id=?').run(uname, id)
+  } catch {
+    // столкновение по UNIQUE — оставляем пустым
+  }
+}
 
 /** Экономика Game: бонус за регистрацию и заработок за запуск игры. */
 export const STARTER_COINS = 300
@@ -78,13 +97,22 @@ export function getOrCreateUser(id: number, name: string, username?: string): Us
       db.prepare('UPDATE users SET color=? WHERE id=?').run(c, id)
       existing.color = c
     }
+    // Игрок мог завести @username в Telegram уже после регистрации — подхватим,
+    // но только если он ещё не выбрал собственный ник (его не перетираем).
+    if (!existing.username && username) {
+      claimUsername(id, username)
+      existing.username = (db.prepare('SELECT username FROM users WHERE id=?').get(id) as { username: string | null }).username
+    }
     return existing
   }
   const color = defaultColor(id)
+  // Вставляем без ника, затем пытаемся занять @username из Telegram — так
+  // конфликт по UNIQUE не роняет регистрацию (ник просто останется пустым).
   db.prepare(
-    "INSERT INTO users (id, name, username, color, coins, last_seen) VALUES (?,?,?,?,?,datetime('now'))",
-  ).run(id, name, username ?? null, color, STARTER_COINS)
+    "INSERT INTO users (id, name, color, coins, last_seen) VALUES (?,?,?,?,datetime('now'))",
+  ).run(id, name, color, STARTER_COINS)
   ensureFriendCode(id, null)
+  if (username) claimUsername(id, username)
   return db.prepare('SELECT * FROM users WHERE id=?').get(id) as UserRow
 }
 
@@ -93,6 +121,7 @@ export function toProfile(u: UserRow): Profile {
   return {
     id: u.id,
     name: u.name,
+    username: u.username || '',
     color: u.color || defaultColor(u.id),
     face: u.face || DEFAULT_EQUIP.face,
     frame: u.frame || DEFAULT_EQUIP.frame,
@@ -153,12 +182,23 @@ export function getProfile(id: number): Profile | null {
   return toProfile(u)
 }
 
-/** Сменить отображаемое имя. Аватар и прочая косметика — через equip (там
- *  проверяется владение), чтобы нельзя было надеть запертый предмет в обход. */
-export function updateProfile(id: number, patch: { name?: string }): Profile | null {
-  const name = patch.name?.trim().slice(0, 40)
-  if (name) db.prepare('UPDATE users SET name=? WHERE id=?').run(name, id)
-  return getProfile(id)
+/** Выбрать ник — доступно, только пока у игрока ника нет (у кого есть @username
+ *  из Telegram, ник фиксирован). Ник уникален (регистронезависимо). Аватар и
+ *  прочая косметика — через equip (там проверяется владение). */
+export function setUsername(id: number, raw: string): { profile: Profile } | { error: string } {
+  const current = db.prepare('SELECT username FROM users WHERE id=?').get(id) as { username: string | null } | undefined
+  if (!current) return { error: 'not_found' }
+  if (current.username) return { error: 'username_locked' }
+  const uname = normalizeUsername(raw)
+  if (!validUsername(uname)) return { error: 'bad_username' }
+  if (!usernameFree(uname, id)) return { error: 'username_taken' }
+  try {
+    db.prepare('UPDATE users SET username=? WHERE id=?').run(uname, id)
+  } catch {
+    return { error: 'username_taken' }
+  }
+  const profile = getProfile(id)
+  return profile ? { profile } : { error: 'not_found' }
 }
 
 // Record that a player launched a game and return their updated profile.

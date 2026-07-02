@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { validateInitData, issueToken, verifyToken, DEV_MODE } from './auth'
 import { BOT_USERNAME, PRESENCE_KEY, gameOverrides, type Env } from './env'
 import { touchPresence, clearPresence } from './presence'
-import { getOrCreateUser, getProfile, recordOpen, recentGames, profileDetail, updateProfile, userExists } from './profiles'
+import { getOrCreateUser, getProfile, recordOpen, recentGames, profileDetail, setUsername, userExists } from './profiles'
 import { addFriendByCode, removeFriend, friendsOf, activityFeed, leaderboard, socialSnapshot, giftCoins } from './social'
 import { questsOf, claimQuest } from './quests'
 import { packById } from '../../shared/wallet'
@@ -96,13 +96,15 @@ api.get('/profile/detail', c => {
 
 // Edit display name. Appearance (avatar/frame/banner/title) goes through
 // /cosmetics/equip so ownership is always enforced.
-const profileSchema = z.object({ name: z.string().trim().min(1).max(40) })
-api.post('/profile/update', async c => {
-  const parsed = profileSchema.safeParse(await c.req.json().catch(() => null))
+// Выбор ника (только для игроков без @username из Telegram). Ник уникален;
+// сервер возвращает username_taken / bad_username / username_locked.
+const usernameSchema = z.object({ username: z.string().min(1).max(40) })
+api.post('/profile/username', async c => {
+  const parsed = usernameSchema.safeParse(await c.req.json().catch(() => null))
   if (!parsed.success) return c.json({ error: 'bad_request' }, 400)
-  const profile = updateProfile(c.get('uid'), parsed.data)
-  if (!profile) return c.json({ error: 'not_found' }, 404)
-  return c.json({ profile })
+  const res = setUsername(c.get('uid'), parsed.data.username)
+  if ('error' in res) return c.json({ error: res.error }, res.error === 'not_found' ? 404 : 400)
+  return c.json(res)
 })
 
 // ─── Cosmetics: wardrobe + equip ─────────────────────────────────────────

@@ -244,6 +244,7 @@ const B = (id: string, name: string, rarity: Rarity, collection: string, unlock:
 
 const HL = 'radial-gradient(120% 120% at 12% 0%, rgba(255,255,255,.28), rgba(255,255,255,0) 55%),'
 export const BANNER_ITEMS: BannerItem[] = [
+  B('banner_amber', 'Янтарь', 'common', 'Базовые', { kind: 'starter' }, HL + 'linear-gradient(135deg,#ffb733 0%,#ff9d00 56%,#e57e00 100%)'),
   B('banner_blue', 'Электрик', 'common', 'Базовые', { kind: 'starter' }, HL + 'linear-gradient(135deg,#4a90ff 0%,#3a82f7 56%,#2256d8 100%)'),
   B('banner_midnight', 'Полночь', 'common', 'Базовые', { kind: 'starter' }, HL + 'linear-gradient(135deg,#1b2a4a,#0e1730)'),
   B('banner_mint', 'Мята', 'common', 'Базовые', { kind: 'starter' }, HL + 'linear-gradient(135deg,#2bb39a,#117a8b)'),
@@ -317,7 +318,7 @@ export const DEFAULT_EQUIP: Record<Slot, string> = {
   eyewear: 'eye_none',
   effect: 'fx_none',
   companion: 'comp_none',
-  banner: 'banner_blue',
+  banner: 'banner_amber',
   title: 'title_player',
 }
 

@@ -6,6 +6,9 @@ import type { Cosmetic, Slot, Look } from './cosmetics'
 export interface Profile {
   id: number
   name: string
+  /** @username из Telegram, либо выбранный игроком уникальный ник. Пусто =>
+   *  у игрока пока нет ника (нет в Telegram и он ещё не выбрал свой). */
+  username: string
   /** id цвета тела персонажа (c_*). */
   color: string
   /** id выражения лица (f_*). */

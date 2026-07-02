@@ -53,7 +53,7 @@ export function Profile() {
             />
           </button>
           <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
-            <div className="nm2">{profile.name}</div>
+            <div className="nm2">{profile.username ? `@${profile.username}` : profile.name}</div>
             <div className="tag2">{titleText(profile.title)}</div>
           </div>
           <button className="banner-edit" onClick={() => openSheet('editProfile')} aria-label="Редактировать имя">

@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react'
 import { useStore } from '../store'
 import { Avatar } from '../art/Avatar'
 import { GameTileIcon } from '../art/GameTileIcon'
-import { SoundOnIcon, SoundOffIcon, HelpIcon, PlayIcon } from '../art/icons'
+import { PlayIcon } from '../art/icons'
 import { levelInfo } from '@shared/progression'
 import { cosmeticById } from '@shared/cosmetics'
 import type { BannerItem, TitleItem } from '@shared/cosmetics'
@@ -49,10 +49,7 @@ export function Home() {
   const friends = useStore(s => s.friends)
   const quests = useStore(s => s.quests)
   const meta = useStore(s => s.meta)
-  const soundOn = useStore(s => s.soundOn)
-  const toggleSound = useStore(s => s.toggleSound)
   const toggleFavorite = useStore(s => s.toggleFavorite)
-  const openSheet = useStore(s => s.openSheet)
   const openGameSheet = useStore(s => s.openGameSheet)
   const setTab = useStore(s => s.setTab)
   const launch = useStore(s => s.launch)
@@ -60,7 +57,6 @@ export function Home() {
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<Filter>('all')
 
-  const firstName = profile?.name ? profile.name.split(' ')[0] : null
   const recentCards = recent.map(id => catalog.find(g => g.id === id)).filter(Boolean) as GameCard[]
 
   // Глобальные чарты: топ по запускам всех игроков (пустые в новых инсталляциях).
@@ -100,18 +96,6 @@ export function Home() {
 
   return (
     <div className="tab-page stagger">
-      <div className="topbar">
-        <div className="hello">
-          <div className="hi">{firstName ? 'С возвращением' : 'Привет 👋'}</div>
-          <div className="nm">{firstName ?? 'Game is Game'}</div>
-        </div>
-        {profile && <button className="coin-chip" onClick={() => setTab('style')} aria-label="Магазин стиля"><span className="coin">G</span>{profile.coins.toLocaleString('ru')}</button>}
-        <button className="iconbtn" onClick={toggleSound} aria-label="Звук">
-          {soundOn ? <SoundOnIcon /> : <SoundOffIcon />}
-        </button>
-        <button className="iconbtn" onClick={() => openSheet('help')} aria-label="Помощь"><HelpIcon /></button>
-      </div>
-
       {profile && <PlayerBanner onOpen={() => setTab('profile')} />}
 
       {profile && quests.length > 0 && <QuestsCard />}
@@ -180,7 +164,7 @@ export function Home() {
 
       {!browsing && popular.length > 0 && (
         <>
-          <div className="sec"><h2>Популярное 🔥</h2></div>
+          <div className="sec"><h2>Популярное <img src="https://cdn.jsdelivr.net/npm/emoji-datasource-apple/img/apple/64/1f525.png" alt="🔥" style={{ width: 19, height: 19, verticalAlign: -3, display: 'inline-block' }} /></h2></div>
           <div className="strip">
             {popular.map(g => (
               <button key={g.id} className="chip-game" style={gameStyle(g)} onClick={() => launch(g)}>
@@ -378,7 +362,7 @@ function PlayerBanner({ onOpen }: { onOpen(): void }) {
           seed={profile.id} size={58} ring={false}
         />
         <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
-          <div className="nm2">{profile.name}</div>
+          <div className="nm2">{profile.username ? `@${profile.username}` : profile.name}</div>
           <div className="tag2">{titleText(profile.title)}</div>
         </div>
         <span style={{ fontSize: 13, fontWeight: 900, background: 'rgba(255,255,255,.2)', padding: '6px 12px', borderRadius: 999, boxShadow: 'inset 0 0 0 1.5px rgba(255,255,255,.35)' }}>

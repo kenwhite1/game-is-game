@@ -60,7 +60,7 @@ interface S {
   buy(itemId: string, name: string): Promise<boolean>
   addFriend(code: string): Promise<{ ok: boolean; error?: string; name?: string }>
   removeFriend(id: number): Promise<void>
-  saveProfile(patch: { name: string }): Promise<void>
+  chooseUsername(username: string): Promise<{ ok: boolean; error?: string }>
 }
 
 let toastTimer: ReturnType<typeof setTimeout> | null = null
@@ -364,18 +364,18 @@ export const useStore = create<S>((set, get) => ({
     } catch { /* ignore */ }
   },
 
-  async saveProfile(patch) {
+  async chooseUsername(username) {
     try {
-      const r = await api.updateProfile(patch)
-      set({ profile: r.profile, sheet: null })
-      // обновим производные данные
+      const r = await api.setUsername(username)
+      set({ profile: r.profile, sheet: null, socialLoaded: false })
+      // обновим производные данные (профиль, лидерборд показывают ник)
       void get().loadDetail()
-      set({ socialLoaded: false })
       haptic('success')
-      get().showToast('Профиль обновлён ✨')
-    } catch {
+      get().showToast(`Ник @${r.profile.username} закреплён ✨`)
+      return { ok: true }
+    } catch (e) {
       haptic('warn')
-      get().showToast('Не удалось сохранить')
+      return { ok: false, error: (e as { message?: string }).message ?? 'request_failed' }
     }
   },
 }))

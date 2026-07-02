@@ -5,16 +5,22 @@
    активная вкладка. Тактильный материал: карточки с «губой»-тенью,
    мягкие слои, стеклянная навигация. Спокойно, дорого, по-игровому.
    ============================================================ */
+@font-face {
+  font-family: 'Actay Wide';
+  src: url('https://db.onlinewebfonts.com/t/5f3589e3d4b854aada3b2b1548d15cb4.woff2') format('woff2'),
+       url('https://db.onlinewebfonts.com/t/5f3589e3d4b854aada3b2b1548d15cb4.woff') format('woff');
+  font-weight: 400 900; font-display: swap;
+}
 :root {
   /* фирменный кремовый */
   --bg: #f3e2bc;
   --bg-deep: #ecd6a4;
-  --card: #fffaf0;
+  --card: #cdffa0;
   --card-2: #f8eeda;
-  --ink: #40301a;
-  --ink-soft: #97825f;
-  --brown: #875733;
-  --brown-deep: #674120;
+  --ink: #2c1a47;
+  --ink-soft: #7a6a99;
+  --brown: #3d2a5c;
+  --brown-deep: #2a1640;
 
   /* тёплый золотой (вторичный акцент, игры/звёзды) */
   --accent: #f2a93b;
@@ -59,7 +65,7 @@ html, body, #root { height: 100%; margin: 0; }
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: 'Nunito', 'SF Pro Rounded', system-ui, sans-serif;
+  font-family: 'Jost', system-ui, sans-serif;
   font-size: 16px;
   font-weight: 600;
   overscroll-behavior: none;
@@ -73,17 +79,14 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 /* -- app shell ------------------------------------------------ */
 .app {
   position: fixed; inset: 0; display: flex; flex-direction: column; overflow: hidden;
-  background:
-    radial-gradient(130% 70% at 50% -10%, rgba(255,255,255,.66), rgba(255,255,255,0) 52%),
-    radial-gradient(90% 50% at 100% 0%, rgba(58,130,247,.12), rgba(58,130,247,0) 60%),
-    linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
+  background: #FF5733;
 }
 
 /* scrolling page area for each tab */
 .page {
   position: relative; z-index: 1; flex: 1; min-height: 0; overflow-y: auto;
   display: flex; flex-direction: column; align-items: center;
-  padding: calc(var(--safe-top) + 12px) 16px calc(var(--nav-h) + 18px);
+  padding: calc(var(--safe-top) + 12px) 16px 20px 62px;
 }
 .col { width: 100%; max-width: 480px; }
 
@@ -133,7 +136,8 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 .banner {
   position: relative; width: 100%; overflow: hidden; border-radius: var(--radius-xl); padding: 18px;
   color: #fff; box-shadow: var(--shadow-pop);
-  background: var(--grad-hero);
+  background: radial-gradient(120% 120% at 12% 0%, rgba(255,255,255,.28), rgba(255,255,255,0) 55%),
+              linear-gradient(135deg, #ffb733 0%, #ff9d00 56%, #e57e00 100%);
 }
 .banner::after {
   content: ''; position: absolute; right: -36px; top: -36px; width: 150px; height: 150px; border-radius: 50%;
@@ -216,6 +220,8 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 .gi-img { display: grid; place-items: center; border-radius: 30%; overflow: hidden; flex-shrink: 0; }
 .gi-img picture, .gi-img img { width: 100%; height: 100%; display: block; object-fit: cover; }
 .gi-img--svg { background: radial-gradient(circle at 50% 26%, #74cf78, #347d3d); }
+.gi-ico { background: #d2cffc; box-shadow: inset 0 0 0 1px rgba(20,16,24,.1); }
+.gi-ico svg { width: 100%; height: 100%; padding: 17%; box-sizing: border-box; display: block; }
 
 /* -- cards / rows -------------------------------------------- */
 .card { width: 100%; background: var(--card); border-radius: var(--radius-lg); padding: 16px;
@@ -255,6 +261,9 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
   padding: 14px 16px; font-size: 16px; font-weight: 800; color: var(--ink);
   box-shadow: inset 0 0 0 1.5px var(--line); letter-spacing: .5px; }
 .input::placeholder { color: var(--ink-soft); font-weight: 700; letter-spacing: 0; }
+.uname-at { display: grid; place-items: center; width: 46px; flex-shrink: 0; border-radius: 14px;
+  background: var(--card-2); box-shadow: inset 0 0 0 1.5px var(--line); font-size: 18px; font-weight: 900; color: var(--ink-soft); }
+.uname-fixed { font-size: 22px; font-weight: 900; letter-spacing: .3px; color: var(--brown-deep); padding: 4px 2px; }
 .input:focus { box-shadow: inset 0 0 0 2px var(--blue); background: var(--card); }
 
 /* -- invite (referral) card ----------------------------------- */
@@ -351,20 +360,23 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 
 /* -- bottom nav ---------------------------------------------- */
 .nav {
-  position: absolute; left: 0; right: 0; bottom: 0; z-index: 30;
-  display: flex; justify-content: center; gap: 4px;
-  padding: 8px 14px calc(8px + var(--safe-bottom));
-  background: linear-gradient(180deg, rgba(243,226,188,0) 0%, var(--bg) 36%);
+  position: absolute; left: 0; top: 0; bottom: 0; z-index: 30;
+  display: flex; align-items: stretch;
+  padding: calc(var(--safe-top) + 12px) 0 calc(var(--safe-bottom) + 12px) 8px;
 }
-.nav-inner { display: flex; gap: 2px; width: 100%; max-width: 480px; padding: 6px; border-radius: 22px;
-  background: rgba(255,250,240,.86); backdrop-filter: blur(14px) saturate(1.3);
-  box-shadow: var(--shadow-pop), inset 0 0 0 1px rgba(255,255,255,.6); }
-.tab { flex: 1; cursor: pointer; border: none; background: transparent; display: flex; flex-direction: column; align-items: center; gap: 3px;
-  padding: 8px 4px; border-radius: 16px; color: var(--ink-soft); transition: color .15s ease, background .15s ease; }
-.tab svg { width: 23px; height: 23px; }
-.tab span { font-size: 10.5px; font-weight: 900; letter-spacing: .1px; }
-.tab.active { color: var(--blue-deep); background: var(--blue-tint); }
+.nav-inner { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+  padding: 20px 3px; border-radius: 22px;
+  background: #e9ffa0; backdrop-filter: blur(14px) saturate(1.3);
+  box-shadow: var(--shadow-pop), inset 0 0 0 1px rgba(255,255,255,.5); }
+.nav-group { display: flex; flex-direction: column; align-items: center; gap: 22px; }
+.tab { cursor: pointer; border: none; background: transparent; display: grid; place-items: center;
+  width: 30px; height: 38px; padding: 0; border-radius: 11px; color: #d9cef2; transition: color .15s ease, background .15s ease; }
+.tab svg { width: 20px; height: 20px; }
+.tab.active { color: #fff; background: var(--blue); }
 .tab:active { transform: scale(.94); }
+.railcoin { cursor: pointer; border: none; background: transparent; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 0; color: var(--brown-deep); }
+.railcoin:active { transform: scale(.94); }
+.railnum { font-size: 8.5px; font-weight: 900; color: #000; letter-spacing: .2px; }
 
 /* -- toast ---------------------------------------------------- */
 .toast { position: fixed; left: 50%; bottom: calc(var(--nav-h) + 16px); transform: translateX(-50%); z-index: 60;
@@ -516,7 +528,7 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 /* ─── Каталог: поиск, категории, избранное, карточка игры ───────────── */
 
 .search-row { width: 100%; display: flex; align-items: center; gap: 9px; margin-top: 14px;
-  background: var(--card); border-radius: 16px; padding: 12px 14px;
+  background: var(--card); border-radius: 5px; padding: 12px 14px;
   box-shadow: var(--shadow-lip), inset 0 0 0 1px rgba(255,255,255,.5); }
 .search-row .search-ic { font-size: 14px; opacity: .65; }
 .search-row input { flex: 1; min-width: 0; border: none; outline: none; background: transparent;
@@ -580,19 +592,20 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 
 /* ─── Задания дня, друзья в сети, подарки ───────────────────────────── */
 
-.quests { margin-top: 14px; padding: 14px 16px; }
+.quests { margin-top: 14px; padding: 14px 16px; background: #d544ee; font-family: 'Actay Wide', 'Jost', system-ui, sans-serif; }
+.quests * { font-family: inherit; }
 .q-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
-.q-title-main { font-size: 16px; font-weight: 900; color: var(--brown-deep); }
-.q-sub { margin-left: auto; font-size: 12px; font-weight: 800; color: var(--ink-soft); }
+.q-title-main { font-size: 16px; font-weight: 900; color: #fff; }
+.q-sub { margin-left: auto; font-size: 12px; font-weight: 800; color: rgba(255,255,255,.85); }
 .q-row { display: flex; align-items: center; gap: 11px; padding: 9px 0; }
-.q-row + .q-row { border-top: 1px solid var(--line); }
+.q-row + .q-row { border-top: 1px solid rgba(255,255,255,.2); }
 .q-emoji { font-size: 20px; width: 26px; text-align: center; flex-shrink: 0; }
 .q-tx { flex: 1; min-width: 0; }
-.q-name { font-size: 13.5px; font-weight: 800; color: var(--ink); }
-.q-bar { height: 6px; border-radius: 999px; background: var(--card-2); margin-top: 5px; overflow: hidden; }
-.q-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--accent-deep));
+.q-name { font-size: 13.5px; font-weight: 800; color: #fff; }
+.q-bar { height: 6px; border-radius: 999px; background: rgba(255,255,255,.28); margin-top: 5px; overflow: hidden; }
+.q-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #ffaa00, #ff7000, #bf00ff);
   transition: width .3s ease; }
-.q-prog { font-size: 12.5px; font-weight: 900; color: var(--ink-soft); flex-shrink: 0; }
+.q-prog { font-size: 12.5px; font-weight: 900; color: rgba(255,255,255,.92); flex-shrink: 0; }
 .q-done { width: 28px; height: 28px; border-radius: 999px; background: #ddf1df; color: #37833f;
   display: grid; place-items: center; font-size: 14px; font-weight: 900; flex-shrink: 0; }
 .q-claim { border: none; cursor: pointer; flex-shrink: 0; font: inherit; font-size: 12.5px; font-weight: 900;

@@ -6,7 +6,8 @@ import { Friends } from './screens/Friends'
 import { Style } from './screens/Style'
 import { Profile } from './screens/Profile'
 import { BrandLogo } from './screens/Logo'
-import { TabIcons, CheckIcon } from './art/icons'
+import { TabIcons, CheckIcon, SoundOnIcon, SoundOffIcon, HelpIcon } from './art/icons'
+import { validUsername, normalizeUsername } from '@shared/username'
 
 const TABS: { key: Tab; ru: string }[] = [
   { key: 'home', ru: 'Дом' },
@@ -22,6 +23,10 @@ export function App() {
   const tab = useStore(s => s.tab)
   const setTab = useStore(s => s.setTab)
   const toast = useStore(s => s.toast)
+  const soundOn = useStore(s => s.soundOn)
+  const toggleSound = useStore(s => s.toggleSound)
+  const openSheet = useStore(s => s.openSheet)
+  const profile = useStore(s => s.profile)
 
   useEffect(() => { void init() }, [init])
 
@@ -54,12 +59,25 @@ export function App() {
 
       <nav className="nav">
         <div className="nav-inner">
-          {TABS.map(t => (
-            <button key={t.key} className={`tab ${tab === t.key ? 'active' : ''}`} onClick={() => setTab(t.key)} aria-label={t.ru}>
-              {TabIcons[t.key]}
-              <span>{t.ru}</span>
+          <div className="nav-group">
+            {TABS.map(t => (
+              <button key={t.key} className={`tab ${tab === t.key ? 'active' : ''}`} onClick={() => setTab(t.key)} aria-label={t.ru}>
+                {TabIcons[t.key]}
+              </button>
+            ))}
+          </div>
+          <div className="nav-group">
+            <button className="tab" onClick={toggleSound} aria-label="Звук">
+              {soundOn ? <SoundOnIcon /> : <SoundOffIcon />}
             </button>
-          ))}
+            <button className="tab" onClick={() => openSheet('help')} aria-label="Помощь"><HelpIcon /></button>
+            {profile && (
+              <button className="railcoin" onClick={() => setTab('style')} aria-label="Магазин стиля">
+                <span className="coin">G</span>
+                <span className="railnum">{profile.coins.toLocaleString('ru')}</span>
+              </button>
+            )}
+          </div>
         </div>
       </nav>
 
@@ -146,27 +164,61 @@ function Settings() {
 
 function EditProfile({ onDone }: { onDone(): void }) {
   const profile = useStore(s => s.profile)!
-  const saveProfile = useStore(s => s.saveProfile)
+  const chooseUsername = useStore(s => s.chooseUsername)
   const setTab = useStore(s => s.setTab)
-  const [name, setName] = useState(profile.name)
+  const showToast = useStore(s => s.showToast)
+  const [uname, setUname] = useState('')
   const [busy, setBusy] = useState(false)
 
+  const clean = normalizeUsername(uname)
+  const ok = validUsername(uname)
+  const hasUsername = !!profile.username
+
   const save = async () => {
+    if (!ok) { showToast('Ник: 3–32 символа, латиница, цифры и _'); return }
     setBusy(true)
-    await saveProfile({ name: name.trim() || profile.name })
+    const r = await chooseUsername(clean)
     setBusy(false)
-    onDone()
+    if (!r.ok) {
+      showToast(r.error === 'username_taken' ? 'Этот ник уже занят — придумай другой'
+        : r.error === 'username_locked' ? 'Ник уже закреплён'
+        : 'Недопустимый ник')
+    }
   }
   const toStyle = () => { onDone(); setTab('style') }
 
   return (
     <>
-      <h2>Имя профиля</h2>
-      <div className="kicker" style={{ margin: '14px 0 8px' }}>Имя</div>
-      <input className="input" value={name} maxLength={40} onChange={e => setName(e.target.value)} placeholder="Как тебя зовут" style={{ width: '100%', letterSpacing: 0 }} />
-      <button className="btn block" style={{ marginTop: 16 }} onClick={save} disabled={busy}>
-        <CheckIcon /> Сохранить
-      </button>
+      <h2>Профиль</h2>
+
+      {hasUsername ? (
+        <>
+          <div className="kicker" style={{ margin: '14px 0 8px' }}>Ник</div>
+          <div className="uname-fixed">@{profile.username}</div>
+          <p className="soft" style={{ marginTop: 10 }}>Ник берётся из твоего Telegram и общий для всех наших игр.</p>
+        </>
+      ) : (
+        <>
+          <div className="kicker" style={{ margin: '14px 0 8px' }}>Придумай ник</div>
+          <div className="field">
+            <span className="uname-at">@</span>
+            <input
+              className="input" value={uname} maxLength={32} autoFocus
+              onChange={e => setUname(e.target.value)} placeholder="ник"
+              autoCapitalize="off" autoCorrect="off" spellCheck={false} enterKeyHint="done"
+              onKeyDown={e => { if (e.key === 'Enter' && ok) void save() }}
+            />
+          </div>
+          <p className="soft" style={{ marginTop: 10 }}>
+            В Telegram у тебя нет @username, поэтому выбери свой — 3–32 символа: латиница, цифры и «_».
+            Его больше никто не сможет занять.
+          </p>
+          <button className="btn block" style={{ marginTop: 16 }} onClick={save} disabled={busy || !ok}>
+            <CheckIcon /> Закрепить ник
+          </button>
+        </>
+      )}
+
       <button className="btn block ghost" style={{ marginTop: 10 }} onClick={toStyle}>
         ✨ Сменить образ
       </button>
