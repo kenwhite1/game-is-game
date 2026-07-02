@@ -1,7 +1,8 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
-import { validateInitData, issueToken, verifyToken } from './auth'
-import { BOT_USERNAME, gameOverrides, type Env } from './env'
+import { validateInitData, issueToken, verifyToken, DEV_MODE } from './auth'
+import { BOT_USERNAME, PRESENCE_KEY, gameOverrides, type Env } from './env'
+import { touchPresence, clearPresence } from './presence'
 import { getOrCreateUser, getProfile, recordOpen, recentGames, profileDetail, updateProfile, userExists } from './profiles'
 import { addFriendByCode, removeFriend, friendsOf, activityFeed, leaderboard, socialSnapshot, giftCoins } from './social'
 import { questsOf, claimQuest } from './quests'
@@ -56,10 +57,27 @@ api.post('/auth', async c => {
   })
 })
 
+// Пинг присутствия от серверов игр (не от игроков): X-Presence-Key вместо JWT.
+// Игра шлёт start/ping раз в минуту на активную сессию и end при выходе.
+const pingSchema = z.object({
+  userId: z.number().int().positive(),
+  gameId: z.string().min(1).max(32),
+  event: z.enum(['start', 'ping', 'end']).default('ping'),
+})
+api.post('/presence/ping', async c => {
+  const key = PRESENCE_KEY ?? (DEV_MODE ? 'dev' : null)
+  if (!key || c.req.header('x-presence-key') !== key) return c.json({ error: 'forbidden' }, 403)
+  const parsed = pingSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'bad_request' }, 400)
+  if (parsed.data.event === 'end') clearPresence(parsed.data.userId)
+  else touchPresence(parsed.data.userId, parsed.data.gameId)
+  return c.json({ ok: true })
+})
+
 // auth gate for everything below
 api.use('/*', async (c, next) => {
   const p = c.req.path
-  if (p.endsWith('/auth') || p.endsWith('/health') || p.endsWith('/catalog')) return next()
+  if (p.endsWith('/auth') || p.endsWith('/health') || p.endsWith('/catalog') || p.endsWith('/presence/ping')) return next()
   const token = c.req.header('authorization')?.replace(/^Bearer /, '')
   const uid = token ? await verifyToken(token) : null
   if (!uid) return c.json({ error: 'unauthorized' }, 401)
@@ -122,6 +140,8 @@ api.post('/open', async c => {
   if (!parsed.success || !VALID_IDS.has(parsed.data.gameId)) return c.json({ error: 'bad_request' }, 400)
   const uid = c.get('uid')
   const profile = recordOpen(uid, parsed.data.gameId)
+  // Запуск из хаба = игрок сейчас в игре (пока сама игра не начнёт пинговать).
+  touchPresence(uid, parsed.data.gameId)
   return c.json({ profile, recent: recentGames(uid) })
 })
 

@@ -5,6 +5,7 @@ import { defaultColor } from '../../shared/avatars'
 import { DEFAULT_EQUIP, type Look } from '../../shared/cosmetics'
 import { getProfile } from './profiles'
 import { invitedCount } from './referrals'
+import { presenceOf } from './presence'
 import { GAMES } from '../../shared/games'
 
 const VALID_GAME_IDS = new Set(GAMES.map(g => g.id))
@@ -73,6 +74,7 @@ export function friendsOf(uid: number): Friend[] {
         ORDER BY u.last_seen DESC NULLS LAST, u.id DESC`,
     )
     .all(uid) as (LookRow & { id: number; name: string; opens: number; last_seen: string | null; last_game: string | null })[]
+  const live = presenceOf(rows.map(r => r.id))
   return rows.map(r => ({
     id: r.id,
     name: r.name,
@@ -80,6 +82,7 @@ export function friendsOf(uid: number): Friend[] {
     level: levelInfo(xpFromOpens(r.opens)).level,
     lastGame: r.last_game && VALID_GAME_IDS.has(r.last_game) ? r.last_game : null,
     lastSeen: r.last_seen,
+    playing: live.get(r.id) ?? null,
   }))
 }
 

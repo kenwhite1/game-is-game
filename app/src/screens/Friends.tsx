@@ -117,8 +117,9 @@ export function Friends() {
           {friends.length === 0 ? (
             <div className="empty"><div className="em">🫂</div><div className="t">Пока никого</div><div className="s">Поделись кодом или добавь друга — и играйте вместе.</div></div>
           ) : friends.map(f => {
-            const game = gameById(catalog, f.lastGame)
-            const online = isOnline(f.lastSeen)
+            const liveGame = gameById(catalog, f.playing)
+            const game = liveGame ?? gameById(catalog, f.lastGame)
+            const online = !!f.playing || isOnline(f.lastSeen)
             return (
               <div className="row" key={f.id}>
                 <Avatar look={f.look} seed={f.id} size={44} />
@@ -126,8 +127,9 @@ export function Friends() {
                   <div className="t">{f.name}</div>
                   <div className="s">
                     <span className={`dot ${online ? 'on' : 'off'}`} />
-                    {online ? 'в сети' : f.lastSeen ? `был(а) ${timeAgo(f.lastSeen)}` : 'давно не заходил(а)'}
-                    {game ? ` · ${game.name}` : ''}
+                    {liveGame ? `играет в ${liveGame.name}`
+                      : online ? 'в сети' : f.lastSeen ? `был(а) ${timeAgo(f.lastSeen)}` : 'давно не заходил(а)'}
+                    {!liveGame && game ? ` · ${game.name}` : ''}
                   </div>
                 </div>
                 <span className="lvl-badge">Ур. {f.level}</span>

@@ -84,7 +84,19 @@ export function Home() {
 
   const featured = recentCards[0] ?? catalog[0]
   const grid = browsing ? filtered : catalog.filter(g => g.id !== featured?.id)
-  const onlineFriends = friends.filter(f => isOnline(f.lastSeen)).slice(0, 8)
+  const onlineFriends = friends.filter(f => f.playing || isOnline(f.lastSeen)).slice(0, 8)
+
+  // «Похоже на X»: игры той же категории, что и последняя запущенная,
+  // которые игрок ещё не пробовал. Считается на клиенте, свежие сверху чартов.
+  const similar = useMemo(() => {
+    const anchor = recentCards[0]
+    if (!anchor) return []
+    const tried = new Set(recent)
+    return catalog
+      .filter(g => g.category === anchor.category && g.id !== anchor.id && !tried.has(g.id))
+      .sort((a, b) => (meta[b.id]?.opens ?? 0) - (meta[a.id]?.opens ?? 0))
+      .slice(0, 6)
+  }, [catalog, recentCards, recent, meta])
 
   return (
     <div className="tab-page stagger">
@@ -131,17 +143,19 @@ export function Home() {
           <div className="sec"><h2>Друзья в сети 🟢</h2></div>
           <div className="strip">
             {onlineFriends.map(f => {
-              const game = f.lastGame ? catalog.find(g => g.id === f.lastGame) : null
+              const liveId = f.playing ?? f.lastGame
+              const game = liveId ? catalog.find(g => g.id === liveId) : null
+              const label = f.playing ? `играет · зайти` : game ? `в ${game.name} · зайти` : 'в сети'
               return (
                 <button
                   key={f.id} className="chip-game chip-friend" style={game ? gameStyle(game) : undefined}
                   onClick={() => { if (game) launch(game); else setTab('friends') }}
-                  aria-label={game ? `${f.name} в ${game.name}: зайти` : f.name}
+                  aria-label={game ? `${f.name}: ${game.name}, зайти` : f.name}
                 >
                   <Avatar look={f.look} seed={f.id} size={34} />
                   <span className="of-tx">
                     <span className="nm">{f.name.split(' ')[0]}</span>
-                    <span className="of-sub">{game ? `в ${game.name} · зайти` : 'в сети'}</span>
+                    <span className="of-sub">{f.playing && game ? `🟢 в ${game.name}` : label}</span>
                   </span>
                 </button>
               )
@@ -169,6 +183,20 @@ export function Home() {
           <div className="sec"><h2>Популярное 🔥</h2></div>
           <div className="strip">
             {popular.map(g => (
+              <button key={g.id} className="chip-game" style={gameStyle(g)} onClick={() => launch(g)}>
+                <GameTileIcon id={g.id} emoji={g.emoji} size={36} />
+                <span className="nm">{g.name}</span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+
+      {!browsing && similar.length > 0 && (
+        <>
+          <div className="sec"><h2>Похоже на «{recentCards[0]!.name}»</h2></div>
+          <div className="strip">
+            {similar.map(g => (
               <button key={g.id} className="chip-game" style={gameStyle(g)} onClick={() => launch(g)}>
                 <GameTileIcon id={g.id} emoji={g.emoji} size={36} />
                 <span className="nm">{g.name}</span>
@@ -248,7 +276,7 @@ function GameSheet() {
   const g = id ? catalog.find(x => x.id === id) : null
   if (!g) return null
 
-  const m = meta[g.id] ?? { opens: 0, likes: 0, dislikes: 0, followers: 0 }
+  const m = meta[g.id] ?? { opens: 0, likes: 0, dislikes: 0, followers: 0, playing: 0 }
   const votes = m.likes + m.dislikes
   const likePct = votes > 0 ? Math.round((m.likes / votes) * 100) : null
   const my = ratings[g.id]
@@ -274,6 +302,7 @@ function GameSheet() {
         </div>
         <p className="soft">{g.blurb}</p>
         <div className="gsheet-stats">
+          {m.playing > 0 && <span>🟢 {m.playing} в игре</span>}
           <span>🚀 {m.opens.toLocaleString('ru')} {m.opens === 1 ? 'запуск' : 'запусков'}</span>
           <span>{likePct !== null ? `👍 ${likePct}% (${votes})` : '👍 Оцени первым'}</span>
         </div>

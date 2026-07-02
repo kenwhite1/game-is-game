@@ -1,6 +1,7 @@
 import { db } from './db'
 import type { GameMeta, RatingValue } from '../../shared/types'
 import { GAMES } from '../../shared/games'
+import { playingCounts } from './presence'
 
 const VALID_GAME_IDS = new Set(GAMES.map(g => g.id))
 
@@ -18,8 +19,9 @@ export function gameMeta(): Record<string, GameMeta> {
   const fans = db
     .prepare('SELECT game_id AS id, COUNT(*) AS n FROM follows GROUP BY game_id')
     .all() as { id: string; n: number }[]
+  const playing = playingCounts()
   const meta: Record<string, GameMeta> = {}
-  for (const g of GAMES) meta[g.id] = { opens: 0, likes: 0, dislikes: 0, followers: 0 }
+  for (const g of GAMES) meta[g.id] = { opens: 0, likes: 0, dislikes: 0, followers: 0, playing: playing[g.id] ?? 0 }
   for (const r of opens) if (meta[r.id]) meta[r.id].opens = r.n
   for (const r of votes) if (meta[r.id]) { meta[r.id].likes = r.likes ?? 0; meta[r.id].dislikes = r.dislikes ?? 0 }
   for (const r of fans) if (meta[r.id]) meta[r.id].followers = r.n

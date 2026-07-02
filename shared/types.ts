@@ -44,12 +44,14 @@ export interface GameStat {
   opens: number
 }
 
-/** Глобальные агрегаты по игре: запуски, оценки и подписчики. */
+/** Глобальные агрегаты по игре: запуски, оценки, подписчики, кто в игре сейчас. */
 export interface GameMeta {
   opens: number
   likes: number
   dislikes: number
   followers: number
+  /** Сколько игроков в игре прямо сейчас (живое присутствие). */
+  playing: number
 }
 
 /** Личная оценка игры: нравится или нет. */
@@ -98,6 +100,8 @@ export interface Friend {
   lastGame: string | null
   /** Последняя активность, ISO-строка. */
   lastSeen: string | null
+  /** id игры, в которой друг прямо сейчас (живое присутствие), иначе null. */
+  playing: string | null
 }
 
 export interface ActivityItem {

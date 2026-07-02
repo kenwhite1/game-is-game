@@ -10,6 +10,10 @@ export const BOT_USERNAME = process.env.BOT_USERNAME ?? 'game_is_game_bot'
 // so the defaults from shared/games.ts win.
 const IDS = GAMES.map(g => g.id)
 
+/** Общий секрет для серверов игр: POST /api/presence/ping c X-Presence-Key.
+ *  Не задан — эндпоинт выключен (кроме DEV MODE, там ключ "dev"). */
+export const PRESENCE_KEY = process.env.PRESENCE_KEY?.trim() || null
+
 /** Telegram id админов (ADMIN_IDS=123,456): им доступна команда /announce. */
 export const ADMIN_IDS = new Set(
   (process.env.ADMIN_IDS ?? '')
