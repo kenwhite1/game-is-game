@@ -626,6 +626,11 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 .q-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #ffaa00, #ff7000, #bf00ff);
   transition: width .3s ease; }
 .q-prog { font-size: 12.5px; font-weight: 900; color: rgba(255,255,255,.92); flex-shrink: 0; }
+.q-right { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
+.q-reroll { border: none; cursor: pointer; font: inherit; font-size: 13px; line-height: 1; width: 26px; height: 26px;
+  border-radius: 999px; color: #fff; background: rgba(255,255,255,.22); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.35); }
+.q-reroll:active { transform: scale(.9); }
+.quests.weekly { background: #6c5ce0; margin-top: 12px; }
 .q-done { width: 28px; height: 28px; border-radius: 999px; background: #ddf1df; color: #37833f;
   display: grid; place-items: center; font-size: 14px; font-weight: 900; flex-shrink: 0; }
 .q-claim { border: none; cursor: pointer; flex-shrink: 0; font: inherit; font-size: 12.5px; font-weight: 900;

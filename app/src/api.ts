@@ -43,8 +43,9 @@ export const api = {
     req<{ ratings: Record<string, RatingValue>; meta: Record<string, GameMeta> }>('/rate', { gameId, value }),
   toggleFollow: (gameId: string) =>
     req<{ following: boolean; follows: string[]; meta: Record<string, GameMeta> }>('/follow/toggle', { gameId }),
-  quests: () => req<{ quests: Quest[] }>('/quests'),
-  claimQuest: (questId: string) => req<{ reward: number; profile: Profile; quests: Quest[] }>('/quests/claim', { questId }),
+  quests: () => req<{ quests: Quest[]; weekly: Quest[]; rerollsLeft: number }>('/quests'),
+  claimQuest: (questId: string) => req<{ reward: number; profile: Profile; quests: Quest[]; weekly: Quest[] }>('/quests/claim', { questId }),
+  rerollQuest: (questId: string) => req<{ quests: Quest[]; free: boolean; profile: Profile; rerollsLeft: number }>('/quests/reroll', { questId }),
   gift: (friendId: number, amount: number) => req<{ amount: number; profile: Profile; friends: Friend[] }>('/gift', { friendId, amount }),
 
   profileDetail: () => req<ProfileDetail>('/profile/detail'),

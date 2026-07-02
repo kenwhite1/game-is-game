@@ -8,7 +8,7 @@ import { levelInfo } from '@shared/progression'
 import { cosmeticById } from '@shared/cosmetics'
 import type { BannerItem, TitleItem } from '@shared/cosmetics'
 import { CATEGORIES, categoryRu, type Category } from '@shared/games'
-import type { GameCard } from '@shared/types'
+import type { GameCard, Quest } from '@shared/types'
 import { shareInvite } from '../telegram'
 import { isOnline } from '../util'
 
@@ -99,6 +99,7 @@ export function Home() {
       {profile && <PlayerBanner onOpen={() => setTab('profile')} />}
 
       {profile && quests.length > 0 && <QuestsCard />}
+      {profile && <WeeklyCard />}
 
       <div className="search-row">
         <span className="search-ic">🔍</span>
@@ -322,30 +323,56 @@ function GameSheet() {
 }
 
 /** Задания дня: три квеста, прогресс и кнопка «Забрать» за выполненные. */
+function QuestRow({ q, onReroll }: { q: Quest; onReroll?: () => void }) {
+  const claimQuest = useStore(s => s.claimQuest)
+  return (
+    <div className="q-row">
+      <span className="q-emoji">{q.emoji}</span>
+      <div className="q-tx">
+        <div className="q-name">{q.title}</div>
+        <div className="q-bar"><div className="q-fill" style={{ width: `${Math.round((q.progress / q.target) * 100)}%` }} /></div>
+      </div>
+      {q.claimed
+        ? <span className="q-done">✓</span>
+        : q.done
+          ? <button className="q-claim" onClick={() => void claimQuest(q.id)}>+{q.reward} G</button>
+          : <span className="q-right">
+              <span className="q-prog">{q.progress}/{q.target}</span>
+              {onReroll && <button className="q-reroll" onClick={onReroll} aria-label="Заменить задание">♻</button>}
+            </span>}
+    </div>
+  )
+}
+
 function QuestsCard() {
   const quests = useStore(s => s.quests)
-  const claimQuest = useStore(s => s.claimQuest)
+  const rerollsLeft = useStore(s => s.rerollsLeft)
+  const rerollQuest = useStore(s => s.rerollQuest)
   const unclaimed = quests.filter(q => q.done && !q.claimed).length
   return (
     <div className="card quests">
       <div className="q-head">
         <span className="q-title-main">Задания дня</span>
-        <span className="q-sub">{unclaimed > 0 ? `можно забрать: ${unclaimed}` : 'новые каждый день'}</span>
+        <span className="q-sub">{unclaimed > 0 ? `можно забрать: ${unclaimed}` : rerollsLeft > 0 ? 'замена: 1 бесплатно' : 'новые каждый день'}</span>
       </div>
       {quests.map(q => (
-        <div className="q-row" key={q.id}>
-          <span className="q-emoji">{q.emoji}</span>
-          <div className="q-tx">
-            <div className="q-name">{q.title}</div>
-            <div className="q-bar"><div className="q-fill" style={{ width: `${Math.round((q.progress / q.target) * 100)}%` }} /></div>
-          </div>
-          {q.claimed
-            ? <span className="q-done">✓</span>
-            : q.done
-              ? <button className="q-claim" onClick={() => void claimQuest(q.id)}>+{q.reward} G</button>
-              : <span className="q-prog">{q.progress}/{q.target}</span>}
-        </div>
+        <QuestRow key={q.id} q={q} onReroll={() => void rerollQuest(q.id)} />
       ))}
+    </div>
+  )
+}
+
+function WeeklyCard() {
+  const weekly = useStore(s => s.weeklyQuests)
+  if (weekly.length === 0) return null
+  const unclaimed = weekly.filter(q => q.done && !q.claimed).length
+  return (
+    <div className="card quests weekly">
+      <div className="q-head">
+        <span className="q-title-main">Задания недели</span>
+        <span className="q-sub">{unclaimed > 0 ? `можно забрать: ${unclaimed}` : 'сброс в понедельник'}</span>
+      </div>
+      {weekly.map(q => <QuestRow key={q.id} q={q} />)}
     </div>
   )
 }

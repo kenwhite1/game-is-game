@@ -7,7 +7,7 @@ import { BOT_USERNAME, PRESENCE_KEY, gameOverrides, type Env } from './env'
 import { touchPresence, clearPresence } from './presence'
 import { getOrCreateUser, getProfile, recordOpen, recentGames, profileDetail, setUsername, userExists } from './profiles'
 import { addFriendByCode, removeFriend, friendsOf, activityFeed, leaderboard, socialSnapshot, giftCoins } from './social'
-import { questsOf, claimQuest } from './quests'
+import { questsOf, weeklyQuestsOf, claimQuest, rerollQuest, rerollsLeft } from './quests'
 import { packById } from '../../shared/wallet'
 import { bot } from './bot'
 import { applyReferral } from './referrals'
@@ -215,7 +215,10 @@ api.post('/wallet/invoice', async c => {
   }
 })
 
-api.get('/quests', c => c.json({ quests: questsOf(c.get('uid')) }))
+api.get('/quests', c => {
+  const uid = c.get('uid')
+  return c.json({ quests: questsOf(uid), weekly: weeklyQuestsOf(uid), rerollsLeft: rerollsLeft(uid) })
+})
 
 const claimSchema = z.object({ questId: z.string().min(1).max(48) })
 api.post('/quests/claim', async c => {
@@ -224,7 +227,16 @@ api.post('/quests/claim', async c => {
   const uid = c.get('uid')
   const r = claimQuest(uid, parsed.data.questId)
   if (!r.ok) return c.json({ error: r.reason }, r.reason === 'claimed' ? 409 : 400)
-  return c.json({ reward: r.reward, profile: getProfile(uid), quests: questsOf(uid) })
+  return c.json({ reward: r.reward, profile: getProfile(uid), quests: questsOf(uid), weekly: weeklyQuestsOf(uid) })
+})
+
+api.post('/quests/reroll', async c => {
+  const parsed = claimSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'bad_request' }, 400)
+  const uid = c.get('uid')
+  const r = rerollQuest(uid, parsed.data.questId)
+  if (!r.ok) return c.json({ error: r.reason }, r.reason === 'too_poor' ? 402 : 400)
+  return c.json({ quests: r.quests, free: r.free, profile: getProfile(uid), rerollsLeft: rerollsLeft(uid) })
 })
 
 // ─── Gifts: подарить Game другу ──────────────────────────────────────────

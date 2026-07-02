@@ -23,6 +23,8 @@ interface S {
   follows: string[]
   meta: Record<string, GameMeta>
   quests: Quest[]
+  weeklyQuests: Quest[]
+  rerollsLeft: number
   /** id игры, открытой в карточке-шторке (null = закрыто). */
   gameSheet: string | null
   detail: ProfileDetail | null
@@ -49,6 +51,7 @@ interface S {
   rate(id: string, value: RatingValue | 0): Promise<void>
   refreshQuests(): Promise<void>
   claimQuest(id: string): Promise<void>
+  rerollQuest(id: string): Promise<void>
   buyCoins(packId: string): Promise<void>
   gift(friendId: number, amount: number): Promise<{ ok: boolean; error?: string }>
   openSheet(s: Sheet): void
@@ -79,6 +82,8 @@ export const useStore = create<S>((set, get) => ({
   follows: [],
   meta: {},
   quests: [],
+  weeklyQuests: [],
+  rerollsLeft: 1,
   gameSheet: null,
   detail: null,
   achievements: null,
@@ -115,6 +120,8 @@ export const useStore = create<S>((set, get) => ({
       referral = r.referral ?? null
       // Друзья нужны уже на «Доме» (полка «Друзья в сети»), грузим сразу.
       void get().loadSocial()
+      // Догружаем недельные квесты и счётчик рероллов (auth отдаёт только дневные).
+      void get().refreshQuests()
     } catch {
       // гость или офлайн: показываем меню из публичного каталога или статики
       try {
@@ -177,14 +184,14 @@ export const useStore = create<S>((set, get) => ({
   async refreshQuests() {
     try {
       const r = await api.quests()
-      set({ quests: r.quests })
+      set({ quests: r.quests, weeklyQuests: r.weekly, rerollsLeft: r.rerollsLeft })
     } catch { /* офлайн */ }
   },
 
   async claimQuest(id) {
     try {
       const r = await api.claimQuest(id)
-      set({ profile: r.profile, quests: r.quests })
+      set({ profile: r.profile, quests: r.quests, weeklyQuests: r.weekly })
       haptic('success')
       if (get().soundOn) playSfx('open')
       get().showToast(`Задание выполнено: +${r.reward} Game 🎉`)
@@ -193,6 +200,19 @@ export const useStore = create<S>((set, get) => ({
       const reason = (e as { message?: string }).message
       get().showToast(reason === 'claimed' ? 'Награда уже получена' : 'Задание ещё не выполнено')
       void get().refreshQuests()
+    }
+  },
+
+  async rerollQuest(id) {
+    try {
+      const r = await api.rerollQuest(id)
+      set({ quests: r.quests, profile: r.profile, rerollsLeft: r.rerollsLeft })
+      haptic('select')
+      if (get().soundOn) playSfx('tap')
+      get().showToast(r.free ? 'Задание заменено' : `Задание заменено · −50 Game`)
+    } catch (e) {
+      haptic('warn')
+      get().showToast((e as { message?: string }).message === 'too_poor' ? 'Не хватает Game на реролл' : 'Не удалось заменить')
     }
   },
 

@@ -33,10 +33,21 @@ Each phase is committed + deployed (Railway) before the next. Updated as the
   - Not yet: per-game 410 (needs `matches_game_*` + per-game skill stats from
     the SDK); day-based ladders (⑤⑥⑦); friend-specific/hidden (⑱⑲).
 
+- **Phase 2 — Quests 2.0** (this commit):
+  - Rewrote `server/src/quests.ts`: per-user daily deal with a bucket spread
+    (engage / category / meta), weekly quests, `quest_assignments` (migration
+    016), reroll (1 free/day then 50🪙, same-bucket swap), completion bonus
+    (daily +50 / weekly +200, paid once via a `_bonus` slot), all via ledger.
+    Progress windowed to today / since-Monday from opens/ratings/favorites;
+    daily stays completable pre-SDK (launch/breadth/meta based).
+  - `GET /quests` → {quests, weekly, rerollsLeft}; `POST /quests/reroll`.
+  - Home UI: daily card + ♻ reroll button, new purple weekly card.
+  - Verified: bucket spread, free→paid reroll (−50), claim (+reward),
+    completion bonus fires exactly once. UI renders, no console errors.
+  - Co-op friend quests deferred (needs pairing).
+
 ## Next (bible build order §17.2)
 
-- **Phase 2 — Quests 2.0**: weighted daily pool, reroll, weeklies, co-op;
-  `quest_assignments`. (Streaks already shipped.)
 - **Phase 3 — Cosmetics retail**: rotating daily shop, new `Unlock` kinds,
   collections/set bonuses, recolor sink; apply remaining §4 balance.
 - **Phase 4 — Season Pass**; **5 — Events/Tokens**; **6 — Ranked/Glicko-2**;
