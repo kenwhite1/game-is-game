@@ -21,7 +21,7 @@ import { rankedOf, boards } from './ranked'
 import { marketView, listItem, buyListing, cancelListing } from './market'
 import { clanView, clanBoard, createClan, joinClan, leaveClan, claimClanWeekly } from './clans'
 import { collectionsOf, claimCollection } from './collections'
-import { PASS_PREMIUM_STARS } from '../../shared/wallet'
+import { PASS_PREMIUM_STARS, PASS_PLUS_STARS } from '../../shared/wallet'
 import { packById } from '../../shared/wallet'
 import { packsBought } from './wallet'
 import { bot } from './bot'
@@ -357,6 +357,25 @@ api.post('/season/premium', async c => {
     return c.json({ link })
   } catch (e) {
     console.error('pass invoice failed', e)
+    return c.json({ error: 'invoice_failed' }, 502)
+  }
+})
+
+// «Пропуск+» (§11.1): премиум + сразу +10 тиров.
+api.post('/season/premium-plus', async c => {
+  if (!bot) return c.json({ error: 'unavailable' }, 503)
+  try {
+    const link = await bot.api.createInvoiceLink(
+      'Пропуск+',
+      'Премиум-трек + сразу +10 тиров текущего сезона',
+      JSON.stringify({ kind: 'pass_plus', uid: c.get('uid') }),
+      '',
+      'XTR',
+      [{ label: 'Пропуск+', amount: PASS_PLUS_STARS }],
+    )
+    return c.json({ link })
+  } catch (e) {
+    console.error('pass+ invoice failed', e)
     return c.json({ error: 'invoice_failed' }, 502)
   }
 })

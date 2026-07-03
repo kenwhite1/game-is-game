@@ -90,6 +90,15 @@ export function progressMatch(uid: number, gameId: string, r: MatchReport): void
       bumpProgress(uid, `winsvsh_game_${gameId}`, 1)
     }
   }
+  // «Дежавю» (§7A⑲): 3 поражения подряд в одной игре, затем победа.
+  const lossKey = `lstreak_game_${gameId}`
+  if (r.result === 'loss') bumpProgress(uid, lossKey, 1)
+  else if (r.result === 'win') {
+    if (getProgress(uid, lossKey) >= 3) bumpProgress(uid, 'dejavu', 1)
+    if (getProgress(uid, lossKey) > 0) setProgress(uid, lossKey, 0)
+  }
+  // «Комбо-брейкер» (§7A⑲): игра рапортует, что прервала серию 5+ побед соперника.
+  if (r.result === 'win' && r.stats?.combobreaker === true) bumpProgress(uid, 'combobreaker', 1)
   // Свободные игровые метрики (§7B): булев true (не в проигрыше) = «фирменный»
   // момент → f_<id>_<flag>; число = накопление → s_<id>_<num>. Игре достаточно
   // прислать нужный ключ — код на хабе для новой игры не нужен.

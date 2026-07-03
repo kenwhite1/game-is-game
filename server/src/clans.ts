@@ -59,7 +59,13 @@ export function createClan(uid: number, name: string, tag: string): ClanResult {
   } catch {
     return { ok: false, reason: 'tag_taken' }
   }
+  grantClanTitle(uid) // §15.3 клан-эксклюзив
   return { ok: true, view: clanView(uid)! }
+}
+
+/** Клан-эксклюзивная косметика (§15.3): титул «В команде» при вступлении. */
+function grantClanTitle(uid: number): void {
+  db.prepare('INSERT OR IGNORE INTO cosmetics_owned (user_id, item_id) VALUES (?,?)').run(uid, 'title_clan')
 }
 
 export function joinClan(uid: number, clanId: number): ClanResult {
@@ -68,6 +74,7 @@ export function joinClan(uid: number, clanId: number): ClanResult {
   if (!clan) return { ok: false, reason: 'not_found' }
   if (memberIds(clanId).length >= CLAN_MAX_MEMBERS) return { ok: false, reason: 'full' }
   db.prepare("INSERT OR IGNORE INTO clan_members (clan_id, user_id, role) VALUES (?,?,'member')").run(clanId, uid)
+  grantClanTitle(uid) // §15.3 клан-эксклюзив
   return { ok: true, view: clanView(uid)! }
 }
 

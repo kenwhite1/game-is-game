@@ -6,7 +6,7 @@ import { REFERRER_REWARD, REFERRED_BONUS, REF_PREFIX, inviteLink } from '../../s
 import { getOrCreateUser } from './profiles'
 import { followerIds } from './catalog'
 import { recordPayment, paymentByCharge, markRefunded, packById } from './wallet'
-import { unlockPremium } from './season'
+import { unlockPremium, unlockPremiumPlus } from './season'
 import { economyReportText } from './econ'
 
 export const bot = BOT_TOKEN ? new Bot(BOT_TOKEN) : null
@@ -185,7 +185,7 @@ if (bot) {
     let ok = false
     try {
       const p = JSON.parse(payload)
-      ok = p.kind === 'pass' ? true : !!packById(p.packId)
+      ok = p.kind === 'pass' || p.kind === 'pass_plus' ? true : !!packById(p.packId)
     } catch { /* чужой или битый payload — отклоняем */ }
     await ctx.answerPreCheckoutQuery(ok, ok ? undefined : 'Этот товар больше недоступен. Попробуй ещё раз из приложения.')
   })
@@ -202,6 +202,15 @@ if (bot) {
       await ctx.reply(
         (unlocked ? 'Премиум-пропуск активирован ✨ ' : 'Премиум-пропуск уже активен. ') +
           `Награды премиум-трека теперь твои.\n\nКвитанция: ${sp.telegram_payment_charge_id}`,
+        { reply_markup: appKeyboard() },
+      )
+      return
+    }
+    // «Пропуск+»: премиум + сразу +10 тиров.
+    if (parsed.kind === 'pass_plus') {
+      unlockPremiumPlus(ctx.from.id)
+      await ctx.reply(
+        `Пропуск+ активирован ✨ Премиум-трек и сразу +10 тиров твои!\n\nКвитанция: ${sp.telegram_payment_charge_id}`,
         { reply_markup: appKeyboard() },
       )
       return

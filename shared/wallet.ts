@@ -22,6 +22,10 @@ export const PACKS: CoinPack[] = [
 ]
 
 export const PASS_PREMIUM_STARS = 350
+/** «Пропуск+» (§11.1): премиум + сразу +10 тиров. */
+export const PASS_PLUS_STARS = 700
+/** Сколько тиров даёт «Пропуск+» мгновенно. */
+export const PASS_PLUS_TIERS = 10
 
 export function packById(id: string): CoinPack | undefined {
   return PACKS.find(p => p.id === id)

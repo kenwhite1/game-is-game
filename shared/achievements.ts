@@ -123,6 +123,26 @@ const CROSS: Achievement[] = [
     title: 'Сова', desc: 'Сыграй ночью, с 03:00 до 05:00 МСК',
     rungs: [r('bronze', 1, 'Сова')],
   },
+  {
+    id: 'combo_breaker', category: 'skill', stat: 'combobreaker', hidden: true,
+    title: 'Комбо-брейкер', desc: 'Прерви серию из 5+ побед другого игрока',
+    rungs: [r('silver', 1, 'Комбо-брейкер')],
+  },
+  {
+    id: 'underdog', category: 'skill', stat: 'underdog', hidden: true,
+    title: 'Из грязи в князи', desc: 'Выиграй ранговый матч, будучи в низшем дивизионе',
+    rungs: [r('bronze', 1, 'Из грязи в князи')],
+  },
+  {
+    id: 'season_pioneer', category: 'dedication', stat: 'season_pioneer', hidden: true,
+    title: 'Первопроходец сезона', desc: 'Одним из первых заверши сезонный пропуск',
+    rungs: [r('gold', 1, 'Первопроходец')],
+  },
+  {
+    id: 'dejavu', category: 'dedication', stat: 'dejavu', hidden: true,
+    title: 'Дежавю', desc: 'Проиграй одной игре 3 раза подряд — и всё-таки победи',
+    rungs: [r('bronze', 1, 'Дежавю')],
+  },
   // Дневные ладдеры (§7A ⑤⑥⑦): «в один день» и «разные игры по дням».
   {
     id: 'variety_marathon', category: 'dedication', stat: 'variety_best',

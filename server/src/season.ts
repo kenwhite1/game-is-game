@@ -1,6 +1,8 @@
 import { db } from './db'
 import { credit } from './ledger'
+import { bumpProgress } from './events'
 import { FREEZE_CAP } from '../../shared/economy'
+import { PASS_PLUS_TIERS } from '../../shared/wallet'
 import { cosmeticById } from '../../shared/cosmetics'
 import {
   currentSeason, tierOf, TRACK, TIERS, XP_PER_TIER, FULL_PASS_XP,
@@ -24,12 +26,21 @@ function claimedSet(r: Row): Set<string> {
 }
 
 /** Начислить Season XP в текущий сезон игрока. */
+/** Сколько первых финишеров пропуска получают «Первопроходца сезона» (§7A⑲). */
+const SEASON_PIONEER_LIMIT = 100
+
 export function grantSeasonXp(uid: number, amount: number): void {
   if (amount <= 0) return
   const s = currentSeason(Date.now())
   ensureRow.run(uid, s.id)
+  const before = (db.prepare('SELECT xp FROM season_progress WHERE user_id=? AND season_id=?').get(uid, s.id) as { xp: number } | undefined)?.xp ?? 0
   db.prepare('UPDATE season_progress SET xp = MIN(?, xp + ?) WHERE user_id=? AND season_id=?')
     .run(FULL_PASS_XP, amount, uid, s.id)
+  // Первопроходец сезона: впервые добил пропуск до конца и оказался в числе первых.
+  if (before < FULL_PASS_XP && before + amount >= FULL_PASS_XP) {
+    const finishers = (db.prepare('SELECT COUNT(*) AS n FROM season_progress WHERE season_id=? AND xp>=?').get(s.id, FULL_PASS_XP) as { n: number }).n
+    if (finishers <= SEASON_PIONEER_LIMIT) bumpProgress(uid, 'season_pioneer', 1)
+  }
 }
 
 function payReward(uid: number, reward: Reward, ref: string): void {
@@ -80,6 +91,12 @@ export function unlockPremium(uid: number): boolean {
   if (r.premium === 1) return false
   db.prepare('UPDATE season_progress SET premium=1 WHERE user_id=? AND season_id=?').run(uid, s.id)
   return true
+}
+
+/** «Пропуск+» (§11.1): открыть премиум И сразу выдать +10 тиров (Season XP). */
+export function unlockPremiumPlus(uid: number): void {
+  unlockPremium(uid)
+  grantSeasonXp(uid, PASS_PLUS_TIERS * XP_PER_TIER)
 }
 
 export function seasonView(uid: number): SeasonView {

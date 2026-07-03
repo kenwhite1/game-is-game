@@ -119,8 +119,8 @@ export const FESTIVALS: Festival[] = [
     id: 'maslenitsa27',
     name: 'Масленица',
     emoji: '🥞',
-    startMs: Date.parse('2027-02-16T00:00:00Z'),
-    endMs: Date.parse('2027-02-23T00:00:00Z'),
+    startMs: Date.parse('2027-02-08T00:00:00Z'),
+    endMs: Date.parse('2027-02-15T00:00:00Z'),
     quests: [
       { id: 'ms_breadth5', title: 'Открой 5 разных игр', emoji: '🥞', target: 5, tokens: 20, stat: 'distinct_since' },
       { id: 'ms_play10', title: 'Сыграй 10 раз', emoji: '☀️', target: 10, tokens: 15, stat: 'opens_since' },
@@ -131,6 +131,40 @@ export const FESTIVALS: Festival[] = [
     ],
     community: { title: 'Сообщество: 120 000 партий на Масленицу', metric: 'opens', target: 120_000, rewardItemId: 'title_maslenitsa_community' },
     spotlight: { category: 'word', tokens: 3 },
+  },
+  {
+    id: 'defender27',
+    name: '23 Февраля',
+    emoji: '🎖️',
+    startMs: Date.parse('2027-02-21T00:00:00Z'),
+    endMs: Date.parse('2027-02-25T00:00:00Z'),
+    quests: [
+      { id: 'df_breadth5', title: 'Открой 5 разных игр', emoji: '🪖', target: 5, tokens: 20, stat: 'distinct_since' },
+      { id: 'df_play9', title: 'Сыграй 9 раз', emoji: '⭐', target: 9, tokens: 20, stat: 'opens_since' },
+    ],
+    shop: [
+      { itemId: 'title_defender', tokens: 20 },
+      { itemId: 'frame_defender', tokens: 60 },
+    ],
+    community: { title: 'Сообщество: 120 000 партий к 23 февраля', metric: 'opens', target: 120_000, rewardItemId: 'title_defender_community' },
+    spotlight: { category: 'strategy', tokens: 4 },
+  },
+  {
+    id: 'women27',
+    name: '8 Марта',
+    emoji: '🌷',
+    startMs: Date.parse('2027-03-06T00:00:00Z'),
+    endMs: Date.parse('2027-03-10T00:00:00Z'),
+    quests: [
+      { id: 'wm_breadth5', title: 'Открой 5 разных игр', emoji: '🌷', target: 5, tokens: 20, stat: 'distinct_since' },
+      { id: 'wm_play9', title: 'Сыграй 9 раз', emoji: '💐', target: 9, tokens: 20, stat: 'opens_since' },
+    ],
+    shop: [
+      { itemId: 'title_women', tokens: 20 },
+      { itemId: 'frame_women', tokens: 60 },
+    ],
+    community: { title: 'Сообщество: 120 000 партий к 8 марта', metric: 'opens', target: 120_000, rewardItemId: 'title_women_community' },
+    spotlight: { category: 'party', tokens: 4 },
   },
 ]
 

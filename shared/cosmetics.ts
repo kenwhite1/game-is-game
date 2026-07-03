@@ -174,6 +174,8 @@ export const FRAME_ITEMS: FrameItem[] = [
   F('frame_ny', 'Морозко', 'epic', 'События', { kind: 'event', event: 'newyear27' }, 'linear-gradient(135deg,#a8e6ff,#5b8cff,#ffffff)', 'rgba(120,180,255,.7)', 'shimmer'),
   F('frame_victory', 'Знамя', 'epic', 'События', { kind: 'event', event: 'victory27' }, 'linear-gradient(135deg,#c0392b,#f2a93b)', 'rgba(240,169,59,.7)', 'shimmer'),
   F('frame_maslenitsa', 'Блины', 'epic', 'События', { kind: 'event', event: 'maslenitsa27' }, 'linear-gradient(135deg,#ffcf6b,#ff8a3c)', 'rgba(255,138,60,.7)', 'shimmer'),
+  F('frame_defender', 'Гвардия', 'epic', 'События', { kind: 'event', event: 'defender27' }, 'linear-gradient(135deg,#3a5a40,#8f9779)', 'rgba(143,151,121,.7)', 'shimmer'),
+  F('frame_women', 'Мимоза', 'epic', 'События', { kind: 'event', event: 'women27' }, 'linear-gradient(135deg,#ffd166,#ff8fb1)', 'rgba(255,143,177,.7)', 'shimmer'),
 ]
 
 // ─── Шляпы ─────────────────────────────────────────────────────────────
@@ -328,6 +330,7 @@ export const TITLE_ITEMS: TitleItem[] = [
   T('title_legend', 'Легенда GG', 'legendary', 'Заслуги', { kind: 'achievement', achId: 'centurion', tierIndex: 3 }),
   T('title_devoted', 'Преданный', 'epic', 'Заслуги', { kind: 'streak', days: 30 }),
   T('title_coop', 'Товарищ', 'epic', 'Заслуги', { kind: 'event', event: 'coop' }), // кооп-квест (§8.3), выдаётся грантом
+  T('title_clan', 'В команде', 'rare', 'Заслуги', { kind: 'event', event: 'clan' }), // клан-эксклюзив (§15.3), выдаётся при вступлении
   // Событийные (§12): только из магазина события за 🎟, либо общая цель.
   T('title_summer', 'Летний', 'rare', 'События', { kind: 'event', event: 'summer26' }),
   T('title_community', 'Соучастник', 'epic', 'События', { kind: 'event', event: 'summer26' }),
@@ -339,6 +342,10 @@ export const TITLE_ITEMS: TitleItem[] = [
   T('title_victory_community', 'Помним', 'epic', 'События', { kind: 'event', event: 'victory27' }),
   T('title_maslenitsa', 'Блинный', 'rare', 'События', { kind: 'event', event: 'maslenitsa27' }),
   T('title_maslenitsa_community', 'Широкая душа', 'epic', 'События', { kind: 'event', event: 'maslenitsa27' }),
+  T('title_defender', 'Защитник', 'rare', 'События', { kind: 'event', event: 'defender27' }),
+  T('title_defender_community', 'На страже хаба', 'epic', 'События', { kind: 'event', event: 'defender27' }),
+  T('title_women', 'Весенний', 'rare', 'События', { kind: 'event', event: 'women27' }),
+  T('title_women_community', 'Душа весны', 'epic', 'События', { kind: 'event', event: 'women27' }),
 ]
 
 // ─── §10.7 рост каталога: партия дешёвых предметов (цвета/титулы/уборы) ──────

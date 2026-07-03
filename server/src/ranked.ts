@@ -4,9 +4,10 @@ import { currentSeason } from '../../shared/season'
 import {
   RANKED_GAMES, START_RATING, START_RD, kFactor, expectedScore,
   glicko2Update, softResetSeed, decayedRating,
-  divisionLabel, ladderContribution,
+  divisionLabel, divisionOf, ladderContribution,
   type RankedView, type RankedGameView, type Boards, type BoardRow,
 } from '../../shared/ranked'
+import { bumpProgress } from './events'
 
 // Рейтинговый движок: Elo-против-поля per-game/сезон + агрегат GG-лиги + доски.
 
@@ -43,6 +44,9 @@ export function updateRating(uid: number, gameId: string, result: string, humanP
       cur = { ...cur, rating: seed.rating, rd: seed.rd, vol: seed.vol }
     }
   }
+
+  // «Из грязи в князи» (§7A⑲): победа в низшем дивизионе (Бронза) — до обновления.
+  if (score === 1 && divisionOf(cur.rating).index === 0) bumpProgress(uid, 'underdog', 1)
 
   const oppIds = (opponents ?? []).filter(id => id !== uid)
   let next: number, rd = cur.rd, vol = cur.vol
