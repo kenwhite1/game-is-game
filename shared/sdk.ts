@@ -59,3 +59,28 @@ export async function ggReport(
     return { ok: false, rewarded: false, coins: 0, error: 'network' }
   }
 }
+
+// ─── Доставка токена запуска через startapp (§2.3) ─────────────────────────
+// Токен запуска — это JWT, а в нём есть точки; Telegram `startapp` разрешает
+// только [A-Za-z0-9_-] (≤512 симв.), поэтому точки туда нельзя. Заворачиваем
+// токен в base64url БЕЗ паддинга — так он безопасно едет в ссылке на игру.
+// Хаб: `?startapp=${encodeLaunchParam(token)}`. Игра: раскодирует start_param.
+// Обе функции чистые (btoa/atob есть и в Node ≥18, и в браузере), токен — ASCII.
+
+/** Хаб → ссылка на игру: завернуть токен запуска для startapp. */
+export function encodeLaunchParam(launchToken: string): string {
+  return btoa(launchToken).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+/** Игра ← start_param: развернуть токен запуска (или null, если это не он). */
+export function decodeLaunchParam(startParam: string | undefined): string | null {
+  if (!startParam) return null
+  try {
+    const token = atob(startParam.replace(/-/g, '+').replace(/_/g, '/'))
+    // Токен запуска — это JWT (три сегмента через точку). Иначе это обычный
+    // deep-link (напр. 'gg' / реф-код) — не токен.
+    return token.split('.').length === 3 ? token : null
+  } catch {
+    return null
+  }
+}

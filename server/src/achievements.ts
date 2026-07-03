@@ -4,9 +4,37 @@ import { progressMap, setProgress, getProgress, writeFeed } from './events'
 import { invitedCount } from './referrals'
 import { CATEGORIES } from '../../shared/games'
 import {
-  ACHIEVEMENTS, META_STATS, TIER_META, reachedIndex, pointsUpTo, achievementById,
+  ACHIEVEMENTS, META_STATS, TIER_META, reachedIndex, pointsUpTo, achievementById, isMasterStat,
   ACH_CATEGORY_RU, type Achievement, type Tier, type AchView, type AchievementsPayload,
 } from '../../shared/achievements'
+
+// Достижения уровня игры, сгруппированные по игре (для «Мастеров»), и список
+// самих «Мастеров» — считаются один раз при загрузке модуля.
+const PER_GAME_MEMBERS = new Map<string, Achievement[]>()
+const MASTER_LIST: Achievement[] = []
+for (const a of ACHIEVEMENTS) {
+  if (!a.gameId) continue
+  if (isMasterStat(a.stat)) MASTER_LIST.push(a)
+  else {
+    const list = PER_GAME_MEMBERS.get(a.gameId) ?? []
+    list.push(a)
+    PER_GAME_MEMBERS.set(a.gameId, list)
+  }
+}
+
+/** master_<id> = 1, если все прочие достижения игры взяты на максимум. */
+function computeMasterStats(snap: Record<string, number>, reached: Map<string, number>): void {
+  for (const [gid, members] of PER_GAME_MEMBERS) {
+    const all = members.every(m => (reached.has(m.id) ? (reached.get(m.id) as number) : -1) >= m.rungs.length - 1)
+    snap[`master_${gid}`] = all ? 1 : 0
+  }
+}
+/** Сколько «Мастеров» уже открыто (для «Полимата»). */
+function countMastered(reached: Map<string, number>): number {
+  let n = 0
+  for (const a of MASTER_LIST) if ((reached.has(a.id) ? (reached.get(a.id) as number) : -1) >= 0) n++
+  return n
+}
 
 // Движок достижений: собирает снимок прогресса, открывает взятые «лесенки»
 // (идемпотентно), платит монеты за каждый новый тир через ledger и считает
@@ -27,6 +55,17 @@ function buildSnapshot(uid: number): Record<string, number> {
   snap.friends = scalar('SELECT COUNT(*) AS n FROM friendships WHERE user_id=?', uid)
   snap.referrals = invitedCount(uid)
   snap.streak_best = scalar('SELECT streak_best AS n FROM users WHERE id=?', uid)
+  // Разные сыгранные режимы по каждой игре (для «Знатока режимов»): pm_<gid>_<mode>.
+  const modes = new Map<string, Set<string>>()
+  for (const key in snap) {
+    if (snap[key] <= 0) continue
+    const m = /^pm_(.+)_(solo|multi|friends)$/.exec(key)
+    if (!m) continue
+    let set = modes.get(m[1])
+    if (!set) { set = new Set(); modes.set(m[1], set) }
+    set.add(m[2])
+  }
+  for (const [gid, set] of modes) snap[`modes_game_${gid}`] = set.size
   return snap
 }
 
@@ -69,13 +108,17 @@ export function syncAchievements(uid: number): { newly: UnlockedRung[]; score: n
     reached.set(a.id, idx)
   }
 
-  // Проход 1: обычные достижения.
-  for (const a of ACHIEVEMENTS) if (!META_STATS.has(a.stat)) evalOne(a)
-  // Мета-величины зависят от результата прохода 1.
+  // Проход 1: обычные достижения (в т.ч. уровня игры), кроме «Мастеров»/мета.
+  for (const a of ACHIEVEMENTS) if (!META_STATS.has(a.stat) && !isMasterStat(a.stat)) evalOne(a)
+  // Проход 1.5: «Мастера» игр — зависят от того, взяты ли все достижения игры.
+  computeMasterStats(snap, reached)
+  for (const a of ACHIEVEMENTS) if (isMasterStat(a.stat)) evalOne(a)
+  // Мета-величины зависят от результата предыдущих проходов (вкл. «Мастеров»).
   const s1 = scoreAndCount(reached)
   snap.gg_score = s1.score
   snap.achievements_unlocked = s1.count
-  // Проход 2: мета-достижения (могут добавить очков).
+  snap.games_mastered = countMastered(reached)
+  // Проход 2: мета-достижения (GG Score, трофеи, Полимат) — могут добавить очков.
   for (const a of ACHIEVEMENTS) if (META_STATS.has(a.stat)) evalOne(a)
 
   const final = scoreAndCount(reached)
@@ -94,6 +137,9 @@ export function achievementsView(uid: number): AchievementsPayload {
   const s = scoreAndCount(reached)
   snap.gg_score = s.score
   snap.achievements_unlocked = s.count
+  // Производные величины для отображения карточек «Мастер»/«Полимат».
+  computeMasterStats(snap, reached)
+  snap.games_mastered = countMastered(reached)
 
   const totalUsers = Math.max(1, (db.prepare('SELECT COUNT(*) AS n FROM users').get() as { n: number }).n)
   const ownerCounts = new Map<string, number>(
@@ -106,6 +152,7 @@ export function achievementsView(uid: number): AchievementsPayload {
     title: a.title,
     desc: a.desc,
     category: ACH_CATEGORY_RU[a.category],
+    gameId: a.gameId,
     hidden: !!a.hidden,
     tierReached: reached.has(a.id) ? (reached.get(a.id) as number) : -1,
     value: snap[a.stat] ?? 0,

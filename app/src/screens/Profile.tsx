@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { useStore } from '../store'
 import { Avatar } from '../art/Avatar'
 import { EditIcon, CopyIcon, SettingsIcon } from '../art/icons'
@@ -151,16 +151,46 @@ function AchievementCard({ a }: { a: AchView }) {
   )
 }
 
+/** Взятые и близкие к цели — вперёд; затем по прогрессу. */
+function byProgress(x: AchView, y: AchView): number {
+  if ((y.tierReached >= 0 ? 1 : 0) !== (x.tierReached >= 0 ? 1 : 0)) return y.tierReached - x.tierReached
+  const px = x.value / (x.rungs[Math.min(x.tierReached + 1, x.rungs.length - 1)].target || 1)
+  const py = y.value / (y.rungs[Math.min(y.tierReached + 1, y.rungs.length - 1)].target || 1)
+  return py - px
+}
+
 function Achievements() {
   const ach = useStore(s => s.achievements)
+  const catalog = useStore(s => s.catalog)
+  const [open, setOpen] = useState<Set<string>>(new Set())
   if (!ach || ach.items.length === 0) return null
-  // Взятые и близкие к цели — вперёд; затем по прогрессу.
-  const items = [...ach.items].sort((x, y) => {
-    if ((y.tierReached >= 0 ? 1 : 0) !== (x.tierReached >= 0 ? 1 : 0)) return (y.tierReached) - (x.tierReached)
-    const px = x.value / (x.rungs[Math.min(x.tierReached + 1, x.rungs.length - 1)].target || 1)
-    const py = y.value / (y.rungs[Math.min(y.tierReached + 1, y.rungs.length - 1)].target || 1)
-    return py - px
+
+  // Кросс-игровые (без gameId) — отдельной сеткой; уровня игры — по играм.
+  const cross = ach.items.filter(a => !a.gameId).sort(byProgress)
+  const byGame = new Map<string, AchView[]>()
+  for (const a of ach.items) {
+    if (!a.gameId) continue
+    const list = byGame.get(a.gameId) ?? []
+    list.push(a)
+    byGame.set(a.gameId, list)
+  }
+  const cardOf = new Map(catalog.map(c => [c.id, c]))
+  // Порядок игр: сперва с прогрессом, затем по каталогу.
+  const games = [...byGame.keys()]
+    .map((id, i) => {
+      const items = byGame.get(id)!
+      const earned = items.reduce((n, a) => n + Math.max(0, a.tierReached + 1), 0)
+      const total = items.reduce((n, a) => n + a.rungs.length, 0)
+      const mastered = items.some(a => a.id === `${id}_master` && a.tierReached >= 0)
+      return { id, items, earned, total, mastered, i }
+    })
+    .sort((a, b) => (b.earned - a.earned) || (a.i - b.i))
+  const toggle = (id: string) => setOpen(prev => {
+    const next = new Set(prev)
+    next.has(id) ? next.delete(id) : next.add(id)
+    return next
   })
+
   return (
     <>
       <div className="sec">
@@ -168,7 +198,31 @@ function Achievements() {
         <span className="sub">GG {ach.score.toLocaleString('ru')} · {ach.unlocked}/{ach.total}</span>
       </div>
       <div className="ach-grid">
-        {items.map(a => <AchievementCard key={a.id} a={a} />)}
+        {cross.map(a => <AchievementCard key={a.id} a={a} />)}
+      </div>
+
+      <div className="sec"><h2>По играм</h2><span className="sub">{games.length} игр</span></div>
+      <div className="ach-games">
+        {games.map(g => {
+          const card = cardOf.get(g.id)
+          const isOpen = open.has(g.id)
+          return (
+            <div className="ach-game" key={g.id}>
+              <button className={`ach-game-h ${g.mastered ? 'mst' : ''}`} onClick={() => toggle(g.id)} style={gameStyle(card)}>
+                <span className="em">{card?.emoji ?? '🎮'}</span>
+                <span className="nm">{card?.name ?? g.id}</span>
+                {g.mastered && <span className="crown">💎</span>}
+                <span className="cnt">{g.earned}/{g.total}</span>
+                <span className="chev">{isOpen ? '▾' : '▸'}</span>
+              </button>
+              {isOpen && (
+                <div className="ach-grid" style={{ marginTop: 10 }}>
+                  {[...g.items].sort(byProgress).map(a => <AchievementCard key={a.id} a={a} />)}
+                </div>
+              )}
+            </div>
+          )
+        })}
       </div>
     </>
   )

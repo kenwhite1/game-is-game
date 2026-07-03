@@ -357,6 +357,20 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 .ach-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--blue), var(--blue-deep)); }
 .ach-n { font-size: 10px; font-weight: 900; color: var(--ink-soft); margin-top: 3px; }
 
+/* -- per-game achievement groups ----------------------------- */
+.ach-games { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.ach-game { width: 100%; }
+.ach-game-h { width: 100%; display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer;
+  border: none; border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow-lip), inset 0 0 0 1.5px var(--line);
+  border-left: 4px solid var(--a); transition: transform .08s ease; }
+.ach-game-h:active { transform: scale(.99); }
+.ach-game-h.mst { box-shadow: var(--shadow-lip), inset 0 0 0 1.5px var(--a); }
+.ach-game-h .em { font-size: 22px; line-height: 1; flex-shrink: 0; }
+.ach-game-h .nm { font-size: 14px; font-weight: 900; color: var(--brown-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ach-game-h .crown { font-size: 13px; flex-shrink: 0; }
+.ach-game-h .cnt { margin-left: auto; font-size: 12px; font-weight: 900; color: var(--ink-soft); flex-shrink: 0; }
+.ach-game-h .chev { font-size: 12px; font-weight: 900; color: var(--ink-soft); flex-shrink: 0; width: 12px; text-align: center; }
+
 /* -- avatar picker grid -------------------------------------- */
 .av-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 .av-pick { cursor: pointer; border: none; background: var(--card-2); border-radius: 16px; padding: 10px 0; display: grid; place-items: center;

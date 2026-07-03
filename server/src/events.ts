@@ -49,9 +49,24 @@ export function writeFeed(uid: number, kind: 'achievement' | 'streak' | 'level',
   feedStmt.run(uid, kind, text)
 }
 
-/** Обновить свёрнутые счётчики по результату матча (пожизненные тоталы). */
+/** Санитайзер ключа игровой метрики из report.stats: строчные [a-z0-9_], ≤24 симв.,
+ *  с буквы. Ограничивает поверхность (игра не может насорить произвольными строками). */
+function statKey(raw: string): string | null {
+  const k = raw.toLowerCase().replace(/[^a-z0-9_]/g, '')
+  return /^[a-z][a-z0-9_]{0,23}$/.test(k) ? k : null
+}
+
+/** Обновить свёрнутые счётчики по результату матча (пожизненные тоталы). §2.5, §7B.
+ *  Ключи уровня игры наполняются здесь; достижения (achievements.ts) их читают. */
 export function progressMatch(uid: number, gameId: string, r: MatchReport): void {
   bumpProgress(uid, 'matches_played', 1)
+  bumpProgress(uid, `matches_game_${gameId}`, 1)
+  // Режим (для «Знатока режимов»): раздельные счётчики, из них считается distinct.
+  bumpProgress(uid, `pm_${gameId}_${r.mode ?? 'solo'}`, 1)
+  // «Успех» = победа ИЛИ финиш (раннеры/пасьянсы рапортуют finish) — для #1/#3/#10.
+  const success = r.result === 'win' || r.result === 'finish'
+  if (r.result === 'finish') bumpProgress(uid, `finishes_game_${gameId}`, 1)
+  if (success) bumpProgress(uid, `successes_game_${gameId}`, 1)
   if (r.result === 'win') {
     // distinct_games_won растёт только при ПЕРВОЙ в жизни победе в этой игре.
     const firstEverWinHere = getProgress(uid, `wins_game_${gameId}`) === 0
@@ -60,6 +75,25 @@ export function progressMatch(uid: number, gameId: string, r: MatchReport): void
     bumpProgress(uid, `wins_game_${gameId}`, 1)
     const cat = GAME_CAT.get(gameId)
     if (cat) bumpProgress(uid, `wins_cat_${cat}`, 1)
-    if (isVsHumans(r.humanPlayers)) bumpProgress(uid, 'humans_beaten', Math.max(1, (r.humanPlayers ?? 2) - 1))
+    if (isVsHumans(r.humanPlayers)) {
+      bumpProgress(uid, 'humans_beaten', Math.max(1, (r.humanPlayers ?? 2) - 1))
+      bumpProgress(uid, `winsvsh_game_${gameId}`, 1)
+    }
+  }
+  // Свободные игровые метрики (§7B): булев true (не в проигрыше) = «фирменный»
+  // момент → f_<id>_<flag>; число = накопление → s_<id>_<num>. Игре достаточно
+  // прислать нужный ключ — код на хабе для новой игры не нужен.
+  if (r.stats) {
+    const notLoss = r.result !== 'loss'
+    for (const [rawKey, v] of Object.entries(r.stats)) {
+      const k = statKey(rawKey)
+      if (!k) continue
+      if (typeof v === 'boolean') {
+        if (v && notLoss) bumpProgress(uid, `f_${gameId}_${k}`, 1)
+      } else if (typeof v === 'number' && Number.isFinite(v)) {
+        const n = Math.trunc(v)
+        if (n > 0) bumpProgress(uid, `s_${gameId}_${k}`, n)
+      }
+    }
   }
 }

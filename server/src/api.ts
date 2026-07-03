@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { z } from 'zod'
 import { validateInitData, issueToken, verifyToken, signLaunch, verifyLaunch, DEV_MODE } from './auth'
 import { handleResult } from './sdk'
+import { encodeLaunchParam } from '../../shared/sdk'
 import { achievementsView } from './achievements'
 import { BOT_USERNAME, PRESENCE_KEY, ADMIN_IDS, gameOverrides, type Env } from './env'
 import { economyReport } from './econ'
@@ -30,6 +31,20 @@ const VALID_IDS = new Set(GAMES.map(g => g.id))
 const SLOTS = ['color', 'face', 'frame', 'hat', 'eyewear', 'effect', 'companion', 'banner', 'title'] as const
 const catalog = () => buildCatalog(gameOverrides())
 
+/** Вставить закодированный токен запуска в startapp ссылки на игру (§2.3). */
+function withLaunchParam(link: string, encoded: string): string {
+  return /[?&]startapp=/.test(link)
+    ? link.replace(/([?&]startapp=)[^&]*/, `$1${encoded}`)
+    : `${link}${link.includes('?') ? '&' : '?'}startapp=${encoded}`
+}
+
+/** Каталог для авторизованного игрока: в каждую плитку вшит его токен запуска,
+ *  чтобы игра получила его из startapp и могла честно рапортовать матч (§2.6). */
+async function catalogFor(uid: number) {
+  const base = catalog()
+  return Promise.all(base.map(async g => ({ ...g, link: withLaunchParam(g.link, encodeLaunchParam(await signLaunch(uid, g.id))) })))
+}
+
 api.get('/health', c => c.json({ ok: true }))
 
 // Public catalog, so the menu still renders if a guest opens the URL directly.
@@ -56,7 +71,7 @@ api.post('/auth', async c => {
     profile: getProfile(v.user.id),
     startParam: v.startParam,
     botUsername: BOT_USERNAME,
-    catalog: catalog(),
+    catalog: await catalogFor(v.user.id),
     recent: recentGames(v.user.id),
     favorites: favoritesOf(v.user.id),
     ratings: ratingsOf(v.user.id),
