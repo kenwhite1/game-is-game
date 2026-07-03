@@ -429,7 +429,7 @@ function PlayerBanner({ onOpen }: { onOpen(): void }) {
         <Avatar
           color={profile.color} face={profile.face} frame={profile.frame} hat={profile.hat}
           eyewear={profile.eyewear} effect={profile.effect} companion={profile.companion}
-          seed={profile.id} size={58} ring={false}
+          recolors={profile.recolors} seed={profile.id} size={58} ring={false}
         />
         <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
           <div className="nm2">{profile.username ? `@${profile.username}` : profile.name}</div>

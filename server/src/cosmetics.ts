@@ -1,7 +1,7 @@
 import { db } from './db'
 import type { Wardrobe, CosmeticState } from '../../shared/types'
 import {
-  COSMETICS, cosmeticById, isOwned, unlockLabel, shopPrice, DEFAULT_EQUIP, RARITY_ORDER,
+  COSMETICS, cosmeticById, isOwned, unlockLabel, shopPrice, DEFAULT_EQUIP, RARITY_ORDER, RECOLOR_COST,
   type Slot, type OwnerCtx,
 } from '../../shared/cosmetics'
 import { BADGES } from '../../shared/progression'
@@ -122,6 +122,38 @@ export function grant(uid: number, itemId: string): boolean {
   if (!cosmeticById(itemId)) return false
   db.prepare('INSERT OR IGNORE INTO cosmetics_owned (user_id, item_id) VALUES (?,?)').run(uid, itemId)
   return true
+}
+
+/** Перекраски игрока: itemId → поворот оттенка (для рендера аватара). */
+export function recolorsOf(uid: number): Record<string, number> {
+  const rows = db.prepare('SELECT item_id, hue FROM cosmetic_recolors WHERE user_id=?').all(uid) as { item_id: string; hue: number }[]
+  const out: Record<string, number> = {}
+  for (const r of rows) if (r.hue) out[r.item_id] = r.hue
+  return out
+}
+
+export type RecolorResult = { ok: true } | { ok: false; reason: 'not_found' | 'not_owned' | 'too_poor' }
+
+/** Перекрасить свой предмет (§10.6). hue=0 сбрасывает к оригиналу бесплатно. */
+export function recolor(uid: number, itemId: string, hue: number): RecolorResult {
+  const item = cosmeticById(itemId)
+  if (!item) return { ok: false, reason: 'not_found' }
+  if (!db.prepare('SELECT 1 FROM cosmetics_owned WHERE user_id=? AND item_id=?').get(uid, itemId)) {
+    return { ok: false, reason: 'not_owned' }
+  }
+  const snapped = (((Math.round(hue / 30) * 30) % 360) + 360) % 360 // шаг 30°
+  if (snapped === 0) { // сброс к оригиналу — бесплатно
+    db.prepare('DELETE FROM cosmetic_recolors WHERE user_id=? AND item_id=?').run(uid, itemId)
+    return { ok: true }
+  }
+  const cost = RECOLOR_COST[item.rarity]
+  const out = db.transaction((): RecolorResult => {
+    if (!debit(uid, cost, 'cosmetic', `recolor:${itemId}`)) return { ok: false, reason: 'too_poor' }
+    db.prepare('INSERT INTO cosmetic_recolors (user_id, item_id, hue) VALUES (?,?,?) ON CONFLICT(user_id, item_id) DO UPDATE SET hue=excluded.hue')
+      .run(uid, itemId, snapped)
+    return { ok: true }
+  })()
+  return out
 }
 
 export { DEFAULT_EQUIP }

@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react'
 import { colorOf, faceOf } from '@shared/avatars'
-import { cosmeticById } from '@shared/cosmetics'
+import { cosmeticById, hueFilter } from '@shared/cosmetics'
 import type { FrameItem, EffectItem, Look } from '@shared/cosmetics'
 import { Character } from './Character'
 
@@ -33,6 +33,10 @@ export function Avatar(props: Props) {
   }
   const hex = colorOf(ids.color, seed).hex
   const faceKey = faceOf(ids.face).face
+  // Перекраска надетых предметов (§10.6): поворот оттенка тела и рамки.
+  const recolors = look?.recolors ?? props.recolors
+  const bodyHue = recolors?.[ids.color ?? ''] ?? 0
+  const frameHue = recolors?.[ids.frame ?? ''] ?? 0
 
   const fr = ids.frame && ids.frame !== 'frame_none' ? (cosmeticById(ids.frame) as FrameItem | undefined) : undefined
   const hat = emojiOf(ids.hat)
@@ -41,13 +45,13 @@ export function Avatar(props: Props) {
   const fx = ids.effect && ids.effect !== 'fx_none' ? (cosmeticById(ids.effect) as EffectItem | undefined) : undefined
   const big = size >= 36
 
-  const plate = <span className="av-char"><Character color={hex} face={faceKey} size={size} /></span>
+  const plate = <span className="av-char" style={{ filter: hueFilter(bodyHue) }}><Character color={hex} face={faceKey} size={size} /></span>
 
   const base = fr && fr.slot === 'frame'
     ? (
       <span
         className={`av-frame ${fr.anim ? `fr-${fr.anim}` : ''}`}
-        style={{ background: fr.bg, boxShadow: fr.glow ? `0 0 14px ${fr.glow}` : undefined, ['--av-ring']: hex } as CSSProperties}
+        style={{ background: fr.bg, boxShadow: fr.glow ? `0 0 14px ${fr.glow}` : undefined, ['--av-ring']: hex, filter: hueFilter(frameHue) } as CSSProperties}
       >
         <span className="av av--bare" style={{ width: size, height: size }}>{plate}</span>
       </span>

@@ -103,4 +103,5 @@ export const api = {
   cosmetics: () => req<Wardrobe>('/cosmetics'),
   equip: (slot: Slot, itemId: string) => req<{ profile: Profile; wardrobe: Wardrobe }>('/cosmetics/equip', { slot, itemId }),
   buy: (itemId: string) => req<{ profile: Profile; wardrobe: Wardrobe }>('/cosmetics/buy', { itemId }),
+  recolor: (itemId: string, hue: number) => req<{ profile: Profile; wardrobe: Wardrobe }>('/cosmetics/recolor', { itemId, hue }),
 }

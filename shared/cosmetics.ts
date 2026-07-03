@@ -316,7 +316,7 @@ export const TITLE_ITEMS: TitleItem[] = [
   T('title_tryhard', 'Свитчер', 'epic', 'Стиль', shop('epic')),
   T('title_guru', 'Гуру игр', 'legendary', 'Стиль', { kind: 'level', level: 15 }),
   T('title_speedrunner', 'Спидранер', 'legendary', 'Стиль', { kind: 'level', level: 20 }),
-  T('title_legend', 'Легенда хаба', 'legendary', 'Стиль', { kind: 'level', level: 25 }),
+  T('title_legend_hub', 'Легенда хаба', 'legendary', 'Стиль', { kind: 'level', level: 25 }),
   T('title_immortal', 'Бессмертный', 'legendary', 'Стиль', shop('legendary')),
   T('title_goated', 'ГОАТ', 'mythic', 'Стиль', { kind: 'level', level: 30 }),
   T('title_vip', 'VIP', 'legendary', 'Топ', shop('legendary')),
@@ -341,9 +341,36 @@ export const TITLE_ITEMS: TitleItem[] = [
   T('title_maslenitsa_community', 'Широкая душа', 'epic', 'События', { kind: 'event', event: 'maslenitsa27' }),
 ]
 
+// ─── §10.7 рост каталога: партия дешёвых предметов (цвета/титулы/уборы) ──────
+// К цели ~400 к концу года — контент-долг; здесь заметная партия из «дешёвых»
+// слотов (данные-строки, маржинальная стоимость ≈ 0).
+const EXTRA_COLORS: ColorItem[] = ([
+  ['Индиго', '#4b3fd6', 'rare'], ['Изумруд', '#2ecc71', 'rare'], ['Рубин', '#e0245e', 'rare'],
+  ['Сапфир', '#2f6bd6', 'rare'], ['Аметист', '#9b59b6', 'rare'], ['Янтарь', '#f4a41c', 'rare'],
+  ['Малахит', '#1f9d78', 'epic'], ['Гранат', '#b03060', 'epic'], ['Кобальт', '#3a52d6', 'epic'],
+  ['Фуксия', '#ff3fa4', 'epic'], ['Кармин', '#c81d4e', 'epic'], ['Ультрамарин', '#3f5bef', 'epic'],
+  ['Уголёк', '#3a3f4a', 'rare'], ['Терракота', '#c65d3b', 'rare'], ['Мох', '#6f8f3a', 'rare'],
+  ['Пудра', '#f6d7d0', 'common'], ['Крем-брюле', '#e8c58a', 'common'], ['Незабудка', '#8fb7ff', 'common'],
+] as [string, string, Rarity][]).map(([n, h, r], i) => CL(`c_x${i}`, n, h, r, 'Палитра', shop(r)))
+
+const EXTRA_TITLES: TitleItem[] = ([
+  ['Везунчик', 'common'], ['Хитрец', 'common'], ['Новобранец', 'common'], ['Задира', 'common'],
+  ['Полуночник', 'common'], ['Фартовый', 'rare'], ['Стратег', 'rare'], ['Мастер блефа', 'rare'],
+  ['Комбо-кинг', 'rare'], ['Спидранер', 'rare'], ['Тактик', 'rare'], ['Заводила', 'rare'],
+  ['Легенда двора', 'epic'], ['Чемпион района', 'epic'], ['Гуру', 'epic'], ['Небожитель', 'epic'],
+] as [string, Rarity][]).map(([t, r], i) => T(`title_x${i}`, t, r, 'Слова', shop(r)))
+
+const EXTRA_HATS: HatItem[] = ([
+  ['🎓', 'Выпускник', 'rare'], ['⛑️', 'Каска', 'common'], ['🎀', 'Бантик', 'common'],
+  ['👒', 'Шляпка', 'rare'], ['🪖', 'Пилотка', 'rare'], ['🥷', 'Капюшон', 'rare'],
+  ['🧙', 'Колпак мага', 'epic'], ['👨‍🚀', 'Шлем космонавта', 'epic'], ['🤠', 'Ковбойская', 'rare'],
+  ['🧢', 'Снэпбэк', 'common'], ['🎃', 'Тыква-шлем', 'epic'], ['👑', 'Малая корона', 'epic'],
+] as [string, string, Rarity][]).map(([e, n, r], i) => H(`hat_x${i}`, n, e, r, 'Уборы', shop(r)))
+
 export const COSMETICS: Cosmetic[] = [
   ...COLOR_ITEMS, ...FACE_ITEMS, ...FRAME_ITEMS, ...HAT_ITEMS, ...EYEWEAR_ITEMS,
   ...EFFECT_ITEMS, ...COMPANION_ITEMS, ...BANNER_ITEMS, ...TITLE_ITEMS,
+  ...EXTRA_COLORS, ...EXTRA_TITLES, ...EXTRA_HATS,
 ]
 
 const BY_ID = new Map<string, Cosmetic>(COSMETICS.map(c => [c.id, c]))
@@ -399,6 +426,18 @@ export interface Look {
   eyewear: string
   effect: string
   companion: string
+  /** Перекраска надетых предметов (§10.6): itemId → поворот оттенка (градусы). */
+  recolors?: Record<string, number>
+}
+
+// ─── Перекраска (§10.6) ─────────────────────────────────────────────────────
+/** Стоимость перекраски по редкости (150–400🪙). */
+export const RECOLOR_COST: Record<Rarity, number> = { common: 150, rare: 200, epic: 280, legendary: 350, mythic: 400 }
+/** Доступные повороты оттенка: 12 шагов по 30°. 0 — оригинал. */
+export const RECOLOR_STEPS = 12
+/** CSS-фильтр перекраски для рендера. */
+export function hueFilter(hue: number): string {
+  return hue ? `hue-rotate(${((hue % 360) + 360) % 360}deg)` : 'none'
 }
 
 export const EMPTY_LOOK: Look = {

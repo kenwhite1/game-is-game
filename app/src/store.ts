@@ -104,6 +104,7 @@ interface S {
   claimClanWeekly(): Promise<void>
   loadWardrobe(): Promise<void>
   equip(slot: Slot, itemId: string): Promise<void>
+  recolor(itemId: string, hue: number): Promise<void>
   buy(itemId: string, name: string): Promise<boolean>
   addFriend(code: string): Promise<{ ok: boolean; error?: string; name?: string }>
   removeFriend(id: number): Promise<void>
@@ -707,6 +708,17 @@ export const useStore = create<S>((set, get) => ({
       haptic('warn')
       const reason = (e as { message?: string }).message
       get().showToast(reason === 'locked' ? 'Этот предмет ещё закрыт' : 'Не удалось надеть')
+    }
+  },
+
+  async recolor(itemId, hue) {
+    try {
+      const r = await api.recolor(itemId, hue)
+      set({ profile: r.profile, wardrobe: r.wardrobe, socialLoaded: false, detail: null })
+      haptic('success')
+    } catch (e) {
+      haptic('warn')
+      get().showToast((e as { message?: string }).message === 'too_poor' ? 'Не хватает Game на перекраску' : 'Не удалось перекрасить')
     }
   },
 

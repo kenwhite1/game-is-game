@@ -26,7 +26,7 @@ import { packsBought } from './wallet'
 import { bot } from './bot'
 import { applyReferral } from './referrals'
 import { REF_PREFIX } from '../../shared/referrals'
-import { wardrobeOf, equip, buy } from './cosmetics'
+import { wardrobeOf, equip, buy, recolor } from './cosmetics'
 import { gameMeta, favoritesOf, toggleFavorite, ratingsOf, rate, followsOf, toggleFollow } from './catalog'
 import { buildCatalog, GAMES } from '../../shared/games'
 
@@ -195,6 +195,17 @@ api.post('/cosmetics/buy', async c => {
   if (!parsed.success) return c.json({ error: 'bad_request' }, 400)
   const uid = c.get('uid')
   const r = buy(uid, parsed.data.itemId)
+  if (!r.ok) return c.json({ error: r.reason }, r.reason === 'too_poor' ? 402 : 400)
+  return c.json({ profile: getProfile(uid), wardrobe: wardrobeOf(uid) })
+})
+
+// Перекраска надетого предмета (§10.6): поворот оттенка за 🪙 (hue=0 — сброс).
+const recolorSchema = z.object({ itemId: z.string().min(1).max(64), hue: z.number().int().min(0).max(360) })
+api.post('/cosmetics/recolor', async c => {
+  const parsed = recolorSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'bad_request' }, 400)
+  const uid = c.get('uid')
+  const r = recolor(uid, parsed.data.itemId, parsed.data.hue)
   if (!r.ok) return c.json({ error: r.reason }, r.reason === 'too_poor' ? 402 : 400)
   return c.json({ profile: getProfile(uid), wardrobe: wardrobeOf(uid) })
 })

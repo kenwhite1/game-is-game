@@ -40,6 +40,8 @@ export interface Profile {
   streakPerfect: boolean
   /** Открытое окно ремонта серии (§9.3), если серия недавно порвалась. */
   streakRepair?: { value: number; until: number; plays: number; canPlayFree: boolean; cost: number; playsNeeded: number } | null
+  /** Перекраски надетых предметов (§10.6): itemId → поворот оттенка. */
+  recolors?: Record<string, number>
   /** Сколько раз игрок открывал игры из хаба. */
   opens: number
   /** Накопленный опыт (выводится из opens). */

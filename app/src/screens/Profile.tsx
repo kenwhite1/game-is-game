@@ -53,7 +53,7 @@ export function Profile() {
             <Avatar
               color={profile.color} face={profile.face} frame={profile.frame} hat={profile.hat}
               eyewear={profile.eyewear} effect={profile.effect} companion={profile.companion}
-              seed={profile.id} size={64} ring={false}
+              recolors={profile.recolors} seed={profile.id} size={64} ring={false}
             />
           </button>
           <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>

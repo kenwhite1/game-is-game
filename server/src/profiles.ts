@@ -150,6 +150,10 @@ export function toProfile(u: UserRow): Profile {
     freezes: u.streak_freezes ?? 0,
     streakPerfect: (u.streak_perfect ?? 1) === 1,
     streakRepair: streakRepairInfo(u.id),
+    recolors: Object.fromEntries(
+      (db.prepare('SELECT item_id, hue FROM cosmetic_recolors WHERE user_id=?').all(u.id) as { item_id: string; hue: number }[])
+        .filter(r => r.hue).map(r => [r.item_id, r.hue]),
+    ),
     opens: u.opens,
     xp,
     level: levelInfo(xp).level,
