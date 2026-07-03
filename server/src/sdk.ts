@@ -9,6 +9,7 @@ import { grantSeasonXp } from './season'
 import { SEASON_XP } from '../../shared/season'
 import { grantAccountXp } from './xp'
 import { updateRating } from './ranked'
+import { screenMatch } from './anomaly'
 import { matchReward, MATCH_COIN_CAP, type CoinReason } from '../../shared/economy'
 import type { MatchReport, ReportResponse } from '../../shared/sdk'
 
@@ -70,6 +71,15 @@ export function handleResult(launchToken: string | undefined, rawBody: unknown, 
   if (ins.changes === 0) {
     const p = getProfile(uid)
     return { status: 200, body: { ok: true, rewarded: false, coins: p?.coins ?? 0, error: 'duplicate' } }
+  }
+
+  // Анти-чит (§16.2): скрининг ПЕРЕД начислением. Матч уже записан (аудит), но
+  // при аномалии не приносит наград/прогресса/ранга — тихое удержание, не бан.
+  const verdict = screenMatch(uid, gameId, rep)
+  if (!verdict.rewardable) {
+    logEvent(uid, 'match_held', { gameId, reason: verdict.reason })
+    const p = getProfile(uid)
+    return { status: 200, body: { ok: true, rewarded: false, coins: p?.coins ?? 0, error: verdict.reason } }
   }
 
   // Награды считает хаб; применяем дневной потолок покомпонентно.
