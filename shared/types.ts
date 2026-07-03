@@ -42,6 +42,8 @@ export interface Profile {
   xp: number
   /** Текущий уровень. */
   level: number
+  /** Звезда престижа (§5.4): 0 = ещё не престижил. */
+  prestige: number
   /** Код для добавления в друзья. */
   friendCode: string
   /** Когда присоединился, ISO-строка. */

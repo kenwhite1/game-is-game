@@ -2,14 +2,28 @@
 // клиента и сервера, чтобы шкала уровня и значки считались одинаково везде.
 // Без браузерных или Node-зависимостей: файл должен импортироваться отовсюду.
 
-/** Сколько опыта даёт один запуск игры из хаба. */
+/** Сколько опыта даёт один запуск игры из хаба (историческое, для бэкфилла). */
 export const XP_PER_OPEN = 25
-/** Сколько опыта нужно на один уровень (линейная кривая, легко читается). */
-export const XP_PER_LEVEL = 100
 
 /** Опыт игрока выводится из числа запусков: один источник правды, без рассинхрона. */
 export function xpFromOpens(opens: number): number {
   return Math.max(0, Math.floor(opens)) * XP_PER_OPEN
+}
+
+// ─── Кривая уровней (§5.3) ─────────────────────────────────────────────────
+// Плавно растущая: быстрые ранние уровни для онбординга, «престижные» поздние.
+//   xpToNext(level) = 80 + 20·level   → L1→2 = 100, L2→3 = 120, … L49→50 = 1060.
+//   cumulativeXP(L)  = 10·L² + 70·L − 80 (XP, чтобы ДОСТИЧЬ уровня L; L1 = 0).
+// ≈29k XP до L50, ≈107k до L100 — L100 как марафонский знак отличия.
+
+/** XP, нужный для перехода с `level` на `level+1`. */
+export function xpToNext(level: number): number {
+  return 80 + 20 * Math.max(1, Math.floor(level))
+}
+/** Накопленный XP, чтобы ДОСТИЧЬ уровня `level` (level ≥ 1). cumulativeXP(1) = 0. */
+export function cumulativeXP(level: number): number {
+  const n = Math.max(0, Math.floor(level) - 1)
+  return 80 * n + 10 * n * (n + 1) // Σ_{k=1..n}(80+20k) = 80n + 10n(n+1)
 }
 
 export interface LevelInfo {
@@ -28,10 +42,12 @@ export interface LevelInfo {
 
 export function levelInfo(xp: number): LevelInfo {
   const safe = Math.max(0, Math.floor(xp))
-  const level = 1 + Math.floor(safe / XP_PER_LEVEL)
-  const floor = (level - 1) * XP_PER_LEVEL
-  const ceil = level * XP_PER_LEVEL
-  return { level, floor, ceil, into: safe - floor, span: XP_PER_LEVEL, pct: (safe - floor) / XP_PER_LEVEL }
+  // Инверсия cumulativeXP: cumXP(L) = 10L²+70L−80 ≤ safe. Корень квадратного.
+  const level = Math.max(1, Math.floor((-70 + Math.sqrt(4900 + 40 * (80 + safe))) / 20))
+  const floor = cumulativeXP(level)
+  const ceil = cumulativeXP(level + 1)
+  const span = ceil - floor
+  return { level, floor, ceil, into: safe - floor, span, pct: span > 0 ? (safe - floor) / span : 0 }
 }
 
 // ─── Значки ────────────────────────────────────────────────────────────

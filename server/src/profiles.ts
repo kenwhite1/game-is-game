@@ -12,6 +12,7 @@ import { tickStreak } from './streak'
 import { syncAchievements, achievementsSummary } from './achievements'
 import { grantSeasonXp } from './season'
 import { SEASON_XP } from '../../shared/season'
+import { grantAccountXp } from './xp'
 import { tickCommunity, settleExpired } from './festival'
 
 interface UserRow {
@@ -31,6 +32,8 @@ interface UserRow {
   streak_current: number
   streak_best: number
   streak_freezes: number
+  account_xp: number
+  prestige: number
   friend_code: string | null
   opens: number
   created_at: string
@@ -123,7 +126,9 @@ export function getOrCreateUser(id: number, name: string, username?: string): Us
 }
 
 export function toProfile(u: UserRow): Profile {
-  const xp = xpFromOpens(u.opens)
+  // XP уровня аккаунта развязан от «запусков» (§5): читаем account_xp (бэкфилл
+  // сохранил прежний уровень), а не opens*25.
+  const xp = u.account_xp ?? 0
   return {
     id: u.id,
     name: u.name,
@@ -144,6 +149,7 @@ export function toProfile(u: UserRow): Profile {
     opens: u.opens,
     xp,
     level: levelInfo(xp).level,
+    prestige: u.prestige ?? 0,
     friendCode: u.friend_code ?? '',
     joinedAt: u.created_at,
   }
@@ -234,10 +240,11 @@ export function recordOpen(id: number, gameId: string): Profile {
   if (!openedThisGameToday && distinctToday < LAUNCH_BREADTH_CAP) {
     credit(id, LAUNCH_BREADTH_REWARD, 'launch_breadth', gameId)
     grantSeasonXp(id, SEASON_XP.launchBreadth)
+    grantAccountXp(id, SEASON_XP.launchBreadth)
   }
   // Серия дня: первый заход за день продвигает streak и платит награду/вехи.
   const st = tickStreak(id)
-  if (st.ticked) grantSeasonXp(id, SEASON_XP.streakDay)
+  if (st.ticked) { grantSeasonXp(id, SEASON_XP.streakDay); grantAccountXp(id, SEASON_XP.streakDay) }
   // Достижения широты/коллекции могли продвинуться — синкаем (идемпотентно).
   syncAchievements(id)
   // События: тикаем общую цель и конвертируем токены завершившихся событий.

@@ -74,6 +74,7 @@ interface S {
 
   loadSocial(): Promise<void>
   loadDetail(): Promise<void>
+  prestige(): Promise<void>
   loadAchievements(): Promise<void>
   loadSeason(): Promise<void>
   claimSeasonTier(tier: number, track: 'free' | 'premium'): Promise<void>
@@ -398,6 +399,20 @@ export const useStore = create<S>((set, get) => ({
       const detail = await api.profileDetail()
       set({ detail, profile: detail.profile })
     } catch { /* офлайн */ }
+  },
+
+  async prestige() {
+    try {
+      const r = await api.prestige()
+      set({ profile: r.profile })
+      void get().loadDetail()
+      haptic('success')
+      if (get().soundOn) playSfx('open')
+      get().showToast(`Престиж ${r.profile.prestige} ⭐ Уровень сброшен — вперёд по новой!`)
+    } catch (e) {
+      haptic('warn')
+      get().showToast((e as { message?: string }).message === 'too_low' ? 'Престиж откроется на 100 уровне' : 'Не удалось')
+    }
   },
 
   async loadAchievements() {

@@ -1,6 +1,6 @@
 import { db } from './db'
 import type { Friend, ActivityItem, LeaderRow } from '../../shared/types'
-import { xpFromOpens, levelInfo } from '../../shared/progression'
+import { levelInfo } from '../../shared/progression'
 import { defaultColor } from '../../shared/avatars'
 import { DEFAULT_EQUIP, type Look } from '../../shared/cosmetics'
 import { getProfile } from './profiles'
@@ -67,20 +67,20 @@ export function removeFriend(uid: number, friendId: number): void {
 export function friendsOf(uid: number): Friend[] {
   const rows = db
     .prepare(
-      `SELECT u.id, u.name, ${LOOK_COLS}, u.opens, u.last_seen,
+      `SELECT u.id, u.name, ${LOOK_COLS}, u.account_xp, u.last_seen,
               (SELECT game_id FROM opens o WHERE o.user_id=u.id ORDER BY o.id DESC LIMIT 1) AS last_game
          FROM friendships f
          JOIN users u ON u.id = f.friend_id
         WHERE f.user_id = ?
         ORDER BY u.last_seen DESC NULLS LAST, u.id DESC`,
     )
-    .all(uid) as (LookRow & { id: number; name: string; opens: number; last_seen: string | null; last_game: string | null })[]
+    .all(uid) as (LookRow & { id: number; name: string; account_xp: number; last_seen: string | null; last_game: string | null })[]
   const live = presenceOf(rows.map(r => r.id))
   return rows.map(r => ({
     id: r.id,
     name: r.name,
     look: lookOf(r, r.id),
-    level: levelInfo(xpFromOpens(r.opens)).level,
+    level: levelInfo(r.account_xp).level,
     lastGame: r.last_game && VALID_GAME_IDS.has(r.last_game) ? r.last_game : null,
     lastSeen: r.last_seen,
     playing: live.get(r.id) ?? null,
@@ -141,16 +141,16 @@ export function activityFeed(uid: number, limit = 30): ActivityItem[] {
 export function leaderboard(uid: number, limit = 20): LeaderRow[] {
   const rows = db
     .prepare(
-      `SELECT u.id, u.name, ${LOOK_COLS}, u.opens
+      `SELECT u.id, u.name, ${LOOK_COLS}, u.account_xp
          FROM users u
         WHERE u.id = ?
            OR u.id IN (SELECT friend_id FROM friendships WHERE user_id = ?)
-        ORDER BY u.opens DESC, u.id ASC
+        ORDER BY u.account_xp DESC, u.id ASC
         LIMIT ?`,
     )
-    .all(uid, uid, limit) as (LookRow & { id: number; name: string; opens: number })[]
+    .all(uid, uid, limit) as (LookRow & { id: number; name: string; account_xp: number })[]
   return rows.map(r => {
-    const xp = xpFromOpens(r.opens)
+    const xp = r.account_xp
     return {
       id: r.id,
       name: r.name,

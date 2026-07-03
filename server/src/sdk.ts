@@ -7,6 +7,7 @@ import { getProfile } from './profiles'
 import { syncAchievements } from './achievements'
 import { grantSeasonXp } from './season'
 import { SEASON_XP } from '../../shared/season'
+import { grantAccountXp } from './xp'
 import { updateRating } from './ranked'
 import { matchReward, MATCH_COIN_CAP, type CoinReason } from '../../shared/economy'
 import type { MatchReport, ReportResponse } from '../../shared/sdk'
@@ -82,8 +83,9 @@ export function handleResult(launchToken: string | undefined, rawBody: unknown, 
   pay(reward.won, 'match_won')
   pay(reward.firstWin, 'match_firstwin')
 
-  // Season XP за матч (наполняет пропуск §11), не зависит от дневного кап-а монет.
-  grantSeasonXp(uid, SEASON_XP.matchPlayed + (rep.result === 'win' ? SEASON_XP.matchWon : 0) + (firstWinToday ? SEASON_XP.firstWinOfDay : 0))
+  // Season + Account XP за матч (§5, §11), не зависят от дневного кап-а монет.
+  const mxp = SEASON_XP.matchPlayed + (rep.result === 'win' ? SEASON_XP.matchWon : 0) + (firstWinToday ? SEASON_XP.firstWinOfDay : 0)
+  grantSeasonXp(uid, mxp); grantAccountXp(uid, mxp)
 
   // Прогресс, лог события и серия (матч — это игра дня).
   progressMatch(uid, gameId, rep)

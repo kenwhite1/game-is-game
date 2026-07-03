@@ -4,6 +4,7 @@ import type { Quest } from '../../shared/types'
 import { credit } from './ledger'
 import { grantSeasonXp } from './season'
 import { SEASON_XP } from '../../shared/season'
+import { grantAccountXp } from './xp'
 
 // ─── Квесты 2.0 (§8) ──────────────────────────────────────────────────────
 // Персональная выдача: у каждого игрока свой набор из 3 дневных + 3 недельных
@@ -215,7 +216,8 @@ function claimIn(uid: number, period: 'day' | 'week', questId: string): ClaimRes
       .run(uid, period, key, row.slot)
     if (upd.changes === 0) { result = { ok: false, reason: 'claimed' }; return }
     credit(uid, def.reward, 'quest', questId)
-    grantSeasonXp(uid, period === 'day' ? SEASON_XP.dailyQuest : SEASON_XP.weeklyQuest)
+    const qxp = period === 'day' ? SEASON_XP.dailyQuest : SEASON_XP.weeklyQuest
+    grantSeasonXp(uid, qxp); grantAccountXp(uid, qxp)
     // Бонус за полный набор: когда ВСЕ слоты периода получены.
     const remaining = (db.prepare('SELECT COUNT(*) AS n FROM quest_assignments WHERE user_id=? AND period=? AND period_key=? AND claimed=0').get(uid, period, key) as { n: number }).n
     if (remaining === 0) {

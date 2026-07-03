@@ -3,7 +3,7 @@ import { credit } from './ledger'
 import { getProgress } from './events'
 import { defaultColor } from '../../shared/avatars'
 import { DEFAULT_EQUIP, type Look } from '../../shared/cosmetics'
-import { xpFromOpens, levelInfo } from '../../shared/progression'
+import { levelInfo } from '../../shared/progression'
 import {
   validClanName, validClanTag, CLAN_MAX_MEMBERS, CLAN_WEEKLY_TARGET, CLAN_WEEKLY_REWARD,
   type ClanView, type ClanMemberView, type ClanBoardRow,
@@ -108,12 +108,12 @@ export function clanView(uid: number): ClanView | null {
   const clan = db.prepare('SELECT id, name, tag FROM clans WHERE id=?').get(clanId) as { id: number; name: string; tag: string } | undefined
   if (!clan) return null
   const rows = db.prepare(
-    `SELECT u.id, u.name, u.opens, m.role, ${LOOK_COLS}
+    `SELECT u.id, u.name, u.account_xp, m.role, ${LOOK_COLS}
        FROM clan_members m JOIN users u ON u.id=m.user_id
-      WHERE m.clan_id=? ORDER BY (m.role='owner') DESC, u.opens DESC`,
-  ).all(clanId) as (LookRow & { id: number; name: string; opens: number; role: string })[]
+      WHERE m.clan_id=? ORDER BY (m.role='owner') DESC, u.account_xp DESC`,
+  ).all(clanId) as (LookRow & { id: number; name: string; account_xp: number; role: string })[]
   const members: ClanMemberView[] = rows.map(r => ({
-    id: r.id, name: r.name, look: lookOf(r, r.id), level: levelInfo(xpFromOpens(r.opens)).level,
+    id: r.id, name: r.name, look: lookOf(r, r.id), level: levelInfo(r.account_xp).level,
     role: r.role, ggScore: getProgress(r.id, 'gg_score'),
   }))
   const value = weeklyValue(clanId)

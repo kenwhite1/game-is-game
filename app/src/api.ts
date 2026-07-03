@@ -55,6 +55,7 @@ export const api = {
   gift: (friendId: number, amount: number) => req<{ amount: number; profile: Profile; friends: Friend[] }>('/gift', { friendId, amount }),
 
   profileDetail: () => req<ProfileDetail>('/profile/detail'),
+  prestige: () => req<{ profile: Profile }>('/profile/prestige'),
   achievements: () => req<AchievementsPayload>('/achievements'),
   setUsername: (username: string) => req<{ profile: Profile }>('/profile/username', { username }),
 

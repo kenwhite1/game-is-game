@@ -4,6 +4,7 @@ import { validateInitData, issueToken, verifyToken, signLaunch, verifyLaunch, DE
 import { handleResult } from './sdk'
 import { encodeLaunchParam } from '../../shared/sdk'
 import { achievementsView } from './achievements'
+import { doPrestige } from './xp'
 import { BOT_USERNAME, PRESENCE_KEY, ADMIN_IDS, gameOverrides, type Env } from './env'
 import { economyReport } from './econ'
 import { touchPresence, clearPresence } from './presence'
@@ -125,6 +126,14 @@ api.get('/profile', c => c.json({ profile: getProfile(c.get('uid')), recent: rec
 
 // Достижения игрока: полный список с прогрессом, GG Score и редкостью (§6–7).
 api.get('/achievements', c => c.json(achievementsView(c.get('uid'))))
+
+// Престиж (§5.4): при уровне ≥100 сбросить уровень к 1 и поднять звезду.
+api.post('/profile/prestige', c => {
+  const uid = c.get('uid')
+  const r = doPrestige(uid)
+  if (!r.ok) return c.json({ error: r.reason }, 400)
+  return c.json({ profile: getProfile(uid) })
+})
 
 // Full profile screen: profile + per-game stats + badges.
 api.get('/profile/detail', c => {

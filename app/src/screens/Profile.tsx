@@ -20,6 +20,7 @@ export function Profile() {
   const openSheet = useStore(s => s.openSheet)
   const setTab = useStore(s => s.setTab)
   const showToast = useStore(s => s.showToast)
+  const prestige = useStore(s => s.prestige)
 
   if (!profile) {
     return <div className="tab-page"><div className="empty"><div className="em">👤</div><div className="t">Загрузка профиля…</div></div></div>
@@ -58,6 +59,7 @@ export function Profile() {
             <div className="nm2">{profile.username ? `@${profile.username}` : profile.name}</div>
             <div className="tag2">{titleText(profile.title)}</div>
           </div>
+          {profile.prestige > 0 && <span className="streak-chip" title={`Престиж ${profile.prestige}`}>⭐ {profile.prestige}</span>}
           {profile.streak > 0 && <span className="streak-chip" title={`Серия: ${profile.streak} дн.`}>🔥 {profile.streak}</span>}
           <button className="banner-edit" onClick={() => openSheet('editProfile')} aria-label="Редактировать имя">
             <EditIcon />
@@ -73,10 +75,16 @@ export function Profile() {
       </div>
 
       <div className="stat-grid">
-        <div className="stat"><div className="v">{lv.level}</div><div className="k">Уровень</div></div>
+        <div className="stat"><div className="v">{lv.level}</div><div className="k">Уровень{profile.prestige > 0 ? ` · ⭐${profile.prestige}` : ''}</div></div>
         <div className="stat"><div className="v">🔥 {profile.streak}</div><div className="k">Серия{profile.streakBest > profile.streak ? ` · рек. ${profile.streakBest}` : ''}</div></div>
         <div className="stat"><div className="v">{detail?.friendCount ?? 0}</div><div className="k">Друзей</div></div>
       </div>
+
+      {lv.level >= 100 && (
+        <button className="btn block" style={{ marginBottom: 13, background: 'linear-gradient(135deg,#ffd166,#ff9d00)', boxShadow: '0 4px 0 #d99a1f', color: '#2a1640' }} onClick={() => void prestige()}>
+          ⭐ Престиж — сбросить уровень за звезду
+        </button>
+      )}
 
       <button className="row" onClick={onCopy} style={{ cursor: 'pointer', textAlign: 'left' }}>
         <div className="tx">

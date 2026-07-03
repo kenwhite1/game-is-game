@@ -2,6 +2,7 @@ import { db } from './db'
 import { credit } from './ledger'
 import { progressMap, setProgress, getProgress, writeFeed } from './events'
 import { invitedCount } from './referrals'
+import { grantAccountXp } from './xp'
 import { CATEGORIES } from '../../shared/games'
 import {
   ACHIEVEMENTS, META_STATS, TIER_META, reachedIndex, pointsUpTo, achievementById, isMasterStat,
@@ -102,6 +103,7 @@ export function syncAchievements(uid: number): { newly: UnlockedRung[]; score: n
       const rung = a.rungs[i]
       const coins = TIER_META[rung.tier].coins
       credit(uid, coins, 'achievement', `${a.id}:${rung.tier}`)
+      grantAccountXp(uid, TIER_META[rung.tier].points) // §5.2: достижение даёт XP уровня
       newly.push({ id: a.id, title: a.title, tier: rung.tier, name: rung.name, coins })
     }
     upsertUnlock.run(uid, a.id, idx, Date.now())

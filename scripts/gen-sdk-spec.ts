@@ -103,6 +103,7 @@ for (const g of GAMES) {
     out.push('')
   }
   const notes: string[] = []
+  if (stats.some(s => s.type === 'boolean')) notes.push('булевы флаги шли **только** в том матче, где приём случился (не по умолчанию).')
   if (needsHumans) notes.push('шли `humanPlayers` (число живых) и `result:\'win\'` — для «Против людей».')
   if (needsModes) notes.push('меняй `mode` (`solo`/`multi`/`friends`) — для «Знатока режимов».')
   if (notes.length) { for (const n of notes) out.push(`- ${n}`); out.push('') }
