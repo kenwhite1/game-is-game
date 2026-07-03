@@ -104,8 +104,100 @@ function Sheets() {
         {sheet === 'festival' && <Festival />}
         {sheet === 'boards' && <Boards />}
         {sheet === 'market' && <Market />}
+        {sheet === 'clan' && <Clan />}
       </div>
     </div>
+  )
+}
+
+function Clan() {
+  const clan = useStore(s => s.clan)
+  const board = useStore(s => s.clanBoard)
+  const createClan = useStore(s => s.createClan)
+  const joinClan = useStore(s => s.joinClan)
+  const leaveClan = useStore(s => s.leaveClan)
+  const claimWeekly = useStore(s => s.claimClanWeekly)
+  const [name, setName] = useState('')
+  const [tag, setTag] = useState('')
+
+  if (clan) {
+    const w = clan.weekly
+    const pct = Math.min(100, Math.round((w.value / w.target) * 100))
+    return (
+      <>
+        <div className="sp-head">
+          <div>
+            <h2 style={{ marginBottom: 2 }}>[{clan.tag}] {clan.name}</h2>
+            <div className="soft" style={{ fontSize: 12.5, fontWeight: 800 }}>{clan.memberCount} участников · ты {clan.role === 'owner' ? 'лидер' : 'участник'}</div>
+          </div>
+          <button className="btn sm ghost" onClick={() => void leaveClan()}>Выйти</button>
+        </div>
+
+        <div className="kicker" style={{ margin: '4px 0 8px' }}>Общая цель недели</div>
+        <div className="fest-comm">
+          <div className="fest-comm-t">Вместе запустите {w.target} игр за неделю</div>
+          <div className="q-bar" style={{ marginTop: 6 }}><div className="q-fill" style={{ width: `${pct}%`, background: 'linear-gradient(90deg,#5ad0a0,#3a82f7)' }} /></div>
+          <div className="fest-comm-f">
+            <span>{w.value} / {w.target}</span>
+            {w.reached && (w.claimed
+              ? <span className="soft" style={{ fontWeight: 900 }}>✓ +{w.reward} G получено</span>
+              : <button className="q-claim" onClick={() => void claimWeekly()}>Забрать +{w.reward} G</button>)}
+          </div>
+        </div>
+
+        <div className="kicker" style={{ margin: '16px 0 8px' }}>Состав</div>
+        <div className="lb-list">
+          {clan.members.map(m => (
+            <div className="lb-row2" key={m.id}>
+              <span className="rank">{m.role === 'owner' ? '👑' : ''}</span>
+              <span className="lb-nm">{m.name}</span>
+              <span className="lb-val">GG {m.ggScore}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="kicker" style={{ margin: '16px 0 8px' }}>Топ команд</div>
+        <div className="lb-list">
+          {board.map((c, i) => (
+            <div className={`lb-row2 ${c.isMine ? 'me' : ''}`} key={c.id}>
+              <span className={`rank ${i < 3 ? 'top' : ''}`}>{i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span>
+              <span className="lb-nm">[{c.tag}] {c.name} · {c.members}👥</span>
+              <span className="lb-val">GG {c.score}</span>
+            </div>
+          ))}
+        </div>
+      </>
+    )
+  }
+
+  return (
+    <>
+      <h2 style={{ marginBottom: 2 }}>Команды</h2>
+      <p className="soft" style={{ fontSize: 12.5, fontWeight: 800, marginBottom: 12 }}>Собери команду, бейте общие цели и поднимайтесь в топе.</p>
+
+      <div className="kicker" style={{ margin: '4px 0 8px' }}>Создать команду</div>
+      <div className="field">
+        <input className="input" value={name} maxLength={24} onChange={e => setName(e.target.value)} placeholder="Название" style={{ flex: 1 }} />
+        <input className="input" value={tag} maxLength={5} onChange={e => setTag(e.target.value.toUpperCase())} placeholder="ТЕГ" style={{ width: 88, textAlign: 'center' }} autoCapitalize="characters" />
+      </div>
+      <button className="btn block" style={{ marginTop: 10 }} disabled={name.trim().length < 3 || tag.trim().length < 2} onClick={() => void createClan(name, tag)}>
+        🛡️ Создать
+      </button>
+
+      <div className="kicker" style={{ margin: '18px 0 8px' }}>Найти команду</div>
+      {board.length === 0 ? (
+        <p className="soft" style={{ fontSize: 12.5 }}>Пока команд нет — создай первую!</p>
+      ) : (
+        <div className="lb-list">
+          {board.map(c => (
+            <div className="lb-row2" key={c.id}>
+              <span className="lb-nm">[{c.tag}] {c.name} · {c.members}👥 · GG {c.score}</span>
+              <button className="btn sm" onClick={() => void joinClan(c.id)}>Вступить</button>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
   )
 }
 

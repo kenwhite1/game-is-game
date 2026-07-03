@@ -12,6 +12,7 @@ import { seasonView, claimTier } from './season'
 import { festivalView, claimEventQuest, claimCommunity, buyEventItem } from './festival'
 import { rankedOf, boards } from './ranked'
 import { marketView, listItem, buyListing, cancelListing } from './market'
+import { clanView, clanBoard, createClan, joinClan, leaveClan, claimClanWeekly } from './clans'
 import { PASS_PREMIUM_STARS } from '../../shared/wallet'
 import { packById } from '../../shared/wallet'
 import { bot } from './bot'
@@ -362,6 +363,42 @@ api.post('/market/cancel', async c => {
   const r = cancelListing(uid, parsed.data.listingId)
   if (!r.ok) return c.json({ error: r.reason }, 400)
   return c.json({ market: marketView(uid) })
+})
+
+// ─── Clans (§15.3) ───────────────────────────────────────────────────────
+api.get('/clan', c => { const uid = c.get('uid'); return c.json({ clan: clanView(uid), board: clanBoard(uid) }) })
+
+const clanCreateSchema = z.object({ name: z.string().min(1).max(24), tag: z.string().min(1).max(5) })
+api.post('/clan/create', async c => {
+  const parsed = clanCreateSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'bad_request' }, 400)
+  const uid = c.get('uid')
+  const r = createClan(uid, parsed.data.name, parsed.data.tag)
+  if (!r.ok) return c.json({ error: r.reason }, 400)
+  return c.json({ clan: r.view, board: clanBoard(uid), profile: getProfile(uid) })
+})
+
+const clanJoinSchema = z.object({ clanId: z.number().int().positive() })
+api.post('/clan/join', async c => {
+  const parsed = clanJoinSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'bad_request' }, 400)
+  const uid = c.get('uid')
+  const r = joinClan(uid, parsed.data.clanId)
+  if (!r.ok) return c.json({ error: r.reason }, 400)
+  return c.json({ clan: r.view, board: clanBoard(uid) })
+})
+
+api.post('/clan/leave', c => {
+  const uid = c.get('uid')
+  leaveClan(uid)
+  return c.json({ clan: clanView(uid), board: clanBoard(uid) })
+})
+
+api.post('/clan/weekly/claim', c => {
+  const uid = c.get('uid')
+  const r = claimClanWeekly(uid)
+  if (!r.ok) return c.json({ error: r.reason }, r.reason === 'claimed' ? 409 : 400)
+  return c.json({ clan: clanView(uid), profile: getProfile(uid) })
 })
 
 api.get('/social', c => c.json(socialSnapshot(c.get('uid'))))

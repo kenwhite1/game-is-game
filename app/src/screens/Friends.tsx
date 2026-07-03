@@ -38,6 +38,7 @@ export function Friends() {
   const showToast = useStore(s => s.showToast)
   const openSheet = useStore(s => s.openSheet)
   const loadBoards = useStore(s => s.loadBoards)
+  const loadClan = useStore(s => s.loadClan)
   const challengeFriend = useStore(s => s.challengeFriend)
 
   const [seg, setSeg] = useState<Seg>('friends')
@@ -115,6 +116,10 @@ export function Friends() {
             </div>
             {err && <div style={{ color: 'var(--red)', fontSize: 13, fontWeight: 800, marginTop: 8 }}>{err}</div>}
           </div>
+
+          <button className="btn block ghost" style={{ marginTop: 12 }} onClick={() => { void loadClan(); openSheet('clan') }}>
+            🛡️ Команда
+          </button>
 
           <div className="sec"><h2>Мои друзья</h2><span className="sub">{friends.length}</span></div>
           {friends.length === 0 ? (

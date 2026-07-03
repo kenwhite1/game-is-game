@@ -5,6 +5,7 @@ import type { SeasonView } from '@shared/season'
 import type { FestivalView } from '@shared/festival'
 import type { RankedView, Boards } from '@shared/ranked'
 import type { MarketView } from '@shared/market'
+import type { ClanView, ClanBoardRow } from '@shared/clans'
 import { GAMES, defaultLink } from '@shared/games'
 import { api } from './api'
 import { haptic, openGame as openGameLink, openInvoice, getStartParam, inTelegram, shareInvite } from './telegram'
@@ -14,7 +15,7 @@ import { playSfx, isSoundOn, setSoundOn } from './sound'
 const STATIC_CATALOG: GameCard[] = GAMES.map(g => ({ ...g, link: defaultLink(g.bot) }))
 
 export type Tab = 'home' | 'shop' | 'style' | 'friends' | 'profile'
-type Sheet = 'about' | 'help' | 'settings' | 'editProfile' | 'season' | 'festival' | 'boards' | 'market' | null
+type Sheet = 'about' | 'help' | 'settings' | 'editProfile' | 'season' | 'festival' | 'boards' | 'market' | 'clan' | null
 
 interface S {
   ready: boolean
@@ -38,6 +39,8 @@ interface S {
   ranked: RankedView | null
   boards: Boards | null
   market: MarketView | null
+  clan: ClanView | null
+  clanBoard: ClanBoardRow[]
   friends: Friend[]
   activity: ActivityItem[]
   leaderboard: LeaderRow[]
@@ -82,6 +85,11 @@ interface S {
   listItem(itemId: string, price: number): Promise<void>
   buyListing(listingId: number): Promise<void>
   cancelListing(listingId: number): Promise<void>
+  loadClan(): Promise<void>
+  createClan(name: string, tag: string): Promise<void>
+  joinClan(clanId: number): Promise<void>
+  leaveClan(): Promise<void>
+  claimClanWeekly(): Promise<void>
   loadWardrobe(): Promise<void>
   equip(slot: Slot, itemId: string): Promise<void>
   buy(itemId: string, name: string): Promise<boolean>
@@ -115,6 +123,8 @@ export const useStore = create<S>((set, get) => ({
   ranked: null,
   boards: null,
   market: null,
+  clan: null,
+  clanBoard: [],
   friends: [],
   activity: [],
   leaderboard: [],
@@ -485,6 +495,60 @@ export const useStore = create<S>((set, get) => ({
       haptic('tap')
       get().showToast('Лот снят')
     } catch { haptic('warn'); get().showToast('Не удалось снять лот') }
+  },
+
+  async loadClan() {
+    try {
+      const r = await api.clan()
+      set({ clan: r.clan, clanBoard: r.board })
+    } catch { /* офлайн */ }
+  },
+
+  async createClan(name, tag) {
+    try {
+      const r = await api.clanCreate(name, tag)
+      set({ clan: r.clan, clanBoard: r.board, profile: r.profile })
+      haptic('success')
+      get().showToast(`Команда «${r.clan.name}» создана 🛡️`)
+    } catch (e) {
+      haptic('warn')
+      const m = (e as { message?: string }).message
+      get().showToast(m === 'tag_taken' ? 'Такой тег занят' : m === 'in_clan' ? 'Ты уже в команде' : 'Проверь название и тег')
+    }
+  },
+
+  async joinClan(clanId) {
+    try {
+      const r = await api.clanJoin(clanId)
+      set({ clan: r.clan, clanBoard: r.board })
+      haptic('success')
+      get().showToast(`Ты в команде «${r.clan.name}» 🎉`)
+    } catch (e) {
+      haptic('warn')
+      const m = (e as { message?: string }).message
+      get().showToast(m === 'full' ? 'В команде нет мест' : m === 'in_clan' ? 'Ты уже в команде' : 'Не удалось вступить')
+    }
+  },
+
+  async leaveClan() {
+    try {
+      const r = await api.clanLeave()
+      set({ clan: r.clan, clanBoard: r.board })
+      haptic('tap')
+      get().showToast('Ты покинул(а) команду')
+    } catch { haptic('warn') }
+  },
+
+  async claimClanWeekly() {
+    try {
+      const r = await api.clanClaimWeekly()
+      set({ clan: r.clan, profile: r.profile })
+      haptic('success')
+      get().showToast('Награда команды получена 🎉')
+    } catch (e) {
+      haptic('warn')
+      get().showToast((e as { message?: string }).message === 'claimed' ? 'Уже получено' : 'Цель ещё не достигнута')
+    }
   },
 
   async claimEventQuest(questId) {

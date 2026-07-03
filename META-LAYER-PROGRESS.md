@@ -136,7 +136,15 @@ Each phase is committed + deployed (Railway) before the next. Updated as the
   (migration 022); `activityFeed` merges them with game-launches by time; feed UI
   shows 🏆/🔥 meta events. Verified end-to-end.
 
-## Status: hub-buildable meta-layer COMPLETE (Phases 0–8 + economy foundation)
+- **Phase 9 — Clans/Teams** (§15.3, this commit): create/join/leave clans (tag
+  unique via index, one clan per player, disband-on-last-leave, owner transfer),
+  roster with member GG Score, weekly shared goal (combined launches → +300 to
+  each member, once), clan leaderboard by aggregate GG Score. `shared/clans.ts`,
+  `server/src/clans.ts`, migration 023. UI: "🛡️ Команда" sheet from Friends.
+  Verified: create/in-clan/tag-taken, weekly not_done→claim(+300)→claimed,
+  disband, join. UI OK.
+
+## Status: hub-buildable meta-layer COMPLETE (Phases 0–9 + economy foundation)
 
 All bible phases that live in the hub are shipped & deployed. Remaining bible
 items are out-of-repo or polish:

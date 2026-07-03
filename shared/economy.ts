@@ -95,3 +95,4 @@ export type CoinReason =
   | 'challenge'
   | 'market_buy'
   | 'market_sell'
+  | 'clan'
