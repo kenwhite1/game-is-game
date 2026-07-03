@@ -107,6 +107,17 @@ const CROSS: Achievement[] = [
     title: 'Охотник за трофеями', desc: 'Открывай достижения',
     rungs: [r('silver', 50, 'Охотник'), r('gold', 150, 'Коллекционер трофеев'), r('platinum', 300, 'Платиновый охотник')],
   },
+  // Скрытый кластер (§7A ⑲): сюрприз-открытия, показываются как «???» до взятия.
+  {
+    id: 'hoarder', category: 'economy', stat: 'coins_held', hidden: true,
+    title: 'Копилка', desc: 'Скопи 25 000 Game на балансе (и потрать же!)',
+    rungs: [r('silver', 25000, 'Копилка')],
+  },
+  {
+    id: 'nightowl', category: 'dedication', stat: 'nightowl', hidden: true,
+    title: 'Сова', desc: 'Сыграй ночью, с 03:00 до 05:00 МСК',
+    rungs: [r('bronze', 1, 'Сова')],
+  },
 ]
 
 // ── Мастера категорий ×7 (§7A ⑨): по «лесенке» на каждый жанр ──

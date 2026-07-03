@@ -56,6 +56,7 @@ function buildSnapshot(uid: number): Record<string, number> {
   snap.friends = scalar('SELECT COUNT(*) AS n FROM friendships WHERE user_id=?', uid)
   snap.referrals = invitedCount(uid)
   snap.streak_best = scalar('SELECT streak_best AS n FROM users WHERE id=?', uid)
+  snap.coins_held = scalar('SELECT coins AS n FROM users WHERE id=?', uid) // «Копилка» (§7A ⑲)
   // Разные сыгранные режимы по каждой игре (для «Знатока режимов»): pm_<gid>_<mode>.
   const modes = new Map<string, Set<string>>()
   for (const key in snap) {

@@ -36,6 +36,8 @@ export interface Profile {
   streakBest: number
   /** Заморозки серии на руках. */
   freezes: number
+  /** Серия ни разу не спасена заморозкой — «золотое пламя» (§9.6). */
+  streakPerfect: boolean
   /** Сколько раз игрок открывал игры из хаба. */
   opens: number
   /** Накопленный опыт (выводится из opens). */

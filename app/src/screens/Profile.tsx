@@ -60,7 +60,7 @@ export function Profile() {
             <div className="tag2">{titleText(profile.title)}</div>
           </div>
           {profile.prestige > 0 && <span className="streak-chip" title={`Престиж ${profile.prestige}`}>⭐ {profile.prestige}</span>}
-          {profile.streak > 0 && <span className="streak-chip" title={`Серия: ${profile.streak} дн.`}>🔥 {profile.streak}</span>}
+          {profile.streak > 0 && <span className={`streak-chip ${profile.streakPerfect ? 'streak-gold' : ''}`} title={profile.streakPerfect ? `Идеальная серия: ${profile.streak} дн. — ни одной заморозки` : `Серия: ${profile.streak} дн.`}>🔥 {profile.streak}</span>}
           <button className="banner-edit" onClick={() => openSheet('editProfile')} aria-label="Редактировать имя">
             <EditIcon />
           </button>
@@ -143,17 +143,22 @@ function AchievementCard({ a }: { a: AchView }) {
   const into = Math.min(a.value, next.target) - (maxed ? 0 : prevTarget)
   const pct = maxed ? 100 : Math.max(0, Math.min(100, Math.round((into / span) * 100)))
   const rare = done && a.rarity > 0 && a.rarity < 0.05
+  const masked = a.hidden && !done // §6.3: скрытые достижения — «???» до открытия
   return (
     <div className={`ach ${done ? 'on' : ''} ${rare ? 'rare' : ''}`}>
-      <span className="ach-em">{tierEmoji}</span>
+      <span className="ach-em">{masked ? '❓' : tierEmoji}</span>
       <div className="ach-tx">
         <div className="ach-top">
-          <span className="ach-title">{done ? cur!.name : a.title}</span>
+          <span className="ach-title">{done ? cur!.name : masked ? 'Секрет' : a.title}</span>
           {rare && <span className="ach-rare">редкое · {Math.round(a.rarity * 100)}%</span>}
         </div>
-        <div className="ach-desc">{maxed ? 'Максимум взят' : a.desc}</div>
-        <div className="ach-bar"><div className="ach-fill" style={{ width: `${pct}%` }} /></div>
-        <div className="ach-n">{maxed ? `${a.value}` : `${Math.min(a.value, next.target)} / ${next.target}`}</div>
+        <div className="ach-desc">{masked ? 'Скрытое достижение — открой, чтобы узнать' : maxed ? 'Максимум взят' : a.desc}</div>
+        {!masked && (
+          <>
+            <div className="ach-bar"><div className="ach-fill" style={{ width: `${pct}%` }} /></div>
+            <div className="ach-n">{maxed ? `${a.value}` : `${Math.min(a.value, next.target)} / ${next.target}`}</div>
+          </>
+        )}
       </div>
     </div>
   )

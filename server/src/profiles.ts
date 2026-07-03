@@ -32,6 +32,7 @@ interface UserRow {
   streak_current: number
   streak_best: number
   streak_freezes: number
+  streak_perfect: number
   account_xp: number
   prestige: number
   friend_code: string | null
@@ -146,6 +147,7 @@ export function toProfile(u: UserRow): Profile {
     streak: u.streak_current ?? 0,
     streakBest: u.streak_best ?? 0,
     freezes: u.streak_freezes ?? 0,
+    streakPerfect: (u.streak_perfect ?? 1) === 1,
     opens: u.opens,
     xp,
     level: levelInfo(xp).level,
