@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { GameCard, GameMeta, Profile, ProfileDetail, Friend, ActivityItem, LeaderRow, Wardrobe, Slot, RatingValue, Quest } from '@shared/types'
 import type { AchievementsPayload } from '@shared/achievements'
+import type { SeasonView } from '@shared/season'
 import { GAMES, defaultLink } from '@shared/games'
 import { api } from './api'
 import { haptic, openGame as openGameLink, openInvoice, getStartParam, inTelegram } from './telegram'
@@ -10,7 +11,7 @@ import { playSfx, isSoundOn, setSoundOn } from './sound'
 const STATIC_CATALOG: GameCard[] = GAMES.map(g => ({ ...g, link: defaultLink(g.bot) }))
 
 export type Tab = 'home' | 'shop' | 'style' | 'friends' | 'profile'
-type Sheet = 'about' | 'help' | 'settings' | 'editProfile' | null
+type Sheet = 'about' | 'help' | 'settings' | 'editProfile' | 'season' | null
 
 interface S {
   ready: boolean
@@ -29,6 +30,7 @@ interface S {
   gameSheet: string | null
   detail: ProfileDetail | null
   achievements: AchievementsPayload | null
+  season: SeasonView | null
   friends: Friend[]
   activity: ActivityItem[]
   leaderboard: LeaderRow[]
@@ -61,6 +63,9 @@ interface S {
   loadSocial(): Promise<void>
   loadDetail(): Promise<void>
   loadAchievements(): Promise<void>
+  loadSeason(): Promise<void>
+  claimSeasonTier(tier: number, track: 'free' | 'premium'): Promise<void>
+  buyPremium(): Promise<void>
   loadWardrobe(): Promise<void>
   equip(slot: Slot, itemId: string): Promise<void>
   buy(itemId: string, name: string): Promise<boolean>
@@ -87,6 +92,7 @@ export const useStore = create<S>((set, get) => ({
   gameSheet: null,
   detail: null,
   achievements: null,
+  season: null,
   friends: [],
   activity: [],
   leaderboard: [],
@@ -122,6 +128,8 @@ export const useStore = create<S>((set, get) => ({
       void get().loadSocial()
       // Догружаем недельные квесты и счётчик рероллов (auth отдаёт только дневные).
       void get().refreshQuests()
+      // Прогресс сезонного пропуска для карточки на «Доме».
+      void get().loadSeason()
     } catch {
       // гость или офлайн: показываем меню из публичного каталога или статики
       try {
@@ -337,6 +345,45 @@ export const useStore = create<S>((set, get) => ({
     try {
       set({ achievements: await api.achievements() })
     } catch { /* офлайн */ }
+  },
+
+  async loadSeason() {
+    try {
+      const r = await api.season()
+      set({ season: r.season })
+    } catch { /* офлайн */ }
+  },
+
+  async claimSeasonTier(tier, track) {
+    try {
+      const r = await api.claimSeasonTier(tier, track)
+      set({ season: r.season, profile: r.profile })
+      haptic('success')
+      if (get().soundOn) playSfx('open')
+      const rw = r.reward
+      const label = rw.kind === 'coins' ? `+${rw.amount} Game` : rw.kind === 'freeze' ? `+${rw.count} заморозка` : 'предмет'
+      get().showToast(`Награда получена: ${label} 🎉`)
+    } catch (e) {
+      haptic('warn')
+      const reason = (e as { message?: string }).message
+      get().showToast(reason === 'no_premium' ? 'Нужен премиум-пропуск' : reason === 'locked' ? 'Тир ещё не открыт' : 'Награда уже получена')
+    }
+  },
+
+  async buyPremium() {
+    try {
+      const { link } = await api.passInvoice()
+      const opened = openInvoice(link, status => {
+        if (status !== 'paid') return
+        haptic('success')
+        get().showToast('Премиум-пропуск активирован ✨')
+        void get().loadSeason()
+      })
+      if (!opened) get().showToast('Покупка пропуска работает внутри Telegram')
+    } catch {
+      haptic('warn')
+      get().showToast('Не получилось открыть счёт')
+    }
   },
 
   async loadWardrobe() {

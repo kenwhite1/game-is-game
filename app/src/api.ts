@@ -4,6 +4,7 @@ import type {
   Friend, ActivityItem, LeaderRow, Wardrobe, Slot, RatingValue, Quest,
 } from '@shared/types'
 import type { AchievementsPayload } from '@shared/achievements'
+import type { SeasonView, Reward } from '@shared/season'
 
 let token: string | null = sessionStorage.getItem('gg_jwt')
 
@@ -58,6 +59,11 @@ export const api = {
 
   profile: () => req<{ profile: Profile; recent: string[] }>('/profile'),
   walletInvoice: (packId: string) => req<{ link: string }>('/wallet/invoice', { packId }),
+
+  season: () => req<{ season: SeasonView }>('/season'),
+  claimSeasonTier: (tier: number, track: 'free' | 'premium') =>
+    req<{ reward: Reward; season: SeasonView; profile: Profile }>('/season/claim', { tier, track }),
+  passInvoice: () => req<{ link: string }>('/season/premium'),
 
   cosmetics: () => req<Wardrobe>('/cosmetics'),
   equip: (slot: Slot, itemId: string) => req<{ profile: Profile; wardrobe: Wardrobe }>('/cosmetics/equip', { slot, itemId }),

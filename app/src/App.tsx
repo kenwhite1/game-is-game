@@ -8,6 +8,8 @@ import { Profile } from './screens/Profile'
 import { BrandLogo } from './screens/Logo'
 import { TabIcons, CheckIcon, SoundOnIcon, SoundOffIcon, HelpIcon } from './art/icons'
 import { validUsername, normalizeUsername } from '@shared/username'
+import { cosmeticById } from '@shared/cosmetics'
+import { PASS_PREMIUM_STARS } from '@shared/wallet'
 
 const TABS: { key: Tab; ru: string }[] = [
   { key: 'home', ru: 'Дом' },
@@ -98,8 +100,63 @@ function Sheets() {
         {sheet === 'help' && <Help />}
         {sheet === 'settings' && <Settings />}
         {sheet === 'editProfile' && <EditProfile onDone={close} />}
+        {sheet === 'season' && <SeasonPass />}
       </div>
     </div>
+  )
+}
+
+/** Иконка-подпись награды тира пропуска. */
+function rewardChip(reward: { kind: string; amount?: number; count?: number; itemId?: string } | null): string {
+  if (!reward) return '—'
+  if (reward.kind === 'coins') return `${reward.amount} G`
+  if (reward.kind === 'freeze') return `❄ ${reward.count}`
+  return cosmeticById(reward.itemId ?? '')?.name ?? 'Предмет'
+}
+
+function SeasonPass() {
+  const season = useStore(s => s.season)
+  const claim = useStore(s => s.claimSeasonTier)
+  const buyPremium = useStore(s => s.buyPremium)
+  if (!season) return <p className="soft">Загрузка сезона…</p>
+  const daysLeft = Math.max(0, Math.ceil((season.endsMs - Date.now()) / 86_400_000))
+  return (
+    <>
+      <div className="sp-head">
+        <div>
+          <h2 style={{ marginBottom: 2 }}>{season.season.name}</h2>
+          <div className="soft" style={{ fontSize: 12.5, fontWeight: 800 }}>Тир {season.tier}/{season.tiers} · осталось {daysLeft} дн.</div>
+        </div>
+        {season.premium
+          ? <span className="sp-prem on">Премиум ✨</span>
+          : <button className="sp-prem" onClick={() => void buyPremium()}>Премиум · {PASS_PREMIUM_STARS} ⭐</button>}
+      </div>
+      <div className="sp-legend"><span>Тир</span><span>Бесплатно</span><span>Премиум</span></div>
+      <div className="sp-track">
+        {season.rows.map(r => (
+          <div className={`sp-row ${r.unlocked ? 'on' : ''}`} key={r.tier}>
+            <span className="sp-tier">{r.tier}</span>
+            <SeasonCell reward={r.free} claimed={r.freeClaimed} can={r.unlocked && !r.freeClaimed && !!r.free}
+              onClaim={() => void claim(r.tier, 'free')} />
+            <SeasonCell reward={r.premium} claimed={r.premiumClaimed} can={r.unlocked && season.premium && !r.premiumClaimed && !!r.premium}
+              locked={!season.premium} onClaim={() => void claim(r.tier, 'premium')} />
+          </div>
+        ))}
+      </div>
+    </>
+  )
+}
+
+function SeasonCell({ reward, claimed, can, locked, onClaim }: {
+  reward: { kind: string; amount?: number; count?: number; itemId?: string } | null
+  claimed: boolean; can: boolean; locked?: boolean; onClaim(): void
+}) {
+  if (!reward) return <span className="sp-cell empty">—</span>
+  return (
+    <button className={`sp-cell ${claimed ? 'claimed' : can ? 'can' : ''}`} disabled={!can} onClick={onClaim}>
+      <span className="sp-rw">{rewardChip(reward)}</span>
+      {claimed ? <span className="sp-tag">✓</span> : can ? <span className="sp-tag">забрать</span> : locked ? <span className="sp-tag">🔒</span> : null}
+    </button>
   )
 }
 

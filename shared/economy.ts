@@ -91,3 +91,4 @@ export type CoinReason =
   | 'match_won'
   | 'match_firstwin'
   | 'achievement'
+  | 'season'

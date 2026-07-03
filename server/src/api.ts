@@ -8,6 +8,8 @@ import { touchPresence, clearPresence } from './presence'
 import { getOrCreateUser, getProfile, recordOpen, recentGames, profileDetail, setUsername, userExists } from './profiles'
 import { addFriendByCode, removeFriend, friendsOf, activityFeed, leaderboard, socialSnapshot, giftCoins } from './social'
 import { questsOf, weeklyQuestsOf, claimQuest, rerollQuest, rerollsLeft } from './quests'
+import { seasonView, claimTier } from './season'
+import { PASS_PREMIUM_STARS } from '../../shared/wallet'
 import { packById } from '../../shared/wallet'
 import { bot } from './bot'
 import { applyReferral } from './referrals'
@@ -237,6 +239,38 @@ api.post('/quests/reroll', async c => {
   const r = rerollQuest(uid, parsed.data.questId)
   if (!r.ok) return c.json({ error: r.reason }, r.reason === 'too_poor' ? 402 : 400)
   return c.json({ quests: r.quests, free: r.free, profile: getProfile(uid), rerollsLeft: rerollsLeft(uid) })
+})
+
+// ─── Season Pass (§11) ───────────────────────────────────────────────────
+api.get('/season', c => c.json({ season: seasonView(c.get('uid')) }))
+
+const seasonClaimSchema = z.object({ tier: z.number().int().min(1).max(50), track: z.enum(['free', 'premium']) })
+api.post('/season/claim', async c => {
+  const parsed = seasonClaimSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'bad_request' }, 400)
+  const uid = c.get('uid')
+  const r = claimTier(uid, parsed.data.tier, parsed.data.track)
+  if (!r.ok) return c.json({ error: r.reason }, r.reason === 'claimed' ? 409 : 400)
+  return c.json({ reward: r.reward, season: seasonView(uid), profile: getProfile(uid) })
+})
+
+// Счёт Stars на премиум-пропуск. Разблокировку делает вебхук после оплаты.
+api.post('/season/premium', async c => {
+  if (!bot) return c.json({ error: 'unavailable' }, 503)
+  try {
+    const link = await bot.api.createInvoiceLink(
+      'Премиум-пропуск',
+      'Премиум-трек текущего сезона Game is Game',
+      JSON.stringify({ kind: 'pass', uid: c.get('uid') }),
+      '',
+      'XTR',
+      [{ label: 'Премиум-пропуск', amount: PASS_PREMIUM_STARS }],
+    )
+    return c.json({ link })
+  } catch (e) {
+    console.error('pass invoice failed', e)
+    return c.json({ error: 'invoice_failed' }, 502)
+  }
 })
 
 // ─── Gifts: подарить Game другу ──────────────────────────────────────────

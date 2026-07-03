@@ -98,6 +98,7 @@ export function Home() {
     <div className="tab-page stagger">
       {profile && <PlayerBanner onOpen={() => setTab('profile')} />}
 
+      {profile && <SeasonCard />}
       {profile && quests.length > 0 && <QuestsCard />}
       {profile && <WeeklyCard />}
 
@@ -359,6 +360,29 @@ function QuestsCard() {
         <QuestRow key={q.id} q={q} onReroll={() => void rerollQuest(q.id)} />
       ))}
     </div>
+  )
+}
+
+function SeasonCard() {
+  const season = useStore(s => s.season)
+  const openSheet = useStore(s => s.openSheet)
+  if (!season) return null
+  const intoTier = season.xp - season.tier * season.xpPerTier
+  const pct = season.tier >= season.tiers ? 100 : Math.round((intoTier / season.xpPerTier) * 100)
+  return (
+    <button className="card season-card" onClick={() => openSheet('season')}>
+      <div className="sc-head">
+        <span className="sc-title">{season.season.name} · Пропуск{season.premium ? ' ⭐' : ''}</span>
+        {season.claimable > 0
+          ? <span className="sc-badge">забрать: {season.claimable}</span>
+          : <span className="sc-sub">тир {season.tier}/{season.tiers}</span>}
+      </div>
+      <div className="sc-bar"><div className="sc-fill" style={{ width: `${pct}%` }} /></div>
+      <div className="sc-foot">
+        <span>Тир {season.tier} · {season.tier >= season.tiers ? 'максимум' : `${intoTier}/${season.xpPerTier} XP`}</span>
+        <span className="sc-open">Открыть →</span>
+      </div>
+    </button>
   )
 }
 

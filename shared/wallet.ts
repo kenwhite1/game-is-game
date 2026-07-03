@@ -18,7 +18,10 @@ export const PACKS: CoinPack[] = [
   { id: 'pack_s', coins: 1000, stars: 25, title: 'Горсть Game', emoji: '🪙' },
   { id: 'pack_m', coins: 2600, stars: 60, title: 'Мешочек Game', emoji: '💰', tag: 'выгоднее на 8%' },
   { id: 'pack_l', coins: 6000, stars: 125, title: 'Сундук Game', emoji: '🧰', tag: 'выгоднее на 20%' },
+  { id: 'pack_xl', coins: 15000, stars: 300, title: 'Клад Game', emoji: '💎', tag: 'выгоднее на 25%' },
 ]
+
+export const PASS_PREMIUM_STARS = 350
 
 export function packById(id: string): CoinPack | undefined {
   return PACKS.find(p => p.id === id)

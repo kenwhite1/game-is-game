@@ -5,6 +5,8 @@ import { tickStreak } from './streak'
 import { progressMatch, logEvent } from './events'
 import { getProfile } from './profiles'
 import { syncAchievements } from './achievements'
+import { grantSeasonXp } from './season'
+import { SEASON_XP } from '../../shared/season'
 import { matchReward, MATCH_COIN_CAP, type CoinReason } from '../../shared/economy'
 import type { MatchReport, ReportResponse } from '../../shared/sdk'
 
@@ -78,6 +80,9 @@ export function handleResult(launchToken: string | undefined, rawBody: unknown, 
   pay(reward.played, 'match_played')
   pay(reward.won, 'match_won')
   pay(reward.firstWin, 'match_firstwin')
+
+  // Season XP за матч (наполняет пропуск §11), не зависит от дневного кап-а монет.
+  grantSeasonXp(uid, SEASON_XP.matchPlayed + (rep.result === 'win' ? SEASON_XP.matchWon : 0) + (firstWinToday ? SEASON_XP.firstWinOfDay : 0))
 
   // Прогресс, лог события и серия (матч — это игра дня).
   progressMatch(uid, gameId, rep)

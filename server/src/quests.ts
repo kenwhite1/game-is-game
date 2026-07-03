@@ -2,6 +2,8 @@ import { db } from './db'
 import { GAMES, CATEGORIES } from '../../shared/games'
 import type { Quest } from '../../shared/types'
 import { credit } from './ledger'
+import { grantSeasonXp } from './season'
+import { SEASON_XP } from '../../shared/season'
 
 // ─── Квесты 2.0 (§8) ──────────────────────────────────────────────────────
 // Персональная выдача: у каждого игрока свой набор из 3 дневных + 3 недельных
@@ -213,13 +215,17 @@ function claimIn(uid: number, period: 'day' | 'week', questId: string): ClaimRes
       .run(uid, period, key, row.slot)
     if (upd.changes === 0) { result = { ok: false, reason: 'claimed' }; return }
     credit(uid, def.reward, 'quest', questId)
+    grantSeasonXp(uid, period === 'day' ? SEASON_XP.dailyQuest : SEASON_XP.weeklyQuest)
     // Бонус за полный набор: когда ВСЕ слоты периода получены.
     const remaining = (db.prepare('SELECT COUNT(*) AS n FROM quest_assignments WHERE user_id=? AND period=? AND period_key=? AND claimed=0').get(uid, period, key) as { n: number }).n
     if (remaining === 0) {
       const bonusSlot = 99
       const ins = db.prepare('INSERT OR IGNORE INTO quest_assignments (user_id, period, period_key, slot, quest_id, claimed) VALUES (?,?,?,?,?,1)')
         .run(uid, period, key, bonusSlot, '_bonus')
-      if (ins.changes > 0) credit(uid, period === 'day' ? DAILY_BONUS : WEEKLY_BONUS, 'quest', `${period}_bonus`)
+      if (ins.changes > 0) {
+        credit(uid, period === 'day' ? DAILY_BONUS : WEEKLY_BONUS, 'quest', `${period}_bonus`)
+        grantSeasonXp(uid, period === 'day' ? SEASON_XP.dailyBonus : SEASON_XP.weeklyBonus)
+      }
     }
   })()
   return result

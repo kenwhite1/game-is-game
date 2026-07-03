@@ -10,6 +10,8 @@ import { STARTER_COINS, LAUNCH_BREADTH_REWARD, LAUNCH_BREADTH_CAP } from '../../
 import { credit } from './ledger'
 import { tickStreak } from './streak'
 import { syncAchievements, achievementsSummary } from './achievements'
+import { grantSeasonXp } from './season'
+import { SEASON_XP } from '../../shared/season'
 
 interface UserRow {
   id: number
@@ -230,9 +232,11 @@ export function recordOpen(id: number, gameId: string): Profile {
 
   if (!openedThisGameToday && distinctToday < LAUNCH_BREADTH_CAP) {
     credit(id, LAUNCH_BREADTH_REWARD, 'launch_breadth', gameId)
+    grantSeasonXp(id, SEASON_XP.launchBreadth)
   }
   // Серия дня: первый заход за день продвигает streak и платит награду/вехи.
-  tickStreak(id)
+  const st = tickStreak(id)
+  if (st.ticked) grantSeasonXp(id, SEASON_XP.streakDay)
   // Достижения широты/коллекции могли продвинуться — синкаем (идемпотентно).
   syncAchievements(id)
 

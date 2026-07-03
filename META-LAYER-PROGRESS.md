@@ -59,9 +59,26 @@ Each phase is committed + deployed (Railway) before the next. Updated as the
     discounted buy charged the deal price (−300 for 350→300). No console errors.
   - Deferred: slot price multipliers, collections/set bonuses, recolor sink.
 
+- **Phase 4 — Season Pass** (this commit):
+  - `shared/season.ts`: 8-week seasons (computed from epoch), 50 tiers ×600 XP,
+    free+premium track with a generated reward curve (coins/freezes/existing
+    cosmetics), Season XP rates (Appendix A), `SeasonView`.
+  - `server/src/season.ts`: `grantSeasonXp`, `seasonView`, `claimTier` (locked /
+    no_premium / claimed gating, item grants inlined to avoid an import cycle,
+    coins via ledger `season`, freezes bump), `unlockPremium`. Migration 017
+    `season_progress`.
+  - Season XP wired into recordOpen (breadth/streak), quest claims + bonuses,
+    and match results (`/sdk/result`).
+  - Premium via ⭐: `pack_xl` (15000/300) + `PASS_PREMIUM_STARS` 350; `/season/
+    premium` invoice; bot webhook unlocks premium on payment (idempotent).
+  - UI: Home "Сезон" card (tier/XP bar/claimable) + full pass sheet (track,
+    claim buttons, premium unlock).
+  - Verified: accrual (+15 fresh launch), free claim (+50), idempotent, locked
+    + no_premium gating, premium claim after unlock. UI renders, no errors.
+
 ## Next (bible build order §17.2)
 
-- **Phase 4 — Season Pass**; **5 — Events/Tokens**; **6 — Ranked/Glicko-2**;
+- **5 — Events/Tokens**; **6 — Ranked/Glicko-2**;
   **7 — Social (referral-on-qualify, challenges, clans)**; **8 — Marketplace**.
 
 ## Needs the games (not hub-only)
