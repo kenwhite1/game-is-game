@@ -38,6 +38,8 @@ export interface Profile {
   freezes: number
   /** Серия ни разу не спасена заморозкой — «золотое пламя» (§9.6). */
   streakPerfect: boolean
+  /** Открытое окно ремонта серии (§9.3), если серия недавно порвалась. */
+  streakRepair?: { value: number; until: number; plays: number; canPlayFree: boolean; cost: number; playsNeeded: number } | null
   /** Сколько раз игрок открывал игры из хаба. */
   opens: number
   /** Накопленный опыт (выводится из opens). */

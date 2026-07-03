@@ -21,6 +21,7 @@ export function Profile() {
   const setTab = useStore(s => s.setTab)
   const showToast = useStore(s => s.showToast)
   const prestige = useStore(s => s.prestige)
+  const repairStreak = useStore(s => s.repairStreak)
 
   if (!profile) {
     return <div className="tab-page"><div className="empty"><div className="em">👤</div><div className="t">Загрузка профиля…</div></div></div>
@@ -79,6 +80,18 @@ export function Profile() {
         <div className="stat"><div className="v">🔥 {profile.streak}</div><div className="k">Серия{profile.streakBest > profile.streak ? ` · рек. ${profile.streakBest}` : ''}</div></div>
         <div className="stat"><div className="v">{detail?.friendCount ?? 0}</div><div className="k">Друзей</div></div>
       </div>
+
+      {profile.streakRepair && (
+        <div className="repair-card">
+          <div className="rc-tx">🔧 Серия <b>{profile.streakRepair.value} дней</b> порвалась — восстанови за 24 ч!</div>
+          <div className="rc-btns">
+            <button className="btn sm" disabled={!profile.streakRepair.canPlayFree} onClick={() => void repairStreak('play')}>
+              {profile.streakRepair.canPlayFree ? '▶ 3 игры — даром' : `▶ Игры ${profile.streakRepair.plays}/${profile.streakRepair.playsNeeded}`}
+            </button>
+            <button className="btn sm accent" onClick={() => void repairStreak('pay')}>💰 {profile.streakRepair.cost} Game</button>
+          </div>
+        </div>
+      )}
 
       {lv.level >= 100 && (
         <button className="btn block" style={{ marginBottom: 13, background: 'linear-gradient(135deg,#ffd166,#ff9d00)', boxShadow: '0 4px 0 #d99a1f', color: '#2a1640' }} onClick={() => void prestige()}>

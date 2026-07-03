@@ -151,6 +151,15 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 /* §9.6 идеальная серия — золотое пламя (ни одной заморозки) */
 .streak-gold { background: linear-gradient(180deg, #ffd24a, #f2a015); color: #6b3d00;
   box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.6), 0 0 12px rgba(242,169,20,.55); }
+/* §9.3 ремонт серии — карточка с двумя способами восстановить */
+.repair-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow-lip), inset 0 0 0 1.5px #ff8a5c;
+  padding: 12px 14px; margin-bottom: 13px; }
+.rc-tx { font-size: 13px; font-weight: 800; color: var(--brown-deep); margin-bottom: 9px; }
+.rc-btns { display: flex; gap: 8px; }
+.btn.sm { flex: 1; padding: 9px 10px; font-size: 12.5px; font-weight: 900; border: none; border-radius: 12px;
+  background: var(--card-2); color: var(--brown-deep); cursor: pointer; box-shadow: inset 0 0 0 1.5px var(--line); }
+.btn.sm.accent { background: linear-gradient(135deg, #ffd166, #ff9d00); color: #2a1640; box-shadow: 0 3px 0 #d99a1f; }
+.btn.sm:disabled { opacity: .55; cursor: default; }
 .banner .av { box-shadow: inset 0 0 0 2.5px rgba(255,255,255,.9), 0 4px 12px rgba(0,0,0,.18); background: rgba(255,255,255,.16); }
 
 .banner-edit { flex: none; cursor: pointer; border: none; display: grid; place-items: center; width: 40px; height: 40px;

@@ -57,6 +57,7 @@ export const api = {
 
   profileDetail: () => req<ProfileDetail>('/profile/detail'),
   prestige: () => req<{ profile: Profile }>('/profile/prestige'),
+  repairStreak: (method: 'pay' | 'play') => req<{ profile: Profile }>('/streak/repair', { method }),
   achievements: () => req<AchievementsPayload>('/achievements'),
   setUsername: (username: string) => req<{ profile: Profile }>('/profile/username', { username }),
 

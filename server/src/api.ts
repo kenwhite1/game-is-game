@@ -5,6 +5,7 @@ import { handleResult } from './sdk'
 import { encodeLaunchParam } from '../../shared/sdk'
 import { achievementsView } from './achievements'
 import { doPrestige } from './xp'
+import { repairStreak } from './streak'
 import { BOT_USERNAME, PRESENCE_KEY, ADMIN_IDS, gameOverrides, type Env } from './env'
 import { economyReport } from './econ'
 import { anomalyReport } from './anomaly'
@@ -135,6 +136,17 @@ api.post('/profile/prestige', c => {
   const uid = c.get('uid')
   const r = doPrestige(uid)
   if (!r.ok) return c.json({ error: r.reason }, 400)
+  return c.json({ profile: getProfile(uid) })
+})
+
+// Ремонт серии (§9.3): бесплатно за 3 игры в окне или за 100🪙.
+const repairSchema = z.object({ method: z.enum(['pay', 'play']) })
+api.post('/streak/repair', async c => {
+  const parsed = repairSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'bad_request' }, 400)
+  const uid = c.get('uid')
+  const r = repairStreak(uid, parsed.data.method)
+  if (!r.ok) return c.json({ error: r.reason }, r.reason === 'too_poor' ? 402 : 400)
   return c.json({ profile: getProfile(uid) })
 })
 

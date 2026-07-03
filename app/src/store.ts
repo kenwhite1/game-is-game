@@ -77,6 +77,7 @@ interface S {
   loadSocial(): Promise<void>
   loadDetail(): Promise<void>
   prestige(): Promise<void>
+  repairStreak(method: 'pay' | 'play'): Promise<void>
   loadAchievements(): Promise<void>
   loadSeason(): Promise<void>
   claimSeasonTier(tier: number, track: 'free' | 'premium'): Promise<void>
@@ -429,6 +430,19 @@ export const useStore = create<S>((set, get) => ({
     } catch (e) {
       haptic('warn')
       get().showToast((e as { message?: string }).message === 'too_low' ? 'Престиж откроется на 100 уровне' : 'Не удалось')
+    }
+  },
+
+  async repairStreak(method) {
+    try {
+      const r = await api.repairStreak(method)
+      set({ profile: r.profile })
+      haptic('success')
+      get().showToast(`Серия восстановлена 🔧🔥 ${r.profile.streak} дней`)
+    } catch (e) {
+      haptic('warn')
+      const msg = (e as { message?: string }).message
+      get().showToast(msg === 'too_poor' ? 'Не хватает Game на ремонт' : msg === 'need_plays' ? 'Сыграй 3 матча для бесплатного ремонта' : 'Окно ремонта закрыто')
     }
   },
 

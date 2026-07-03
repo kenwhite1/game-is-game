@@ -47,6 +47,12 @@ export function matchReward(opts: { result: string; humanPlayers?: number; first
 // ─── Серия (streak) ───────────────────────────────────────────────────────
 /** Максимум «заморозок» серии на руках. */
 export const FREEZE_CAP = 5
+/** Стоимость ремонта серии, когда заморозки кончились (§9.3). */
+export const STREAK_REPAIR = 100
+/** Окно ремонта после разрыва (часы). */
+export const STREAK_REPAIR_HOURS = 24
+/** Сколько матчей нужно сыграть в окне, чтобы починить серию бесплатно. */
+export const STREAK_REPAIR_PLAYS = 3
 
 /** Ежедневная награда за серию: 10🪙 в первый день, плавно до 40🪙. */
 export function streakDailyReward(day: number): number {
@@ -79,6 +85,7 @@ export type CoinReason =
   | 'launch_breadth'
   | 'streak_daily'
   | 'streak_milestone'
+  | 'streak_repair'
   | 'quest'
   | 'gift_out'
   | 'gift_in'

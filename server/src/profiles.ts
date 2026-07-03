@@ -8,7 +8,7 @@ import { GAMES } from '../../shared/games'
 import { validUsername, normalizeUsername } from '../../shared/username'
 import { STARTER_COINS, LAUNCH_BREADTH_REWARD, LAUNCH_BREADTH_CAP } from '../../shared/economy'
 import { credit } from './ledger'
-import { tickStreak } from './streak'
+import { tickStreak, streakRepairInfo } from './streak'
 import { syncAchievements, achievementsSummary } from './achievements'
 import { grantSeasonXp } from './season'
 import { SEASON_XP } from '../../shared/season'
@@ -148,6 +148,7 @@ export function toProfile(u: UserRow): Profile {
     streakBest: u.streak_best ?? 0,
     freezes: u.streak_freezes ?? 0,
     streakPerfect: (u.streak_perfect ?? 1) === 1,
+    streakRepair: streakRepairInfo(u.id),
     opens: u.opens,
     xp,
     level: levelInfo(xp).level,
