@@ -680,6 +680,29 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 .sp-rw { font-size: 12px; font-weight: 900; color: var(--brown-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sp-tag { font-size: 10px; font-weight: 900; color: var(--blue-deep); flex-shrink: 0; }
 .sp-cell.claimed .sp-tag { color: var(--green-deep); }
+
+/* -- cross-game events (festival) ----------------------------- */
+.fest-card { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; cursor: pointer; margin-top: 12px;
+  border: none; padding: 13px 15px; color: #2a1640;
+  background: linear-gradient(135deg, #ffe259, #ffa751 60%, #ff5e7e); }
+.fest-emoji { font-size: 30px; line-height: 1; flex-shrink: 0; }
+.fest-tx { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.fest-name { font-size: 15px; font-weight: 900; }
+.fest-sub { font-size: 12px; font-weight: 800; color: rgba(42,22,64,.75); }
+.fest-open { font-size: 12px; font-weight: 900; color: #7a1030; flex-shrink: 0; }
+.fest-badge { font-size: 11px; font-weight: 900; color: #fff; background: #e2574c; padding: 4px 10px; border-radius: 999px; flex-shrink: 0; }
+.fest-tokens { margin-left: auto; font-size: 14px; font-weight: 900; color: var(--brown-deep);
+  background: #fff3c4; padding: 7px 13px; border-radius: 999px; box-shadow: inset 0 0 0 1.5px #ffd166; }
+.fest-comm { background: var(--card-2); border-radius: 14px; padding: 12px; box-shadow: inset 0 0 0 1px var(--line); }
+.fest-comm-t { font-size: 13px; font-weight: 900; color: var(--brown-deep); }
+.fest-comm-f { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 7px; font-size: 12px; font-weight: 900; color: var(--ink-soft); }
+.fest-shop { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.fest-item { border: none; cursor: pointer; font: inherit; background: var(--card-2); border-radius: 14px; padding: 12px;
+  box-shadow: inset 0 0 0 1px var(--line); display: flex; flex-direction: column; gap: 7px; align-items: flex-start; }
+.fest-item:disabled { cursor: default; opacity: .7; }
+.fest-item-n { font-size: 13px; font-weight: 900; color: var(--brown-deep); }
+.fest-item-p { font-size: 12px; font-weight: 900; color: #fff; background: var(--accent); padding: 4px 11px; border-radius: 999px; box-shadow: 0 2px 0 var(--accent-deep); }
+.fest-item-p.owned { background: rgba(52,199,89,.14); color: var(--green-deep); box-shadow: none; }
 .q-done { width: 28px; height: 28px; border-radius: 999px; background: #ddf1df; color: #37833f;
   display: grid; place-items: center; font-size: 14px; font-weight: 900; flex-shrink: 0; }
 .q-claim { border: none; cursor: pointer; flex-shrink: 0; font: inherit; font-size: 12.5px; font-weight: 900;

@@ -12,6 +12,7 @@ import { tickStreak } from './streak'
 import { syncAchievements, achievementsSummary } from './achievements'
 import { grantSeasonXp } from './season'
 import { SEASON_XP } from '../../shared/season'
+import { tickCommunity, settleExpired } from './festival'
 
 interface UserRow {
   id: number
@@ -239,6 +240,9 @@ export function recordOpen(id: number, gameId: string): Profile {
   if (st.ticked) grantSeasonXp(id, SEASON_XP.streakDay)
   // Достижения широты/коллекции могли продвинуться — синкаем (идемпотентно).
   syncAchievements(id)
+  // События: тикаем общую цель и конвертируем токены завершившихся событий.
+  tickCommunity(1)
+  settleExpired(id)
 
   return getProfile(id)!
 }

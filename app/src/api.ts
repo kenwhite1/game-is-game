@@ -5,6 +5,7 @@ import type {
 } from '@shared/types'
 import type { AchievementsPayload } from '@shared/achievements'
 import type { SeasonView, Reward } from '@shared/season'
+import type { FestivalView } from '@shared/festival'
 
 let token: string | null = sessionStorage.getItem('gg_jwt')
 
@@ -64,6 +65,11 @@ export const api = {
   claimSeasonTier: (tier: number, track: 'free' | 'premium') =>
     req<{ reward: Reward; season: SeasonView; profile: Profile }>('/season/claim', { tier, track }),
   passInvoice: () => req<{ link: string }>('/season/premium'),
+
+  festival: () => req<{ festival: FestivalView | null }>('/festival'),
+  claimEventQuest: (questId: string) => req<{ tokens: number; festival: FestivalView }>('/festival/quest/claim', { questId }),
+  claimCommunity: () => req<{ festival: FestivalView }>('/festival/community/claim', {}),
+  buyEventItem: (itemId: string) => req<{ festival: FestivalView }>('/festival/shop/buy', { itemId }),
 
   cosmetics: () => req<Wardrobe>('/cosmetics'),
   equip: (slot: Slot, itemId: string) => req<{ profile: Profile; wardrobe: Wardrobe }>('/cosmetics/equip', { slot, itemId }),

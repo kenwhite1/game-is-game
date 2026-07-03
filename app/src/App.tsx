@@ -101,8 +101,68 @@ function Sheets() {
         {sheet === 'settings' && <Settings />}
         {sheet === 'editProfile' && <EditProfile onDone={close} />}
         {sheet === 'season' && <SeasonPass />}
+        {sheet === 'festival' && <Festival />}
       </div>
     </div>
+  )
+}
+
+function Festival() {
+  const f = useStore(s => s.festival)
+  const claimQuest = useStore(s => s.claimEventQuest)
+  const claimCommunity = useStore(s => s.claimCommunity)
+  const buy = useStore(s => s.buyEventItem)
+  if (!f) return <p className="soft">Событие завершилось.</p>
+  const days = Math.max(0, Math.ceil((f.endsMs - Date.now()) / 86_400_000))
+  const cpct = Math.min(100, Math.round((f.community.value / f.community.target) * 100))
+  return (
+    <>
+      <div className="sp-head">
+        <div>
+          <h2 style={{ marginBottom: 2 }}>{f.emoji} {f.name}</h2>
+          <div className="soft" style={{ fontSize: 12.5, fontWeight: 800 }}>осталось {days} дн.</div>
+        </div>
+        <span className="fest-tokens">🎟 {f.tokens}</span>
+      </div>
+
+      <div className="kicker" style={{ margin: '4px 0 8px' }}>Общая цель</div>
+      <div className="fest-comm">
+        <div className="fest-comm-t">{f.community.title}</div>
+        <div className="q-bar" style={{ marginTop: 6 }}><div className="q-fill" style={{ width: `${cpct}%`, background: 'linear-gradient(90deg,#ffd166,#ff7a00)' }} /></div>
+        <div className="fest-comm-f">
+          <span>{f.community.value.toLocaleString('ru')} / {f.community.target.toLocaleString('ru')}</span>
+          {f.community.reached && (f.community.claimed
+            ? <span className="soft" style={{ fontWeight: 900 }}>✓ {f.community.rewardName}</span>
+            : <button className="q-claim" onClick={() => void claimCommunity()}>Забрать «{f.community.rewardName}»</button>)}
+        </div>
+      </div>
+
+      <div className="kicker" style={{ margin: '16px 0 8px' }}>Задания события</div>
+      {f.quests.map(q => (
+        <div className="q-row" key={q.id} style={{ borderTop: 'none' }}>
+          <span className="q-emoji">{q.emoji}</span>
+          <div className="q-tx">
+            <div className="q-name" style={{ color: 'var(--ink)' }}>{q.title}</div>
+            <div className="q-bar"><div className="q-fill" style={{ width: `${Math.round((q.progress / q.target) * 100)}%` }} /></div>
+          </div>
+          {q.claimed
+            ? <span className="q-done" style={{ color: 'var(--green-deep)' }}>✓</span>
+            : q.done
+              ? <button className="q-claim" onClick={() => void claimQuest(q.id)}>+{q.tokens} 🎟</button>
+              : <span className="q-prog" style={{ color: 'var(--ink-soft)' }}>{q.progress}/{q.target}</span>}
+        </div>
+      ))}
+
+      <div className="kicker" style={{ margin: '16px 0 8px' }}>Магазин события</div>
+      <div className="fest-shop">
+        {f.shop.map(s => (
+          <button key={s.itemId} className={`fest-item ${s.owned ? 'owned' : ''}`} disabled={s.owned} onClick={() => void buy(s.itemId)}>
+            <span className="fest-item-n">{s.name}</span>
+            {s.owned ? <span className="fest-item-p owned">Куплено</span> : <span className="fest-item-p">🎟 {s.tokens}</span>}
+          </button>
+        ))}
+      </div>
+    </>
   )
 }
 

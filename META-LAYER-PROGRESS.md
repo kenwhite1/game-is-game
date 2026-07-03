@@ -76,9 +76,24 @@ Each phase is committed + deployed (Railway) before the next. Updated as the
   - Verified: accrual (+15 fresh launch), free claim (+50), idempotent, locked
     + no_premium gating, premium claim after unlock. UI renders, no errors.
 
+- **Phase 5 — Cross-game Events & Tokens** (this commit):
+  - `shared/festival.ts`: event config (quests / token shop / community goal),
+    one active "Летний движ" (July 2026), 🎟 `TOKEN_TO_COIN` expiry (10%).
+  - `server/src/festival.ts`: token balance, event-quest claims (windowed),
+    token shop buy, community counter + reward, `settleExpired` (ended-event
+    tokens → coins). Migration 018 (event_tokens/event_claims/event_community).
+    Community ticks on launches (recordOpen); item grants inlined (no cycle).
+  - Event-exclusive cosmetics (`unlock:{kind:'event'}`): «Летний», «Соучастник»,
+    frame «Лето».
+  - API: `/festival`, `/festival/quest/claim`, `/festival/community/claim`,
+    `/festival/shop/buy`. UI: Home festival card + full event sheet (tokens,
+    community bar, quests, token shop).
+  - Verified: quest claims (+tokens), not_done gating, token buy (−20) +
+    too_poor, community tick on launch, community reward grant. UI OK.
+
 ## Next (bible build order §17.2)
 
-- **5 — Events/Tokens**; **6 — Ranked/Glicko-2**;
+- **6 — Ranked/Glicko-2**;
   **7 — Social (referral-on-qualify, challenges, clans)**; **8 — Marketplace**.
 
 ## Needs the games (not hub-only)

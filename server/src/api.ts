@@ -9,6 +9,7 @@ import { getOrCreateUser, getProfile, recordOpen, recentGames, profileDetail, se
 import { addFriendByCode, removeFriend, friendsOf, activityFeed, leaderboard, socialSnapshot, giftCoins } from './social'
 import { questsOf, weeklyQuestsOf, claimQuest, rerollQuest, rerollsLeft } from './quests'
 import { seasonView, claimTier } from './season'
+import { festivalView, claimEventQuest, claimCommunity, buyEventItem } from './festival'
 import { PASS_PREMIUM_STARS } from '../../shared/wallet'
 import { packById } from '../../shared/wallet'
 import { bot } from './bot'
@@ -252,6 +253,36 @@ api.post('/season/claim', async c => {
   const r = claimTier(uid, parsed.data.tier, parsed.data.track)
   if (!r.ok) return c.json({ error: r.reason }, r.reason === 'claimed' ? 409 : 400)
   return c.json({ reward: r.reward, season: seasonView(uid), profile: getProfile(uid) })
+})
+
+// ─── Cross-game Events (§12) ─────────────────────────────────────────────
+api.get('/festival', c => c.json({ festival: festivalView(c.get('uid')) }))
+
+const eventQuestSchema = z.object({ questId: z.string().min(1).max(48) })
+api.post('/festival/quest/claim', async c => {
+  const parsed = eventQuestSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'bad_request' }, 400)
+  const uid = c.get('uid')
+  const r = claimEventQuest(uid, parsed.data.questId)
+  if (!r.ok) return c.json({ error: r.reason }, r.reason === 'claimed' ? 409 : 400)
+  return c.json({ tokens: r.tokens, festival: festivalView(uid) })
+})
+
+api.post('/festival/community/claim', c => {
+  const uid = c.get('uid')
+  const r = claimCommunity(uid)
+  if (!r.ok) return c.json({ error: r.reason }, r.reason === 'claimed' ? 409 : 400)
+  return c.json({ festival: festivalView(uid), wardrobeStale: true })
+})
+
+const eventBuySchema = z.object({ itemId: z.string().min(1).max(48) })
+api.post('/festival/shop/buy', async c => {
+  const parsed = eventBuySchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'bad_request' }, 400)
+  const uid = c.get('uid')
+  const r = buyEventItem(uid, parsed.data.itemId)
+  if (!r.ok) return c.json({ error: r.reason }, r.reason === 'too_poor' ? 402 : 400)
+  return c.json({ festival: festivalView(uid) })
 })
 
 // Счёт Stars на премиум-пропуск. Разблокировку делает вебхук после оплаты.

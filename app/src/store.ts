@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type { GameCard, GameMeta, Profile, ProfileDetail, Friend, ActivityItem, LeaderRow, Wardrobe, Slot, RatingValue, Quest } from '@shared/types'
 import type { AchievementsPayload } from '@shared/achievements'
 import type { SeasonView } from '@shared/season'
+import type { FestivalView } from '@shared/festival'
 import { GAMES, defaultLink } from '@shared/games'
 import { api } from './api'
 import { haptic, openGame as openGameLink, openInvoice, getStartParam, inTelegram } from './telegram'
@@ -11,7 +12,7 @@ import { playSfx, isSoundOn, setSoundOn } from './sound'
 const STATIC_CATALOG: GameCard[] = GAMES.map(g => ({ ...g, link: defaultLink(g.bot) }))
 
 export type Tab = 'home' | 'shop' | 'style' | 'friends' | 'profile'
-type Sheet = 'about' | 'help' | 'settings' | 'editProfile' | 'season' | null
+type Sheet = 'about' | 'help' | 'settings' | 'editProfile' | 'season' | 'festival' | null
 
 interface S {
   ready: boolean
@@ -31,6 +32,7 @@ interface S {
   detail: ProfileDetail | null
   achievements: AchievementsPayload | null
   season: SeasonView | null
+  festival: FestivalView | null
   friends: Friend[]
   activity: ActivityItem[]
   leaderboard: LeaderRow[]
@@ -66,6 +68,10 @@ interface S {
   loadSeason(): Promise<void>
   claimSeasonTier(tier: number, track: 'free' | 'premium'): Promise<void>
   buyPremium(): Promise<void>
+  loadFestival(): Promise<void>
+  claimEventQuest(questId: string): Promise<void>
+  claimCommunity(): Promise<void>
+  buyEventItem(itemId: string): Promise<void>
   loadWardrobe(): Promise<void>
   equip(slot: Slot, itemId: string): Promise<void>
   buy(itemId: string, name: string): Promise<boolean>
@@ -93,6 +99,7 @@ export const useStore = create<S>((set, get) => ({
   detail: null,
   achievements: null,
   season: null,
+  festival: null,
   friends: [],
   activity: [],
   leaderboard: [],
@@ -130,6 +137,8 @@ export const useStore = create<S>((set, get) => ({
       void get().refreshQuests()
       // Прогресс сезонного пропуска для карточки на «Доме».
       void get().loadSeason()
+      // Активное событие (если идёт) — для баннера на «Доме».
+      void get().loadFestival()
     } catch {
       // гость или офлайн: показываем меню из публичного каталога или статики
       try {
@@ -383,6 +392,50 @@ export const useStore = create<S>((set, get) => ({
     } catch {
       haptic('warn')
       get().showToast('Не получилось открыть счёт')
+    }
+  },
+
+  async loadFestival() {
+    try {
+      const r = await api.festival()
+      set({ festival: r.festival })
+    } catch { /* офлайн */ }
+  },
+
+  async claimEventQuest(questId) {
+    try {
+      const r = await api.claimEventQuest(questId)
+      set({ festival: r.festival })
+      haptic('success')
+      if (get().soundOn) playSfx('open')
+      get().showToast(`Награда события: +${r.tokens} 🎟`)
+    } catch (e) {
+      haptic('warn')
+      get().showToast((e as { message?: string }).message === 'claimed' ? 'Уже получено' : 'Задание ещё не выполнено')
+    }
+  },
+
+  async claimCommunity() {
+    try {
+      const r = await api.claimCommunity()
+      set({ festival: r.festival, wardrobeLoaded: false })
+      haptic('success')
+      get().showToast('Награда сообщества получена 🎉')
+    } catch (e) {
+      haptic('warn')
+      get().showToast((e as { message?: string }).message === 'claimed' ? 'Уже получено' : 'Цель ещё не достигнута')
+    }
+  },
+
+  async buyEventItem(itemId) {
+    try {
+      const r = await api.buyEventItem(itemId)
+      set({ festival: r.festival, wardrobeLoaded: false })
+      haptic('success')
+      get().showToast('Куплено за 🎟')
+    } catch (e) {
+      haptic('warn')
+      get().showToast((e as { message?: string }).message === 'too_poor' ? 'Не хватает 🎟' : 'Не удалось купить')
     }
   },
 

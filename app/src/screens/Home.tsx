@@ -98,6 +98,7 @@ export function Home() {
     <div className="tab-page stagger">
       {profile && <PlayerBanner onOpen={() => setTab('profile')} />}
 
+      {profile && <FestivalCard />}
       {profile && <SeasonCard />}
       {profile && quests.length > 0 && <QuestsCard />}
       {profile && <WeeklyCard />}
@@ -360,6 +361,24 @@ function QuestsCard() {
         <QuestRow key={q.id} q={q} onReroll={() => void rerollQuest(q.id)} />
       ))}
     </div>
+  )
+}
+
+function FestivalCard() {
+  const festival = useStore(s => s.festival)
+  const openSheet = useStore(s => s.openSheet)
+  if (!festival) return null
+  const claimable = festival.quests.filter(q => q.done && !q.claimed).length + (festival.community.reached && !festival.community.claimed ? 1 : 0)
+  const days = Math.max(0, Math.ceil((festival.endsMs - Date.now()) / 86_400_000))
+  return (
+    <button className="card fest-card" onClick={() => openSheet('festival')}>
+      <span className="fest-emoji">{festival.emoji}</span>
+      <span className="fest-tx">
+        <span className="fest-name">{festival.name}</span>
+        <span className="fest-sub">🎟 {festival.tokens} · осталось {days} дн.</span>
+      </span>
+      {claimable > 0 ? <span className="fest-badge">забрать: {claimable}</span> : <span className="fest-open">Открыть →</span>}
+    </button>
   )
 }
 
