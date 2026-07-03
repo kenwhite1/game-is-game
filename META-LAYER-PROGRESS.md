@@ -193,31 +193,34 @@ Each phase is committed + deployed (Railway) before the next. Updated as the
     кап 40/час/игра + невозможная скорость → тихое удержание награды/прогресса;
     `anomalyReport()` в /admin/economy.
 
-## Status: hub-buildable meta-layer effectively doc-complete
+- **Loop batch #2 «finish all that»** (this run, 12 commits `433497d`→`f2d0d58`):
+  cleared the entire in-repo backlog. Each committed + verified on a throwaway DB.
+  - **§9.3** ремонт серии (24ч окно: 3 игры или 100🪙, миграция 029).
+  - **§7A ⑤⑥⑦** дневные ладдеры (day_games/day_cats пики + varietyTick, мигр. 030).
+  - **§12** ротация событий (5 RU-праздников) + spotlight-множитель + 11 косметик.
+  - **§8.3** кооп-квесты (общий таргет, награда обоим, миграция 031).
+  - **§13.2** настоящий Glicko-2 (opponents[] в SDK, rd/vol, мигр. 032) + мягкий
+    сброс + распад; **§7A ⑱** frenemies.
+  - **§10.6** перекраска (hue-rotate сток, мигр. 033) + **§10.7** +48 косметик
+    (→230; фикс дубля id `title_legend`).
+  - **§9.5** дружеские серии (мигр. 034) + «последний шанс» пуш (таймер).
 
-Almost every bible item that can live in the hub is shipped. What genuinely
-remains:
+## Status: hub-side bible COMPLETE — only the out-of-repo rollout remains
 
-**Out of this repo (the real finish line):**
+Every bible item that can live in the hub is now shipped and verified
+(typecheck + app build + catalogue invariants all green; migrations 025–034).
+
+**The one true remaining item — out of this repo:**
 - **Per-game `ggReport()` adoption** — each of the 41 game repos reads the launch
   token (`decodeLaunchParam`) and reports match outcomes with the `stats` keys in
-  `SDK-PER-GAME.md`. Pipe + rewards + all 410 per-game achievements + token
-  delivery are live here; a game lights up its outcome layer the moment it
-  integrates. Cannot be done from this repo.
+  `SDK-PER-GAME.md`. The pipe, rewards, all 410 per-game achievements, token
+  delivery, Glicko-2 opponents, and every meta system are live here; a game
+  lights up its outcome layer the moment it integrates. Cannot be done from this
+  repo.
 
-**In-repo, deferred (each a focused vertical — good next loop targets):**
-- **§9 depth (rest):** streak repair (24h window, pay-100🪙 / play-3), friend
-  streaks (+shared counter, pairing), last-chance push (needs a near-midnight
-  cron).
-- **§8.3 co-op friend quests** — weekly shared target + shared reward (pairing).
-- **§13.2 true Glicko-2** + decay + soft-reset — needs opponent ids in the SDK
-  report (schema extension); Elo-vs-field proxy shipped.
-- **§12 event rotation** — RU-holiday calendar + multiplier-weekend/tournament
-  archetypes (framework + one event exist).
-- **§7A day-ladders ⑤⑥⑦** (variety-marathon / seven-for-seven / marathoner) +
-  ⑱ frenemies — need day-scoped counters / friend-opponent ids.
-- **§10.6 recolor sink** — deferred (most render-cross-cutting; low econ value).
-- **§10.7** grow cosmetics catalogue toward ~400 (data volume).
+**Ongoing content (not a code gap):**
+- **§10.7** cosmetics catalogue is at 230; the ~400 year-one target is a content
+  drip (each item is a data row — near-zero marginal cost).
 
 ## Needs the games (not hub-only)
 
