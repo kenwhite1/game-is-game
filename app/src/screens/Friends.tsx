@@ -7,6 +7,7 @@ import { copyText, shareInvite } from '../telegram'
 import { timeAgo, isOnline, gameById } from '../util'
 import { REFERRER_REWARD, REFERRED_BONUS, inviteLink } from '@shared/referrals'
 import { isTradeable } from '@shared/cosmetics'
+import { COOP_REWARD } from '@shared/coop'
 import type { Friend } from '@shared/types'
 
 type Seg = 'friends' | 'board' | 'feed'
@@ -41,6 +42,9 @@ export function Friends() {
   const loadBoards = useStore(s => s.loadBoards)
   const loadClan = useStore(s => s.loadClan)
   const challengeFriend = useStore(s => s.challengeFriend)
+  const coop = useStore(s => s.coop)
+  const coopStart = useStore(s => s.coopStart)
+  const coopClaim = useStore(s => s.coopClaim)
 
   const [seg, setSeg] = useState<Seg>('friends')
   const [code, setCode] = useState('')
@@ -96,6 +100,26 @@ export function Friends() {
             <button className="cbtn" onClick={onShare}><ShareIcon /> Пригласить друга</button>
           </div>
 
+          {coop.length > 0 && (
+            <>
+              <div className="sec"><h2>Кооп-квесты 🤝</h2><span className="sub">вместе с другом</span></div>
+              {coop.map(c => {
+                const pct = Math.min(100, Math.round((c.progress / c.target) * 100))
+                return (
+                  <div className="coop-card" key={c.id}>
+                    <div className="cc-top">С <b>{c.partnerName}</b> — вместе выиграть {c.target} за неделю</div>
+                    <div className="ach-bar"><div className="ach-fill" style={{ width: `${pct}%` }} /></div>
+                    <div className="cc-bot">
+                      <span>{c.progress} / {c.target}</span>
+                      {c.done && !c.claimed && <button className="btn sm accent" onClick={() => void coopClaim(c.id)}>Забрать {COOP_REWARD} Game 🤝</button>}
+                      {c.claimed && <span className="cc-done">✓ награда забрана</span>}
+                    </div>
+                  </div>
+                )
+              })}
+            </>
+          )}
+
           <div className="code-card">
             <div className="lab">Твой код друга</div>
             <div className="code">{myCode}</div>
@@ -143,6 +167,7 @@ export function Friends() {
                 </div>
                 <span className="lvl-badge">Ур. {f.level}</span>
                 <button className="iconbtn" style={{ width: 36, height: 36, fontSize: 16 }} onClick={() => challengeFriend(f)} aria-label={`Бросить вызов: ${f.name}`}>⚔️</button>
+                <button className="iconbtn" style={{ width: 36, height: 36, fontSize: 16 }} onClick={() => void coopStart(f.id)} aria-label={`Кооп-квест: ${f.name}`}>🤝</button>
                 <button className="iconbtn" style={{ width: 36, height: 36, fontSize: 17 }} onClick={() => setGiftFor(f)} aria-label={`Подарить Game: ${f.name}`}>🎁</button>
                 <button className="iconbtn" style={{ width: 36, height: 36, color: 'var(--red)' }} onClick={() => removeFriend(f.id)} aria-label="Удалить из друзей"><CloseIcon /></button>
               </div>

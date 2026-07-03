@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { GameCard, GameMeta, Profile, ProfileDetail, Friend, ActivityItem, LeaderRow, Wardrobe, Slot, RatingValue, Quest } from '@shared/types'
 import type { AchievementsPayload } from '@shared/achievements'
+import type { CoopView } from '@shared/coop'
 import type { SeasonView } from '@shared/season'
 import type { FestivalView } from '@shared/festival'
 import type { RankedView, Boards } from '@shared/ranked'
@@ -49,6 +50,7 @@ interface S {
   leaderboard: LeaderRow[]
   /** Сколько новых игроков пришло по моей ссылке-приглашению. */
   invited: number
+  coop: CoopView[]
   socialLoaded: boolean
   wardrobe: Wardrobe | null
   wardrobeLoaded: boolean
@@ -70,6 +72,8 @@ interface S {
   buyCoins(packId: string): Promise<void>
   gift(friendId: number, amount: number): Promise<{ ok: boolean; error?: string }>
   giftCosmetic(friendId: number, itemId: string): Promise<{ ok: boolean; error?: string }>
+  coopStart(friendId: number): Promise<void>
+  coopClaim(id: number): Promise<void>
   openSheet(s: Sheet): void
   toggleSound(): void
   showToast(msg: string): void
@@ -139,6 +143,7 @@ export const useStore = create<S>((set, get) => ({
   activity: [],
   leaderboard: [],
   invited: 0,
+  coop: [],
   socialLoaded: false,
   wardrobe: null,
   wardrobeLoaded: false,
@@ -332,6 +337,31 @@ export const useStore = create<S>((set, get) => ({
     }
   },
 
+  async coopStart(friendId) {
+    try {
+      const r = await api.coopStart(friendId)
+      set({ coop: r.coop })
+      haptic('success')
+      get().showToast('Кооп-квест начат 🤝 Играйте вместе!')
+    } catch (e) {
+      haptic('warn')
+      get().showToast((e as { message?: string }).message === 'not_friends' ? 'Сначала добавь в друзья' : 'Не удалось начать')
+    }
+  },
+
+  async coopClaim(id) {
+    try {
+      const r = await api.coopClaim(id)
+      set({ profile: r.profile, coop: r.coop })
+      haptic('success')
+      if (get().soundOn) playSfx('open')
+      get().showToast('Кооп-награда получена 🤝')
+    } catch (e) {
+      haptic('warn')
+      get().showToast((e as { message?: string }).message === 'not_done' ? 'Цель ещё не достигнута' : 'Не удалось')
+    }
+  },
+
   openGameSheet(id) {
     if (id) {
       haptic('tap')
@@ -408,7 +438,7 @@ export const useStore = create<S>((set, get) => ({
   async loadSocial() {
     try {
       const r = await api.social()
-      set({ friends: r.friends, activity: r.activity, leaderboard: r.leaderboard, invited: r.invited ?? 0, socialLoaded: true })
+      set({ friends: r.friends, activity: r.activity, leaderboard: r.leaderboard, invited: r.invited ?? 0, coop: r.coop ?? [], socialLoaded: true })
     } catch { /* офлайн — оставляем что есть */ }
   },
 

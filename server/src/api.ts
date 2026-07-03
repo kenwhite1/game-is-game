@@ -9,6 +9,7 @@ import { repairStreak } from './streak'
 import { BOT_USERNAME, PRESENCE_KEY, ADMIN_IDS, gameOverrides, type Env } from './env'
 import { economyReport } from './econ'
 import { anomalyReport } from './anomaly'
+import { startCoop, claimCoop, coopOf } from './coop'
 import { touchPresence, clearPresence } from './presence'
 import { getOrCreateUser, getProfile, recordOpen, recentGames, profileDetail, setUsername, userExists } from './profiles'
 import { addFriendByCode, removeFriend, friendsOf, activityFeed, leaderboard, socialSnapshot, giftCoins, giftCosmetic, acceptChallenge } from './social'
@@ -380,6 +381,26 @@ api.post('/gift-cosmetic', async c => {
     void bot.api.sendMessage(parsed.data.friendId, `🎁 ${sender.name} подарил(а) тебе предмет! Загляни в гардероб.`).catch(() => {})
   }
   return c.json({ ok: true, itemId: r.itemId })
+})
+
+// Кооп-квесты с другом (§8.3): начать общий недельный таргет и забрать награду.
+const coopStartSchema = z.object({ friendId: z.number().int().positive() })
+api.post('/coop/start', async c => {
+  const parsed = coopStartSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'bad_request' }, 400)
+  const uid = c.get('uid')
+  const r = startCoop(uid, parsed.data.friendId)
+  if (!r.ok) return c.json({ error: r.reason }, 400)
+  return c.json({ coop: coopOf(uid) })
+})
+const coopClaimSchema = z.object({ id: z.number().int().positive() })
+api.post('/coop/claim', async c => {
+  const parsed = coopClaimSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'bad_request' }, 400)
+  const uid = c.get('uid')
+  const r = claimCoop(uid, parsed.data.id)
+  if (!r.ok) return c.json({ error: r.reason }, 400)
+  return c.json({ profile: getProfile(uid), coop: coopOf(uid) })
 })
 
 // ─── Social: friends, activity, leaderboard ──────────────────────────────

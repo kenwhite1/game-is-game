@@ -5,6 +5,7 @@ import { defaultColor } from '../../shared/avatars'
 import { DEFAULT_EQUIP, cosmeticById, isTradeable, type Look } from '../../shared/cosmetics'
 import { getProfile } from './profiles'
 import { writeFeed } from './events'
+import { coopOf } from './coop'
 import { invitedCount } from './referrals'
 import { presenceOf } from './presence'
 import { credit, debit } from './ledger'
@@ -242,6 +243,7 @@ export function socialSnapshot(uid: number) {
     activity: activityFeed(uid),
     leaderboard: leaderboard(uid),
     invited: invitedCount(uid),
+    coop: coopOf(uid),
   }
 }
 

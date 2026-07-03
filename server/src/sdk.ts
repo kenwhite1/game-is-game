@@ -7,6 +7,7 @@ import { getProfile } from './profiles'
 import { syncAchievements } from './achievements'
 import { updateDayPeaks } from './dayladders'
 import { awardMatchTokens } from './festival'
+import { tickCoop } from './coop'
 import { grantSeasonXp } from './season'
 import { SEASON_XP } from '../../shared/season'
 import { grantAccountXp } from './xp'
@@ -105,6 +106,7 @@ export function handleResult(launchToken: string | undefined, rawBody: unknown, 
   tickStreak(uid)
   updateDayPeaks(uid) // §7A ⑥: пик выигранных жанров за день (для «Семь на семь»)
   awardMatchTokens(uid, gameId, rep.result) // §12.2: бонусные 🎟 в spotlight-жанре
+  if (rep.result === 'win') tickCoop(uid) // §8.3: победа двигает общий кооп-таргет
   // Победы двигают достижения (Центурион, мастера категорий, «люди»…).
   syncAchievements(uid)
   // Ранговый рейтинг (только скилл-игры против людей).

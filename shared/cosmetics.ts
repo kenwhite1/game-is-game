@@ -327,6 +327,7 @@ export const TITLE_ITEMS: TitleItem[] = [
   T('title_universal', 'Универсал', 'epic', 'Заслуги', { kind: 'achievement', achId: 'category_conqueror', tierIndex: 2 }),
   T('title_legend', 'Легенда GG', 'legendary', 'Заслуги', { kind: 'achievement', achId: 'centurion', tierIndex: 3 }),
   T('title_devoted', 'Преданный', 'epic', 'Заслуги', { kind: 'streak', days: 30 }),
+  T('title_coop', 'Товарищ', 'epic', 'Заслуги', { kind: 'event', event: 'coop' }), // кооп-квест (§8.3), выдаётся грантом
   // Событийные (§12): только из магазина события за 🎟, либо общая цель.
   T('title_summer', 'Летний', 'rare', 'События', { kind: 'event', event: 'summer26' }),
   T('title_community', 'Соучастник', 'epic', 'События', { kind: 'event', event: 'summer26' }),

@@ -4,6 +4,7 @@ import type {
   Friend, ActivityItem, LeaderRow, Wardrobe, Slot, RatingValue, Quest,
 } from '@shared/types'
 import type { AchievementsPayload } from '@shared/achievements'
+import type { CoopView } from '@shared/coop'
 import type { SeasonView, Reward } from '@shared/season'
 import type { FestivalView } from '@shared/festival'
 import type { RankedView, Boards } from '@shared/ranked'
@@ -33,6 +34,7 @@ export interface SocialSnapshot {
   leaderboard: LeaderRow[]
   /** Сколько новых игроков пришло по моей реферальной ссылке. */
   invited: number
+  coop: CoopView[]
 }
 
 export const api = {
@@ -54,6 +56,8 @@ export const api = {
   rerollQuest: (questId: string) => req<{ quests: Quest[]; free: boolean; profile: Profile; rerollsLeft: number }>('/quests/reroll', { questId }),
   gift: (friendId: number, amount: number) => req<{ amount: number; profile: Profile; friends: Friend[] }>('/gift', { friendId, amount }),
   giftCosmetic: (friendId: number, itemId: string) => req<{ ok: boolean; itemId: string }>('/gift-cosmetic', { friendId, itemId }),
+  coopStart: (friendId: number) => req<{ coop: CoopView[] }>('/coop/start', { friendId }),
+  coopClaim: (id: number) => req<{ profile: Profile; coop: CoopView[] }>('/coop/claim', { id }),
 
   profileDetail: () => req<ProfileDetail>('/profile/detail'),
   prestige: () => req<{ profile: Profile }>('/profile/prestige'),
