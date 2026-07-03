@@ -16,6 +16,8 @@ export function Shop() {
   const buy = useStore(s => s.buy)
   const equip = useStore(s => s.equip)
   const showToast = useStore(s => s.showToast)
+  const openSheet = useStore(s => s.openSheet)
+  const loadMarket = useStore(s => s.loadMarket)
   const [filter, setFilter] = useState<Filter>('all')
 
   if (!profile) {
@@ -89,6 +91,10 @@ export function Shop() {
           </div>
         </>
       )}
+
+      <button className="btn block ghost" style={{ marginTop: 4, marginBottom: 4 }} onClick={() => { void loadMarket(); openSheet('market') }}>
+        🏷️ Барахолка — обмен образами за Game
+      </button>
 
       <TopUp />
 

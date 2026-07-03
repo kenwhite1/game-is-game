@@ -394,6 +394,16 @@ export function shopPrice(item: Cosmetic): number | null {
   return item.unlock.kind === 'shop' ? item.unlock.price : null
 }
 
+// ── Торгуемость (§14.1) ────────────────────────────────────────────────────
+// По умолчанию ВСЁ несменяемо (bound): заслуги нельзя купить. Торгуется только
+// узкий набор ПОКУПНЫХ декоративных вещей — «нельзя купить флекс».
+export const TRADEABLE_IDS = new Set<string>([
+  'frame_amethyst', 'frame_electric', 'frame_diamond', 'c_candy', 'title_pro',
+])
+export function isTradeable(item: Cosmetic): boolean {
+  return item.unlock.kind === 'shop' && TRADEABLE_IDS.has(item.id)
+}
+
 /** Подпись условия для запертого предмета. */
 export function unlockLabel(item: Cosmetic, badgeName: (id: string) => string): string {
   switch (item.unlock.kind) {

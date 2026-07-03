@@ -118,10 +118,30 @@ Each phase is committed + deployed (Railway) before the next. Updated as the
     challenge reward + done/bad gating, ⚔️ buttons render.
   - Deferred: clans/teams, activity-feed enrichment (achievement/level events).
 
-## Next (bible build order §17.2)
+- **Phase 8 — Marketplace** (this commit): the deliberately-restrained last phase.
+  - `shared/cosmetics.ts` `isTradeable` + `TRADEABLE_IDS` (only a few shop items;
+    every earned reward stays bound — "you can never buy a flex").
+  - `shared/market.ts`: 10% burn fee, per-rarity price bounds, trade hold
+    (min opens), daily listing cap. `server/src/market.ts`: escrow (item pulled
+    from owner on list + un-equipped), atomic buy (burn 10%, seller gets 90%),
+    cancel returns item. Migration 021 `market_listings`.
+  - API `/market(+/list,/buy,/cancel)`. UI: "Барахолка" sheet from Shop (sell
+    form with rarity bounds, my lots, player lots).
+  - Verified: floor rejection, escrow removes ownership, 10% burn (buyer −200 /
+    seller +180 / 20 destroyed), own-guard, cancel restores item, bound items
+    rejected (`not_tradeable`). UI OK, no console errors.
 
-- **8 — Marketplace** (bound/tradeable split, gifting cosmetics, escrow + burn,
-  anti-fraud) — the deliberately-restrained last phase.
+## Status: hub-buildable meta-layer COMPLETE (Phases 0–8 + economy foundation)
+
+All bible phases that live in the hub are shipped & deployed. Remaining bible
+items are out-of-repo or polish:
+- **Per-game SDK adoption** — each of the 41 game repos calls `ggReport()` on
+  match end (the pipe + rewards already live here); the outcome layer lights up
+  per game as it integrates. Not doable from this repo.
+- Optional polish (future): clans/teams, activity-feed enrichment (publish
+  achievement/level/streak events), collections & set bonuses, cosmetic recolor
+  sink, slot price multipliers, XP-curve/prestige rework, true Glicko-2
+  (needs opponent ids in the SDK).
 
 ## Needs the games (not hub-only)
 

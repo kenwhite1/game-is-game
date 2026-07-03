@@ -103,8 +103,67 @@ function Sheets() {
         {sheet === 'season' && <SeasonPass />}
         {sheet === 'festival' && <Festival />}
         {sheet === 'boards' && <Boards />}
+        {sheet === 'market' && <Market />}
       </div>
     </div>
+  )
+}
+
+function Market() {
+  const market = useStore(s => s.market)
+  const listItem = useStore(s => s.listItem)
+  const buyListing = useStore(s => s.buyListing)
+  const cancelListing = useStore(s => s.cancelListing)
+  const [sellId, setSellId] = useState('')
+  const [price, setPrice] = useState('')
+  if (!market) return <p className="soft">Загрузка барахолки…</p>
+  const sell = market.sellable.find(s => s.itemId === sellId)
+  return (
+    <>
+      <h2 style={{ marginBottom: 2 }}>Барахолка</h2>
+      <p className="soft" style={{ fontSize: 12, fontWeight: 800, marginBottom: 12 }}>Обмен покупными образами за Game. Комиссия {market.feePct}% сгорает. Заслуги не продаются.</p>
+
+      <div className="kicker" style={{ margin: '4px 0 8px' }}>Выставить свой образ</div>
+      {market.sellable.length === 0 ? (
+        <p className="soft" style={{ fontSize: 12.5 }}>Нет торгуемых образов. Купи что-нибудь в магазине.</p>
+      ) : (
+        <div className="mk-sell">
+          <select className="input" value={sellId} onChange={e => { setSellId(e.target.value); setPrice('') }} style={{ flex: 1 }}>
+            <option value="">Выбери образ…</option>
+            {market.sellable.map(s => <option key={s.itemId} value={s.itemId}>{s.name} ({s.rarity})</option>)}
+          </select>
+          <input className="input" type="number" inputMode="numeric" placeholder={sell ? `${sell.floor}–${sell.ceil}` : 'Цена'}
+            value={price} onChange={e => setPrice(e.target.value)} style={{ width: 96 }} disabled={!sell} />
+          <button className="btn sm" disabled={!sell || !price} onClick={() => { if (sell) { void listItem(sell.itemId, Number(price)); setSellId(''); setPrice('') } }}>Продать</button>
+        </div>
+      )}
+
+      {market.mine.length > 0 && (
+        <>
+          <div className="kicker" style={{ margin: '16px 0 8px' }}>Мои лоты</div>
+          {market.mine.map(l => (
+            <div className="mk-row" key={l.id}>
+              <span className="mk-nm">{l.itemName} <span className="mk-rar">{l.rarity}</span></span>
+              <span className="mk-price"><span className="coin">G</span>{l.price}</span>
+              <button className="btn sm ghost" onClick={() => void cancelListing(l.id)}>Снять</button>
+            </div>
+          ))}
+        </>
+      )}
+
+      <div className="kicker" style={{ margin: '16px 0 8px' }}>Лоты игроков</div>
+      {market.listings.length === 0 ? (
+        <div className="empty"><div className="em">🏷️</div><div className="t">Пока пусто</div><div className="s">Загляни позже — тут появятся образы игроков.</div></div>
+      ) : (
+        market.listings.map(l => (
+          <div className="mk-row" key={l.id}>
+            <span className="mk-nm">{l.itemName} <span className="mk-rar">{l.rarity}</span><span className="mk-seller"> · {l.sellerName}</span></span>
+            <span className="mk-price"><span className="coin">G</span>{l.price}</span>
+            <button className="btn sm" disabled={market.coins < l.price} onClick={() => void buyListing(l.id)}>Купить</button>
+          </div>
+        ))
+      )}
+    </>
   )
 }
 

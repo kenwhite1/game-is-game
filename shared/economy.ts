@@ -93,3 +93,5 @@ export type CoinReason =
   | 'achievement'
   | 'season'
   | 'challenge'
+  | 'market_buy'
+  | 'market_sell'

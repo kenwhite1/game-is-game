@@ -4,6 +4,7 @@ import type { AchievementsPayload } from '@shared/achievements'
 import type { SeasonView } from '@shared/season'
 import type { FestivalView } from '@shared/festival'
 import type { RankedView, Boards } from '@shared/ranked'
+import type { MarketView } from '@shared/market'
 import { GAMES, defaultLink } from '@shared/games'
 import { api } from './api'
 import { haptic, openGame as openGameLink, openInvoice, getStartParam, inTelegram, shareInvite } from './telegram'
@@ -13,7 +14,7 @@ import { playSfx, isSoundOn, setSoundOn } from './sound'
 const STATIC_CATALOG: GameCard[] = GAMES.map(g => ({ ...g, link: defaultLink(g.bot) }))
 
 export type Tab = 'home' | 'shop' | 'style' | 'friends' | 'profile'
-type Sheet = 'about' | 'help' | 'settings' | 'editProfile' | 'season' | 'festival' | 'boards' | null
+type Sheet = 'about' | 'help' | 'settings' | 'editProfile' | 'season' | 'festival' | 'boards' | 'market' | null
 
 interface S {
   ready: boolean
@@ -36,6 +37,7 @@ interface S {
   festival: FestivalView | null
   ranked: RankedView | null
   boards: Boards | null
+  market: MarketView | null
   friends: Friend[]
   activity: ActivityItem[]
   leaderboard: LeaderRow[]
@@ -76,6 +78,10 @@ interface S {
   claimCommunity(): Promise<void>
   buyEventItem(itemId: string): Promise<void>
   loadBoards(): Promise<void>
+  loadMarket(): Promise<void>
+  listItem(itemId: string, price: number): Promise<void>
+  buyListing(listingId: number): Promise<void>
+  cancelListing(listingId: number): Promise<void>
   loadWardrobe(): Promise<void>
   equip(slot: Slot, itemId: string): Promise<void>
   buy(itemId: string, name: string): Promise<boolean>
@@ -108,6 +114,7 @@ export const useStore = create<S>((set, get) => ({
   festival: null,
   ranked: null,
   boards: null,
+  market: null,
   friends: [],
   activity: [],
   leaderboard: [],
@@ -435,6 +442,49 @@ export const useStore = create<S>((set, get) => ({
       const [b, r] = await Promise.all([api.boards(), api.ranked()])
       set({ boards: b.boards, ranked: r.ranked })
     } catch { /* офлайн */ }
+  },
+
+  async loadMarket() {
+    try {
+      const r = await api.market()
+      set({ market: r.market })
+    } catch { /* офлайн */ }
+  },
+
+  async listItem(itemId, price) {
+    try {
+      const r = await api.listItem(itemId, price)
+      set({ market: r.market, wardrobeLoaded: false })
+      haptic('success')
+      get().showToast('Лот выставлен 🏷️')
+    } catch (e) {
+      haptic('warn')
+      const m = (e as { message?: string }).message
+      get().showToast(m === 'trade_hold' ? 'Сыграй больше игр, чтобы торговать' : m === 'bad_price' ? 'Цена вне допустимых границ' : m === 'rate_limit' ? 'Лимит лотов на сегодня' : 'Не удалось выставить')
+    }
+  },
+
+  async buyListing(listingId) {
+    try {
+      const r = await api.buyListing(listingId)
+      set({ market: r.market, profile: r.profile, wardrobeLoaded: false })
+      haptic('success')
+      if (get().soundOn) playSfx('open')
+      get().showToast('Куплено на барахолке 🎉')
+    } catch (e) {
+      haptic('warn')
+      const m = (e as { message?: string }).message
+      get().showToast(m === 'too_poor' ? 'Не хватает Game' : m === 'gone' ? 'Лот уже продан' : 'Не удалось купить')
+    }
+  },
+
+  async cancelListing(listingId) {
+    try {
+      const r = await api.cancelListing(listingId)
+      set({ market: r.market, wardrobeLoaded: false })
+      haptic('tap')
+      get().showToast('Лот снят')
+    } catch { haptic('warn'); get().showToast('Не удалось снять лот') }
   },
 
   async claimEventQuest(questId) {

@@ -7,6 +7,7 @@ import type { AchievementsPayload } from '@shared/achievements'
 import type { SeasonView, Reward } from '@shared/season'
 import type { FestivalView } from '@shared/festival'
 import type { RankedView, Boards } from '@shared/ranked'
+import type { MarketView } from '@shared/market'
 
 let token: string | null = sessionStorage.getItem('gg_jwt')
 
@@ -57,6 +58,11 @@ export const api = {
 
   ranked: () => req<{ ranked: RankedView }>('/ranked'),
   boards: () => req<{ boards: Boards }>('/boards'),
+
+  market: () => req<{ market: MarketView }>('/market'),
+  listItem: (itemId: string, price: number) => req<{ market: MarketView }>('/market/list', { itemId, price }),
+  buyListing: (listingId: number) => req<{ market: MarketView; profile: Profile }>('/market/buy', { listingId }),
+  cancelListing: (listingId: number) => req<{ market: MarketView }>('/market/cancel', { listingId }),
 
   social: () => req<SocialSnapshot>('/social'),
   addFriend: (code: string) => req<{ friend: Friend; friends: Friend[] }>('/friends/add', { code }),

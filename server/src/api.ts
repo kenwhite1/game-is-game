@@ -11,6 +11,7 @@ import { questsOf, weeklyQuestsOf, claimQuest, rerollQuest, rerollsLeft } from '
 import { seasonView, claimTier } from './season'
 import { festivalView, claimEventQuest, claimCommunity, buyEventItem } from './festival'
 import { rankedOf, boards } from './ranked'
+import { marketView, listItem, buyListing, cancelListing } from './market'
 import { PASS_PREMIUM_STARS } from '../../shared/wallet'
 import { packById } from '../../shared/wallet'
 import { bot } from './bot'
@@ -330,6 +331,38 @@ api.post('/gift', async c => {
 // ─── Ranked & Leaderboards (§13) ─────────────────────────────────────────
 api.get('/ranked', c => c.json({ ranked: rankedOf(c.get('uid')) }))
 api.get('/boards', c => c.json({ boards: boards(c.get('uid')) }))
+
+// ─── Marketplace (§14) ───────────────────────────────────────────────────
+api.get('/market', c => c.json({ market: marketView(c.get('uid')) }))
+
+const listSchema = z.object({ itemId: z.string().min(1).max(48), price: z.number().int().min(1).max(100000) })
+api.post('/market/list', async c => {
+  const parsed = listSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'bad_request' }, 400)
+  const uid = c.get('uid')
+  const r = listItem(uid, parsed.data.itemId, parsed.data.price)
+  if (!r.ok) return c.json({ error: r.reason }, 400)
+  return c.json({ market: marketView(uid) })
+})
+
+const listingSchema = z.object({ listingId: z.number().int().positive() })
+api.post('/market/buy', async c => {
+  const parsed = listingSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'bad_request' }, 400)
+  const uid = c.get('uid')
+  const r = buyListing(uid, parsed.data.listingId)
+  if (!r.ok) return c.json({ error: r.reason }, r.reason === 'too_poor' ? 402 : 400)
+  return c.json({ market: marketView(uid), profile: getProfile(uid) })
+})
+
+api.post('/market/cancel', async c => {
+  const parsed = listingSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'bad_request' }, 400)
+  const uid = c.get('uid')
+  const r = cancelListing(uid, parsed.data.listingId)
+  if (!r.ok) return c.json({ error: r.reason }, 400)
+  return c.json({ market: marketView(uid) })
+})
 
 api.get('/social', c => c.json(socialSnapshot(c.get('uid'))))
 
