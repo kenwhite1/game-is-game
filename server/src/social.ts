@@ -2,8 +2,9 @@ import { db } from './db'
 import type { Friend, ActivityItem, LeaderRow } from '../../shared/types'
 import { levelInfo } from '../../shared/progression'
 import { defaultColor } from '../../shared/avatars'
-import { DEFAULT_EQUIP, type Look } from '../../shared/cosmetics'
+import { DEFAULT_EQUIP, cosmeticById, isTradeable, type Look } from '../../shared/cosmetics'
 import { getProfile } from './profiles'
+import { writeFeed } from './events'
 import { invitedCount } from './referrals'
 import { presenceOf } from './presence'
 import { credit, debit } from './ledger'
@@ -195,6 +196,42 @@ export function giftCoins(uid: number, friendId: number, amount: number): GiftRe
     db.prepare('INSERT INTO gifts (from_id, to_id, amount) VALUES (?,?,?)').run(uid, friendId, amount)
   })()
   return result
+}
+
+export const COSMETIC_GIFTS_PER_DAY = 3
+
+export type GiftItemResult =
+  | { ok: true; itemId: string }
+  | { ok: false; reason: 'not_found' | 'not_tradeable' | 'not_friends' | 'not_owned' | 'already_owns' | 'limit' }
+
+/** Подарить косметику другу (§14.2). Только ТОРГУЕМЫЕ вещи — заслуги остаются
+ *  bound («флекс нельзя подарить»). Дневной лимит + атомарный перевод владения
+ *  (у дарителя снимается и разэкипируется, другу выдаётся). Денег не касается. */
+export function giftCosmetic(uid: number, friendId: number, itemId: string): GiftItemResult {
+  const item = cosmeticById(itemId)
+  if (!item) return { ok: false, reason: 'not_found' }
+  if (!isTradeable(item)) return { ok: false, reason: 'not_tradeable' } // bound — нельзя
+  if (!db.prepare('SELECT 1 FROM friendships WHERE user_id=? AND friend_id=?').get(uid, friendId)) {
+    return { ok: false, reason: 'not_friends' }
+  }
+  if (!db.prepare('SELECT 1 FROM cosmetics_owned WHERE user_id=? AND item_id=?').get(uid, itemId)) {
+    return { ok: false, reason: 'not_owned' }
+  }
+  if (db.prepare('SELECT 1 FROM cosmetics_owned WHERE user_id=? AND item_id=?').get(friendId, itemId)) {
+    return { ok: false, reason: 'already_owns' }
+  }
+  const sentToday = (db.prepare("SELECT COUNT(*) AS n FROM gift_items WHERE from_id=? AND date(ts)=date('now')").get(uid) as { n: number }).n
+  if (sentToday >= COSMETIC_GIFTS_PER_DAY) return { ok: false, reason: 'limit' }
+
+  db.transaction(() => {
+    db.prepare('DELETE FROM cosmetics_owned WHERE user_id=? AND item_id=?').run(uid, itemId)
+    // Разэкипировать, если предмет надет (slot — контролируемый enum, не инъекция).
+    db.prepare(`UPDATE users SET ${item.slot}=NULL WHERE id=? AND ${item.slot}=?`).run(uid, itemId)
+    db.prepare('INSERT OR IGNORE INTO cosmetics_owned (user_id, item_id) VALUES (?,?)').run(friendId, itemId)
+    db.prepare('INSERT INTO gift_items (from_id, to_id, item_id) VALUES (?,?,?)').run(uid, friendId, itemId)
+  })()
+  writeFeed(uid, 'level', `подарил(а) предмет «${item.name}» другу 🎁`)
+  return { ok: true, itemId }
 }
 
 /** Сводка для соц-вкладок одним запросом. */

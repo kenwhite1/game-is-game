@@ -125,18 +125,22 @@ export function Shop() {
 /** Пакеты Game за Telegram Stars: счёт открывается прямо в Mini App. */
 function TopUp() {
   const buyCoins = useStore(s => s.buyCoins)
+  const boughtPacks = useStore(s => s.boughtPacks)
   return (
     <>
       <div className="sec"><h2>Пополнить баланс</h2><span className="sub">за Telegram Stars</span></div>
       <div className="pack-row">
-        {PACKS.map(p => (
-          <button key={p.id} className="pack" onClick={() => void buyCoins(p.id)} aria-label={`${p.title}: ${p.coins} Game за ${p.stars} Stars`}>
-            <span className="pack-emoji">{p.emoji}</span>
-            <span className="pack-coins"><span className="coin">G</span>{p.coins.toLocaleString('ru')}</span>
-            <span className="pack-stars">⭐ {p.stars}</span>
-            {p.tag && <span className="pack-tag">{p.tag}</span>}
-          </button>
-        ))}
+        {PACKS.map(p => {
+          const first = !boughtPacks.includes(p.id) // §4.5: первая покупка удваивает монеты
+          return (
+            <button key={p.id} className={`pack ${first ? 'pack-2x' : ''}`} onClick={() => void buyCoins(p.id)} aria-label={`${p.title}: ${p.coins} Game за ${p.stars} Stars${first ? ', первая покупка ×2' : ''}`}>
+              <span className="pack-emoji">{p.emoji}</span>
+              <span className="pack-coins"><span className="coin">G</span>{p.coins.toLocaleString('ru')}</span>
+              <span className="pack-stars">⭐ {p.stars}</span>
+              {first ? <span className="pack-tag pack-first">×2 первая</span> : p.tag && <span className="pack-tag">{p.tag}</span>}
+            </button>
+          )
+        })}
       </div>
     </>
   )

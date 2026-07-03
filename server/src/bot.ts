@@ -210,10 +210,11 @@ if (bot) {
     const pack = packById(parsed.packId ?? '')
     if (!pack) return
     // Монеты получает тот, кто заплатил; charge_id делает зачисление идемпотентным.
-    const credited = recordPayment(ctx.from.id, pack, sp.telegram_payment_charge_id)
-    if (credited) {
+    const res = recordPayment(ctx.from.id, pack, sp.telegram_payment_charge_id)
+    if (res.credited) {
+      const bonus = res.doubled ? '\n\n🎁 Удвоитель первой покупки: ×2 монет!' : ''
       await ctx.reply(
-        `Готово! ${pack.emoji} «${pack.title}» куплен: +${pack.coins.toLocaleString('ru')} Game на балансе 🎉\n\n` +
+        `Готово! ${pack.emoji} «${pack.title}» куплен: +${res.coins.toLocaleString('ru')} Game на балансе 🎉${bonus}\n\n` +
           `Квитанция: ${sp.telegram_payment_charge_id}\n` +
           'Если что-то не так с оплатой, команда /paysupport всегда рядом.',
         { reply_markup: appKeyboard() },

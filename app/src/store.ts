@@ -27,6 +27,7 @@ interface S {
   favorites: string[]
   ratings: Record<string, RatingValue>
   follows: string[]
+  boughtPacks: string[]
   meta: Record<string, GameMeta>
   quests: Quest[]
   weeklyQuests: Quest[]
@@ -68,6 +69,7 @@ interface S {
   rerollQuest(id: string): Promise<void>
   buyCoins(packId: string): Promise<void>
   gift(friendId: number, amount: number): Promise<{ ok: boolean; error?: string }>
+  giftCosmetic(friendId: number, itemId: string): Promise<{ ok: boolean; error?: string }>
   openSheet(s: Sheet): void
   toggleSound(): void
   showToast(msg: string): void
@@ -116,6 +118,7 @@ export const useStore = create<S>((set, get) => ({
   favorites: [],
   ratings: {},
   follows: [],
+  boughtPacks: [],
   meta: {},
   quests: [],
   weeklyQuests: [],
@@ -155,6 +158,7 @@ export const useStore = create<S>((set, get) => ({
         favorites: r.favorites ?? [],
         ratings: r.ratings ?? {},
         follows: r.follows ?? [],
+        boughtPacks: r.boughtPacks ?? [],
         meta: r.meta ?? {},
         quests: r.quests ?? [],
         botUsername: r.botUsername || get().botUsername,
@@ -306,6 +310,19 @@ export const useStore = create<S>((set, get) => ({
     try {
       const r = await api.gift(friendId, amount)
       set({ profile: r.profile, friends: r.friends })
+      haptic('success')
+      return { ok: true }
+    } catch (e) {
+      haptic('warn')
+      return { ok: false, error: (e as { message?: string }).message ?? 'request_failed' }
+    }
+  },
+
+  async giftCosmetic(friendId, itemId) {
+    try {
+      await api.giftCosmetic(friendId, itemId)
+      // Предмет ушёл из моего гардероба — перезагрузим при следующем открытии.
+      set({ wardrobeLoaded: false })
       haptic('success')
       return { ok: true }
     } catch (e) {

@@ -4,11 +4,31 @@ import { credit } from './ledger'
 
 // ─── Платежи Stars → Game ────────────────────────────────────────────────
 
+export interface PaymentResult {
+  /** Начислены ли монеты в этом вызове (false при повторе того же charge_id). */
+  credited: boolean
+  /** Итог монет с учётом удвоителя. */
+  coins: number
+  /** Сработал ли разовый удвоитель первой покупки этого пакета (§4.5). */
+  doubled: boolean
+}
+
+/** Куплен ли уже этот пакет игроком (для бейджа «×2 за первую покупку» в UI). */
+export function packsBought(uid: number): string[] {
+  return (db.prepare("SELECT DISTINCT pack_id FROM payments WHERE user_id=? AND status='paid'").all(uid) as { pack_id: string }[])
+    .map(r => r.pack_id)
+}
+
 /** Зачислить оплаченный пакет. Идемпотентно по charge_id: повторный апдейт
- *  от Telegram не зачислит монеты дважды. true = монеты начислены сейчас. */
-export function recordPayment(uid: number, pack: CoinPack, chargeId: string): boolean {
+ *  от Telegram не зачислит монеты дважды. §4.5: первая покупка КАЖДОГО пакета
+ *  удваивает монеты (разовый удвоитель — сильный буст конверсии, без инфляции). */
+export function recordPayment(uid: number, pack: CoinPack, chargeId: string): PaymentResult {
   let credited = false
+  let doubled = false
+  let coins = pack.coins
   db.transaction(() => {
+    // Первая покупка этого пакета? Считаем ДО вставки новой строки.
+    const priorSame = (db.prepare("SELECT COUNT(*) AS n FROM payments WHERE user_id=? AND pack_id=? AND status='paid'").get(uid, pack.id) as { n: number }).n
     const ins = db
       .prepare('INSERT OR IGNORE INTO payments (user_id, pack_id, stars, coins, charge_id) VALUES (?,?,?,?,?)')
       .run(uid, pack.id, pack.stars, pack.coins, chargeId)
@@ -16,9 +36,14 @@ export function recordPayment(uid: number, pack: CoinPack, chargeId: string): bo
     // Игрок мог прийти платежом раньше, чем открыл приложение.
     db.prepare("INSERT OR IGNORE INTO users (id, name, coins) VALUES (?, 'Игрок', 0)").run(uid)
     credit(uid, pack.coins, 'purchase', chargeId)
+    if (priorSame === 0) {
+      doubled = true
+      coins = pack.coins * 2
+      credit(uid, pack.coins, 'purchase', `${chargeId}:first2x`) // удвоитель — отдельная строка ledger
+    }
     credited = true
   })()
-  return credited
+  return { credited, coins, doubled }
 }
 
 export interface PaymentRow {

@@ -787,3 +787,6 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 .pack-tag { position: absolute; top: -7px; right: -4px; font-size: 9.5px; font-weight: 900;
   background: #54b15a; color: #fff; border-radius: 999px; padding: 3px 7px;
   box-shadow: 0 2px 5px rgba(40,90,40,.3); }
+/* §4.5 удвоитель первой покупки: подсветка пакета + жёлтый бейдж «×2» */
+.pack-2x { box-shadow: var(--shadow-lip), inset 0 0 0 2px #f2a93b; }
+.pack-first { background: #f2a93b; box-shadow: 0 2px 5px rgba(180,120,20,.35); }

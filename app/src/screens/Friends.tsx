@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useStore } from '../store'
 import { Avatar } from '../art/Avatar'
 import { GameTileIcon } from '../art/GameTileIcon'
@@ -6,6 +6,7 @@ import { CopyIcon, ShareIcon, PlusIcon, CloseIcon } from '../art/icons'
 import { copyText, shareInvite } from '../telegram'
 import { timeAgo, isOnline, gameById } from '../util'
 import { REFERRER_REWARD, REFERRED_BONUS, inviteLink } from '@shared/referrals'
+import { isTradeable } from '@shared/cosmetics'
 import type { Friend } from '@shared/types'
 
 type Seg = 'friends' | 'board' | 'feed'
@@ -216,10 +217,19 @@ export function Friends() {
 function GiftSheet({ friend, onClose }: { friend: Friend; onClose(): void }) {
   const profile = useStore(s => s.profile)
   const gift = useStore(s => s.gift)
+  const giftCosmetic = useStore(s => s.giftCosmetic)
+  const wardrobe = useStore(s => s.wardrobe)
+  const loadWardrobe = useStore(s => s.loadWardrobe)
   const showToast = useStore(s => s.showToast)
   const [amount, setAmount] = useState(100)
   const [busy, setBusy] = useState(false)
   const coins = profile?.coins ?? 0
+  // Гардероб мог не загрузиться (мы на вкладке «Друзья») — подтянем для списка подарков.
+  useEffect(() => { if (!wardrobe) void loadWardrobe() }, [wardrobe, loadWardrobe])
+  // §14.2: дарить можно только ТОРГУЕМЫЕ вещи, которыми владеешь (заслуги — bound).
+  const giftable = (wardrobe?.items ?? [])
+    .filter(i => i.owned && isTradeable(i.item))
+    .map(i => i.item)
 
   const send = async () => {
     if (busy) return
@@ -231,6 +241,19 @@ function GiftSheet({ friend, onClose }: { friend: Friend; onClose(): void }) {
       onClose()
     } else {
       showToast(GIFT_ERRORS[r.error ?? ''] ?? 'Не получилось отправить')
+    }
+  }
+
+  const sendItem = async (itemId: string, name: string) => {
+    if (busy) return
+    setBusy(true)
+    const r = await giftCosmetic(friend.id, itemId)
+    setBusy(false)
+    if (r.ok) {
+      showToast(`Подарок отправлен: «${name}» → ${friend.name} 🎁`)
+      onClose()
+    } else {
+      showToast(r.error === 'already_owns' ? 'У друга уже есть этот предмет' : r.error === 'limit' ? 'Лимит подарков-предметов на сегодня' : 'Не получилось подарить предмет')
     }
   }
 
@@ -256,6 +279,20 @@ function GiftSheet({ friend, onClose }: { friend: Friend; onClose(): void }) {
         <button className="btn accent" style={{ width: '100%', marginTop: 6 }} onClick={() => void send()} disabled={busy || amount > coins}>
           🎁 Подарить {amount} Game
         </button>
+
+        {giftable.length > 0 && (
+          <>
+            <div className="sec" style={{ margin: '16px 2px 8px' }}><h2 style={{ fontSize: 15 }}>Или подари предмет</h2><span className="sub">до 3 в день</span></div>
+            <div className="gift-presets">
+              {giftable.map(c => (
+                <button key={c.id} className="chip-cat" onClick={() => void sendItem(c.id, c.name)} disabled={busy}>
+                  {c.name}
+                </button>
+              ))}
+            </div>
+            <p className="soft" style={{ marginTop: 8 }}>Дарить можно только покупные вещи — заслуги остаются с тобой.</p>
+          </>
+        )}
       </div>
     </div>
   )

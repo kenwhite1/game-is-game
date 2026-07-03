@@ -53,6 +53,7 @@ export const api = {
   claimQuest: (questId: string) => req<{ reward: number; profile: Profile; quests: Quest[]; weekly: Quest[] }>('/quests/claim', { questId }),
   rerollQuest: (questId: string) => req<{ quests: Quest[]; free: boolean; profile: Profile; rerollsLeft: number }>('/quests/reroll', { questId }),
   gift: (friendId: number, amount: number) => req<{ amount: number; profile: Profile; friends: Friend[] }>('/gift', { friendId, amount }),
+  giftCosmetic: (friendId: number, itemId: string) => req<{ ok: boolean; itemId: string }>('/gift-cosmetic', { friendId, itemId }),
 
   profileDetail: () => req<ProfileDetail>('/profile/detail'),
   prestige: () => req<{ profile: Profile }>('/profile/prestige'),

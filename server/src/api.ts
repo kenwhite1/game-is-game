@@ -9,7 +9,7 @@ import { BOT_USERNAME, PRESENCE_KEY, ADMIN_IDS, gameOverrides, type Env } from '
 import { economyReport } from './econ'
 import { touchPresence, clearPresence } from './presence'
 import { getOrCreateUser, getProfile, recordOpen, recentGames, profileDetail, setUsername, userExists } from './profiles'
-import { addFriendByCode, removeFriend, friendsOf, activityFeed, leaderboard, socialSnapshot, giftCoins, acceptChallenge } from './social'
+import { addFriendByCode, removeFriend, friendsOf, activityFeed, leaderboard, socialSnapshot, giftCoins, giftCosmetic, acceptChallenge } from './social'
 import { questsOf, weeklyQuestsOf, claimQuest, rerollQuest, rerollsLeft } from './quests'
 import { seasonView, claimTier } from './season'
 import { festivalView, claimEventQuest, claimCommunity, buyEventItem } from './festival'
@@ -19,6 +19,7 @@ import { clanView, clanBoard, createClan, joinClan, leaveClan, claimClanWeekly }
 import { collectionsOf, claimCollection } from './collections'
 import { PASS_PREMIUM_STARS } from '../../shared/wallet'
 import { packById } from '../../shared/wallet'
+import { packsBought } from './wallet'
 import { bot } from './bot'
 import { applyReferral } from './referrals'
 import { REF_PREFIX } from '../../shared/referrals'
@@ -78,6 +79,7 @@ api.post('/auth', async c => {
     ratings: ratingsOf(v.user.id),
     follows: followsOf(v.user.id),
     meta: gameMeta(),
+    boughtPacks: packsBought(v.user.id),
     quests: questsOf(v.user.id),
     referral,
   })
@@ -350,6 +352,21 @@ api.post('/gift', async c => {
       .catch(() => {})
   }
   return c.json({ amount: r.amount, profile: sender, friends: friendsOf(uid) })
+})
+
+// Подарить косметику другу (§14.2): только торгуемые вещи, перевод владения.
+const giftItemSchema = z.object({ friendId: z.number().int().positive(), itemId: z.string().min(1).max(64) })
+api.post('/gift-cosmetic', async c => {
+  const parsed = giftItemSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'bad_request' }, 400)
+  const uid = c.get('uid')
+  const r = giftCosmetic(uid, parsed.data.friendId, parsed.data.itemId)
+  if (!r.ok) return c.json({ error: r.reason }, 400)
+  const sender = getProfile(uid)
+  if (bot && sender) {
+    void bot.api.sendMessage(parsed.data.friendId, `🎁 ${sender.name} подарил(а) тебе предмет! Загляни в гардероб.`).catch(() => {})
+  }
+  return c.json({ ok: true, itemId: r.itemId })
 })
 
 // ─── Social: friends, activity, leaderboard ──────────────────────────────
