@@ -72,6 +72,11 @@ const CROSS: Achievement[] = [
     rungs: [r('bronze', 10, 'Задира'), r('silver', 100, 'Гроза лобби'), r('gold', 500, 'Народный чемпион')],
   },
   {
+    id: 'frenemies', category: 'social', stat: 'frenemies',
+    title: 'Друзья-соперники', desc: 'Обыграй друга в РАЗНЫХ играх (§7A ⑱)',
+    rungs: [r('bronze', 3, 'Троих обыграл'), r('silver', 10, 'Десяток'), r('gold', 25, 'Заклятые друзья')],
+  },
+  {
     id: 'patron', category: 'economy', stat: 'coins_spent',
     title: 'Меценат', desc: 'Трать монеты в магазине',
     rungs: [r('bronze', 1000, 'Покупатель'), r('silver', 10000, 'Транжира'), r('gold', 50000, 'Меценат'), r('platinum', 250000, 'Магнат стиля')],

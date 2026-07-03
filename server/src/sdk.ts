@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { db } from './db'
 import { credit } from './ledger'
 import { tickStreak } from './streak'
-import { progressMatch, logEvent } from './events'
+import { progressMatch, logEvent, trackFrenemies } from './events'
 import { getProfile } from './profiles'
 import { syncAchievements } from './achievements'
 import { updateDayPeaks } from './dayladders'
@@ -30,6 +30,7 @@ const reportSchema = z.object({
   durationSec: z.number().int().min(0).max(86_400).optional(),
   mode: z.enum(['multi', 'solo', 'friends']).optional(),
   stats: z.record(z.union([z.number(), z.boolean(), z.string()])).optional(),
+  opponents: z.array(z.number().int().positive()).max(64).optional(),
 })
 
 /** Монеты с матчей, уже начисленные сегодня (для дневного потолка). */
@@ -109,8 +110,9 @@ export function handleResult(launchToken: string | undefined, rawBody: unknown, 
   if (rep.result === 'win') tickCoop(uid) // §8.3: победа двигает общий кооп-таргет
   // Победы двигают достижения (Центурион, мастера категорий, «люди»…).
   syncAchievements(uid)
-  // Ранговый рейтинг (только скилл-игры против людей).
-  updateRating(uid, gameId, rep.result, rep.humanPlayers)
+  // Ранговый рейтинг (только скилл-игры против людей; Glicko-2 при наличии id).
+  updateRating(uid, gameId, rep.result, rep.humanPlayers, rep.opponents)
+  trackFrenemies(uid, gameId, rep.result, rep.opponents) // §7A ⑱: победа над другом
 
   const p = getProfile(uid)
   return { status: 200, body: { ok: true, rewarded: reward.total > 0, coins: p?.coins ?? 0 } }

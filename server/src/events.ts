@@ -49,6 +49,16 @@ export function writeFeed(uid: number, kind: 'achievement' | 'streak' | 'level',
   feedStmt.run(uid, kind, text)
 }
 
+/** ⑱ Друзья-соперники: первая победа над ДРУГОМ в конкретной игре двигает
+ *  distinct-счётчик `frenemies` (нужны id соперников из отчёта). */
+export function trackFrenemies(uid: number, gameId: string, result: string, opponents?: number[]): void {
+  if (result !== 'win' || !opponents?.length) return
+  if (getProgress(uid, `bf_${gameId}`) > 0) return // друга в этой игре уже обыгрывали
+  const beatFriend = opponents.some(oid =>
+    oid !== uid && db.prepare('SELECT 1 FROM friendships WHERE user_id=? AND friend_id=?').get(uid, oid))
+  if (beatFriend) { setProgress(uid, `bf_${gameId}`, 1); bumpProgress(uid, 'frenemies', 1) }
+}
+
 /** Санитайзер ключа игровой метрики из report.stats: строчные [a-z0-9_], ≤24 симв.,
  *  с буквы. Ограничивает поверхность (игра не может насорить произвольными строками). */
 function statKey(raw: string): string | null {

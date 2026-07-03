@@ -24,6 +24,8 @@ export interface MatchReport {
   mode?: MatchMode
   /** Свободные данные для игровых достижений (голы, «без потерь» и т.п.). */
   stats?: Record<string, number | boolean | string>
+  /** Telegram id живых соперников (для честного Glicko-2 и «Друзей-соперников»). */
+  opponents?: number[]
 }
 
 export interface ReportResponse {
