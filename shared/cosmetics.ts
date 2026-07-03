@@ -76,6 +76,19 @@ export const RARITY: Record<Rarity, { label: string; color: string }> = {
 export const PRICE: Record<Rarity, number> = { common: 120, rare: 350, epic: 900, legendary: 2200, mythic: 6000 }
 const shop = (r: Rarity, price?: number): Unlock => ({ kind: 'shop', price: price ?? PRICE[r] })
 
+// Множитель цены по слоту (Appendix B): «тихие» слоты (титул/цвет) дешевле,
+// «громкие» (эффект/питомец) дороже той же редкости. Итог = redкость × слот.
+export const SLOT_MULT: Record<Slot, number> = {
+  title: 0.6, color: 0.6,
+  frame: 1.0, banner: 1.0, hat: 1.0, eyewear: 1.0,
+  face: 1.1,
+  effect: 1.4, companion: 1.4,
+}
+/** Цена с учётом слота, округлённая до 10 (даёт ровно таблицу Appendix B). */
+export function slotAdjustedPrice(basePrice: number, slot: Slot): number {
+  return Math.round((basePrice * SLOT_MULT[slot]) / 10) * 10
+}
+
 // ─── Цвет тела персонажа ───────────────────────────────────────────────────
 const CL = (id: string, name: string, hex: string, rarity: Rarity, collection: string, unlock: Unlock): ColorItem =>
   ({ id, slot: 'color', name, hex, rarity, collection, unlock })
@@ -412,9 +425,9 @@ export function isOwned(item: Cosmetic, ctx: OwnerCtx): boolean {
   }
 }
 
-/** Можно ли купить предмет за Game (товар магазина и ещё не куплен). */
+/** Цена товара магазина в Game (редкость × множитель слота, Appendix B); null — не продаётся. */
 export function shopPrice(item: Cosmetic): number | null {
-  return item.unlock.kind === 'shop' ? item.unlock.price : null
+  return item.unlock.kind === 'shop' ? slotAdjustedPrice(item.unlock.price, item.slot) : null
 }
 
 // ── Торгуемость (§14.1) ────────────────────────────────────────────────────
