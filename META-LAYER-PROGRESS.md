@@ -144,6 +144,13 @@ Each phase is committed + deployed (Railway) before the next. Updated as the
   Verified: create/in-clan/tag-taken, weekly not_done→claim(+300)→claimed,
   disband, join. UI OK.
 
+- **Collections & set bonuses** (§10.5, this commit): the `collection` tags are
+  now sets — `COLLECTIONS` (≥3 items) with rarity-scaled bonuses; `collectionsOf`
+  computes owned/total from ownership (incl. level/achievement-gated), one-time
+  bonus claim (migration 024), publishes a feed event. UI: "🧩 Коллекции" sheet
+  from Shop with progress bars. Verified: Базовые 27/27 → +1080, idempotent,
+  incomplete-guard.
+
 ## Status: hub-buildable meta-layer COMPLETE (Phases 0–9 + economy foundation)
 
 All bible phases that live in the hub are shipped & deployed. Remaining bible

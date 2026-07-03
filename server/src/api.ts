@@ -13,6 +13,7 @@ import { festivalView, claimEventQuest, claimCommunity, buyEventItem } from './f
 import { rankedOf, boards } from './ranked'
 import { marketView, listItem, buyListing, cancelListing } from './market'
 import { clanView, clanBoard, createClan, joinClan, leaveClan, claimClanWeekly } from './clans'
+import { collectionsOf, claimCollection } from './collections'
 import { PASS_PREMIUM_STARS } from '../../shared/wallet'
 import { packById } from '../../shared/wallet'
 import { bot } from './bot'
@@ -334,6 +335,18 @@ api.get('/ranked', c => c.json({ ranked: rankedOf(c.get('uid')) }))
 api.get('/boards', c => c.json({ boards: boards(c.get('uid')) }))
 
 // ─── Marketplace (§14) ───────────────────────────────────────────────────
+// ─── Collections & set bonuses (§10.5) ───────────────────────────────────
+api.get('/collections', c => c.json({ collections: collectionsOf(c.get('uid')) }))
+const collectionSchema = z.object({ name: z.string().min(1).max(48) })
+api.post('/collections/claim', async c => {
+  const parsed = collectionSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'bad_request' }, 400)
+  const uid = c.get('uid')
+  const r = claimCollection(uid, parsed.data.name)
+  if (!r.ok) return c.json({ error: r.reason }, r.reason === 'claimed' ? 409 : 400)
+  return c.json({ bonus: r.bonus, collections: collectionsOf(uid), profile: getProfile(uid) })
+})
+
 api.get('/market', c => c.json({ market: marketView(c.get('uid')) }))
 
 const listSchema = z.object({ itemId: z.string().min(1).max(48), price: z.number().int().min(1).max(100000) })

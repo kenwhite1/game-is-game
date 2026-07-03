@@ -105,8 +105,40 @@ function Sheets() {
         {sheet === 'boards' && <Boards />}
         {sheet === 'market' && <Market />}
         {sheet === 'clan' && <Clan />}
+        {sheet === 'collections' && <Collections />}
       </div>
     </div>
+  )
+}
+
+function Collections() {
+  const collections = useStore(s => s.collections)
+  const claim = useStore(s => s.claimCollection)
+  if (collections.length === 0) return <p className="soft">Загрузка коллекций…</p>
+  return (
+    <>
+      <h2 style={{ marginBottom: 2 }}>Коллекции</h2>
+      <p className="soft" style={{ fontSize: 12.5, fontWeight: 800, marginBottom: 12 }}>Собери все предметы коллекции — получи бонус Game.</p>
+      <div className="lb-list">
+        {collections.map(c => {
+          const pct = Math.round((c.owned / c.total) * 100)
+          const claimable = c.complete && !c.claimed
+          return (
+            <div className={`col-row ${claimable ? 'can' : ''}`} key={c.name}>
+              <div className="col-tx">
+                <div className="col-nm">{c.name} <span className="col-cnt">{c.owned}/{c.total}</span></div>
+                <div className="ach-bar" style={{ marginTop: 5 }}><div className="ach-fill" style={{ width: `${pct}%`, background: c.complete ? 'linear-gradient(90deg,#34c759,#1f8f46)' : undefined }} /></div>
+              </div>
+              {c.claimed
+                ? <span className="col-done">✓</span>
+                : claimable
+                  ? <button className="q-claim" onClick={() => void claim(c.name)}>+{c.bonus} G</button>
+                  : <span className="col-bonus">+{c.bonus} G</span>}
+            </div>
+          )
+        })}
+      </div>
+    </>
   )
 }
 

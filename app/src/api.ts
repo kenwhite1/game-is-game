@@ -9,6 +9,7 @@ import type { FestivalView } from '@shared/festival'
 import type { RankedView, Boards } from '@shared/ranked'
 import type { MarketView } from '@shared/market'
 import type { ClanView, ClanBoardRow } from '@shared/clans'
+import type { CollectionView } from '@shared/cosmetics'
 
 let token: string | null = sessionStorage.getItem('gg_jwt')
 
@@ -65,6 +66,9 @@ export const api = {
   clanJoin: (clanId: number) => req<{ clan: ClanView; board: ClanBoardRow[] }>('/clan/join', { clanId }),
   clanLeave: () => req<{ clan: ClanView | null; board: ClanBoardRow[] }>('/clan/leave', {}),
   clanClaimWeekly: () => req<{ clan: ClanView; profile: Profile }>('/clan/weekly/claim', {}),
+
+  collections: () => req<{ collections: CollectionView[] }>('/collections'),
+  claimCollection: (name: string) => req<{ bonus: number; collections: CollectionView[]; profile: Profile }>('/collections/claim', { name }),
 
   market: () => req<{ market: MarketView }>('/market'),
   listItem: (itemId: string, price: number) => req<{ market: MarketView }>('/market/list', { itemId, price }),

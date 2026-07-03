@@ -324,6 +324,29 @@ const BY_ID = new Map<string, Cosmetic>(COSMETICS.map(c => [c.id, c]))
 export function cosmeticById(id: string | null | undefined): Cosmetic | undefined {
   return id ? BY_ID.get(id) : undefined
 }
+
+// ── Коллекции (§10.5) ──────────────────────────────────────────────────────
+// Тег collection становится сетом: собрал все предметы коллекции — получаешь
+// бонус. Бонус тем больше, чем «дороже» предметы коллекции по редкости.
+export interface CollectionDef { name: string; itemIds: string[]; total: number; bonus: number }
+/** Витрина коллекции для игрока (прогресс + статус бонуса). */
+export interface CollectionView { name: string; owned: number; total: number; bonus: number; complete: boolean; claimed: boolean }
+export const COLLECTIONS: CollectionDef[] = (() => {
+  const groups = new Map<string, Cosmetic[]>()
+  for (const c of COSMETICS) {
+    const arr = groups.get(c.collection) ?? []
+    arr.push(c); groups.set(c.collection, arr)
+  }
+  return [...groups.entries()]
+    .filter(([, items]) => items.length >= 3) // сет — от трёх предметов
+    .map(([name, items]) => ({
+      name,
+      itemIds: items.map(i => i.id),
+      total: items.length,
+      bonus: Math.min(2000, items.reduce((s, i) => s + (RARITY_ORDER[i.rarity] + 1) * 40, 0)),
+    }))
+    .sort((a, b) => a.bonus - b.bonus)
+})()
 export function itemsForSlot(slot: Slot): Cosmetic[] {
   return COSMETICS.filter(c => c.slot === slot)
 }

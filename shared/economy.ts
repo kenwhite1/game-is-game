@@ -96,3 +96,4 @@ export type CoinReason =
   | 'market_buy'
   | 'market_sell'
   | 'clan'
+  | 'collection'

@@ -18,6 +18,7 @@ export function Shop() {
   const showToast = useStore(s => s.showToast)
   const openSheet = useStore(s => s.openSheet)
   const loadMarket = useStore(s => s.loadMarket)
+  const loadCollections = useStore(s => s.loadCollections)
   const [filter, setFilter] = useState<Filter>('all')
 
   if (!profile) {
@@ -92,9 +93,10 @@ export function Shop() {
         </>
       )}
 
-      <button className="btn block ghost" style={{ marginTop: 4, marginBottom: 4 }} onClick={() => { void loadMarket(); openSheet('market') }}>
-        🏷️ Барахолка — обмен образами за Game
-      </button>
+      <div style={{ display: 'flex', gap: 8, marginTop: 4, marginBottom: 4 }}>
+        <button className="btn ghost" style={{ flex: 1 }} onClick={() => { void loadMarket(); openSheet('market') }}>🏷️ Барахолка</button>
+        <button className="btn ghost" style={{ flex: 1 }} onClick={() => { void loadCollections(); openSheet('collections') }}>🧩 Коллекции</button>
+      </div>
 
       <TopUp />
 

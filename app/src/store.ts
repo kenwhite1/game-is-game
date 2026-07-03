@@ -6,6 +6,7 @@ import type { FestivalView } from '@shared/festival'
 import type { RankedView, Boards } from '@shared/ranked'
 import type { MarketView } from '@shared/market'
 import type { ClanView, ClanBoardRow } from '@shared/clans'
+import type { CollectionView } from '@shared/cosmetics'
 import { GAMES, defaultLink } from '@shared/games'
 import { api } from './api'
 import { haptic, openGame as openGameLink, openInvoice, getStartParam, inTelegram, shareInvite } from './telegram'
@@ -15,7 +16,7 @@ import { playSfx, isSoundOn, setSoundOn } from './sound'
 const STATIC_CATALOG: GameCard[] = GAMES.map(g => ({ ...g, link: defaultLink(g.bot) }))
 
 export type Tab = 'home' | 'shop' | 'style' | 'friends' | 'profile'
-type Sheet = 'about' | 'help' | 'settings' | 'editProfile' | 'season' | 'festival' | 'boards' | 'market' | 'clan' | null
+type Sheet = 'about' | 'help' | 'settings' | 'editProfile' | 'season' | 'festival' | 'boards' | 'market' | 'clan' | 'collections' | null
 
 interface S {
   ready: boolean
@@ -41,6 +42,7 @@ interface S {
   market: MarketView | null
   clan: ClanView | null
   clanBoard: ClanBoardRow[]
+  collections: CollectionView[]
   friends: Friend[]
   activity: ActivityItem[]
   leaderboard: LeaderRow[]
@@ -85,6 +87,8 @@ interface S {
   listItem(itemId: string, price: number): Promise<void>
   buyListing(listingId: number): Promise<void>
   cancelListing(listingId: number): Promise<void>
+  loadCollections(): Promise<void>
+  claimCollection(name: string): Promise<void>
   loadClan(): Promise<void>
   createClan(name: string, tag: string): Promise<void>
   joinClan(clanId: number): Promise<void>
@@ -125,6 +129,7 @@ export const useStore = create<S>((set, get) => ({
   market: null,
   clan: null,
   clanBoard: [],
+  collections: [],
   friends: [],
   activity: [],
   leaderboard: [],
@@ -495,6 +500,26 @@ export const useStore = create<S>((set, get) => ({
       haptic('tap')
       get().showToast('Лот снят')
     } catch { haptic('warn'); get().showToast('Не удалось снять лот') }
+  },
+
+  async loadCollections() {
+    try {
+      const r = await api.collections()
+      set({ collections: r.collections })
+    } catch { /* офлайн */ }
+  },
+
+  async claimCollection(name) {
+    try {
+      const r = await api.claimCollection(name)
+      set({ collections: r.collections, profile: r.profile })
+      haptic('success')
+      if (get().soundOn) playSfx('open')
+      get().showToast(`Коллекция собрана: +${r.bonus} Game 🎉`)
+    } catch (e) {
+      haptic('warn')
+      get().showToast((e as { message?: string }).message === 'claimed' ? 'Уже получено' : 'Коллекция ещё не собрана')
+    }
   },
 
   async loadClan() {

@@ -30,6 +30,12 @@ function ownerCtx(uid: number, level: number): OwnerCtx {
   return { level, badges: badgeSet(uid), owned: ownedSet(uid), achTiers: achTiersOf(uid), streakBest }
 }
 
+/** Контекст владения по uid (сам достаёт уровень) — для внешних модулей. */
+export function ownerCtxOf(uid: number): OwnerCtx {
+  const profile = getProfile(uid)
+  return ownerCtx(uid, profile?.level ?? 1)
+}
+
 /** Гардероб игрока: весь каталог со статусом владения/надетости/цены. */
 export function wardrobeOf(uid: number): Wardrobe | null {
   const profile = getProfile(uid)
