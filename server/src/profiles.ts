@@ -10,6 +10,7 @@ import { STARTER_COINS, LAUNCH_BREADTH_REWARD, LAUNCH_BREADTH_CAP } from '../../
 import { credit } from './ledger'
 import { tickStreak, streakRepairInfo } from './streak'
 import { syncAchievements, achievementsSummary } from './achievements'
+import { varietyTick, updateDayPeaks } from './dayladders'
 import { grantSeasonXp } from './season'
 import { SEASON_XP } from '../../shared/season'
 import { grantAccountXp } from './xp'
@@ -248,6 +249,9 @@ export function recordOpen(id: number, gameId: string): Profile {
   // Серия дня: первый заход за день продвигает streak и платит награду/вехи.
   const st = tickStreak(id)
   if (st.ticked) { grantSeasonXp(id, SEASON_XP.streakDay); grantAccountXp(id, SEASON_XP.streakDay) }
+  // Дневные ладдеры (§7A ⑤⑦): разнообразие по дням + пик игр за день.
+  varietyTick(id, gameId)
+  updateDayPeaks(id)
   // Достижения широты/коллекции могли продвинуться — синкаем (идемпотентно).
   syncAchievements(id)
   // События: тикаем общую цель и конвертируем токены завершившихся событий.

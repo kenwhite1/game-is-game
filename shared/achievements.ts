@@ -118,6 +118,22 @@ const CROSS: Achievement[] = [
     title: 'Сова', desc: 'Сыграй ночью, с 03:00 до 05:00 МСК',
     rungs: [r('bronze', 1, 'Сова')],
   },
+  // Дневные ладдеры (§7A ⑤⑥⑦): «в один день» и «разные игры по дням».
+  {
+    id: 'variety_marathon', category: 'dedication', stat: 'variety_best',
+    title: 'Марафон разнообразия', desc: 'Играй в РАЗНЫЕ игры несколько дней подряд',
+    rungs: [r('bronze', 3, 'Три дня'), r('silver', 7, 'Неделя разнообразия'), r('gold', 14, 'Две недели'), r('platinum', 30, 'Месяц без повторов')],
+  },
+  {
+    id: 'marathoner', category: 'dedication', stat: 'day_games',
+    title: 'Марафонец', desc: 'Сыграй в 10 разных игр за один день',
+    rungs: [r('silver', 10, 'Марафонец')],
+  },
+  {
+    id: 'seven_for_seven', category: 'skill', stat: 'day_cats', hidden: true,
+    title: 'Семь на семь', desc: 'Победи в играх всех 7 жанров за один день',
+    rungs: [r('platinum', 7, 'Семь на семь')],
+  },
 ]
 
 // ── Мастера категорий ×7 (§7A ⑨): по «лесенке» на каждый жанр ──
