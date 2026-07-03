@@ -172,6 +172,20 @@ export function Friends() {
         ) : (
           <div className="card" style={{ paddingTop: 6, paddingBottom: 6 }}>
             {activity.map(a => {
+              if (a.kind) {
+                // Мета-событие: достижение / серия.
+                const icon = a.kind === 'achievement' ? '🏆' : a.kind === 'streak' ? '🔥' : '✨'
+                return (
+                  <div className="act" key={a.id}>
+                    <Avatar look={a.look} seed={a.userId} size={38} />
+                    <div className="tx">
+                      <div className="t"><b>{a.name}</b> {a.text}</div>
+                      <div className="when">{timeAgo(a.ts)}</div>
+                    </div>
+                    <span style={{ fontSize: 24 }}>{icon}</span>
+                  </div>
+                )
+              }
               const game = gameById(catalog, a.gameId)
               return (
                 <div className="act" key={a.id}>

@@ -100,7 +100,7 @@ export function activityFeed(uid: number, limit = 30): ActivityItem[] {
         LIMIT ?`,
     )
     .all(uid, uid, limit) as (LookRow & { id: number; user_id: number; game_id: string; ts: string; name: string })[]
-  return rows
+  const launches: ActivityItem[] = rows
     .filter(r => VALID_GAME_IDS.has(r.game_id))
     .map(r => ({
       id: r.id,
@@ -110,6 +110,31 @@ export function activityFeed(uid: number, limit = 30): ActivityItem[] {
       gameId: r.game_id,
       ts: r.ts,
     }))
+
+  // Мета-события (достижения/серии) друзей и свои — «лучшая реклама» мета-слоя.
+  const meta = db
+    .prepare(
+      `SELECT f.id, f.user_id, f.kind, f.text, f.ts, u.name, ${LOOK_COLS}
+         FROM feed_events f JOIN users u ON u.id=f.user_id
+        WHERE f.user_id = ?
+           OR f.user_id IN (SELECT friend_id FROM friendships WHERE user_id = ?)
+        ORDER BY f.id DESC LIMIT ?`,
+    )
+    .all(uid, uid, limit) as (LookRow & { id: number; user_id: number; kind: string; text: string; ts: string; name: string })[]
+  const metaItems: ActivityItem[] = meta.map(r => ({
+    id: r.id + 1_000_000_000, // отдельное id-пространство, чтобы не пересекалось с opens
+    userId: r.user_id,
+    name: r.name,
+    look: lookOf(r, r.user_id),
+    gameId: '',
+    ts: r.ts,
+    kind: r.kind,
+    text: r.text,
+  }))
+
+  return [...launches, ...metaItems]
+    .sort((a, b) => (a.ts < b.ts ? 1 : a.ts > b.ts ? -1 : 0))
+    .slice(0, limit)
 }
 
 /** Таблица лидеров: я и мои друзья по опыту, от большего к меньшему. */

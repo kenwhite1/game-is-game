@@ -42,6 +42,13 @@ export function logEvent(uid: number, kind: string, payload: Record<string, unkn
   logStmt.run(uid, kind, JSON.stringify(payload), Date.now())
 }
 
+// Публичная лента (§15.2): заметные мета-события для друзей. ts в формате opens
+// (datetime), чтобы ленты сливались по времени.
+const feedStmt = db.prepare("INSERT INTO feed_events (user_id, kind, text, ts) VALUES (?,?,?,datetime('now'))")
+export function writeFeed(uid: number, kind: 'achievement' | 'streak' | 'level', text: string): void {
+  feedStmt.run(uid, kind, text)
+}
+
 /** Обновить свёрнутые счётчики по результату матча (пожизненные тоталы). */
 export function progressMatch(uid: number, gameId: string, r: MatchReport): void {
   bumpProgress(uid, 'matches_played', 1)

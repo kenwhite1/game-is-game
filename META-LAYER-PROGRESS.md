@@ -131,6 +131,11 @@ Each phase is committed + deployed (Railway) before the next. Updated as the
     seller +180 / 20 destroyed), own-guard, cancel restores item, bound items
     rejected (`not_tradeable`). UI OK, no console errors.
 
+- **Polish — Activity-feed enrichment** (§15.2, this commit): notable
+  achievement unlocks (gold+) and streak milestones publish to `feed_events`
+  (migration 022); `activityFeed` merges them with game-launches by time; feed UI
+  shows 🏆/🔥 meta events. Verified end-to-end.
+
 ## Status: hub-buildable meta-layer COMPLETE (Phases 0–8 + economy foundation)
 
 All bible phases that live in the hub are shipped & deployed. Remaining bible

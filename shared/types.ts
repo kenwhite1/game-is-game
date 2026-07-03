@@ -121,8 +121,13 @@ export interface ActivityItem {
   userId: number
   name: string
   look: Look
+  /** Запуск игры: id игры. Для мета-событий пусто. */
   gameId: string
   ts: string
+  /** Вид мета-события (achievement | streak | level); пусто = запуск игры. */
+  kind?: string
+  /** Текст мета-события («открыл достижение …»). */
+  text?: string
 }
 
 export interface LeaderRow {

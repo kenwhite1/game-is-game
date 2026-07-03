@@ -1,5 +1,6 @@
 import { db } from './db'
 import { credit } from './ledger'
+import { writeFeed } from './events'
 import { FREEZE_CAP, STREAK_MILESTONES, streakDailyReward } from '../../shared/economy'
 
 // Серия («streak») — сильнейший рычаг ежедневного возврата (§9 библии).
@@ -63,7 +64,10 @@ export function tickStreak(uid: number): StreakTick {
     .run(current, best, today, freezes, uid)
 
   credit(uid, streakDailyReward(current), 'streak_daily', today)
-  if (milestone?.coins) credit(uid, milestone.coins, 'streak_milestone', `d${current}`)
+  if (milestone?.coins) {
+    credit(uid, milestone.coins, 'streak_milestone', `d${current}`)
+    writeFeed(uid, 'streak', `держит серию ${current} дней подряд 🔥`)
+  }
 
   return { current, best, freezes, ticked: true, milestone: milestone ? current : undefined }
 }

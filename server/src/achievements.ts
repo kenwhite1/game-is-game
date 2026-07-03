@@ -1,6 +1,6 @@
 import { db } from './db'
 import { credit } from './ledger'
-import { progressMap, setProgress, getProgress } from './events'
+import { progressMap, setProgress, getProgress, writeFeed } from './events'
 import { invitedCount } from './referrals'
 import { CATEGORIES } from '../../shared/games'
 import {
@@ -80,6 +80,9 @@ export function syncAchievements(uid: number): { newly: UnlockedRung[]; score: n
 
   const final = scoreAndCount(reached)
   setProgress(uid, 'gg_score', final.score)
+  // В ленту публикуем только заметные ранги (золото+), чтобы не спамить.
+  const notable = new Set<Tier>(['gold', 'platinum', 'diamond'])
+  for (const n of newly) if (notable.has(n.tier)) writeFeed(uid, 'achievement', `открыл(а) достижение «${n.name}»`)
   return { newly, score: final.score }
 }
 
