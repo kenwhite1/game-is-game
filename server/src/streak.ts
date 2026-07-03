@@ -2,6 +2,7 @@ import { db } from './db'
 import { credit, debit } from './ledger'
 import { writeFeed, bumpProgress, getProgress } from './events'
 import { FREEZE_CAP, STREAK_MILESTONES, streakDailyReward, STREAK_REPAIR, STREAK_REPAIR_HOURS, STREAK_REPAIR_PLAYS } from '../../shared/economy'
+import { tickFriendStreaks } from './friendstreak'
 
 // Серия («streak») — сильнейший рычаг ежедневного возврата (§9 библии).
 // Пока игры не рапортуют матчи через SDK, серию продвигает первый ЗАПУСК игры
@@ -82,6 +83,8 @@ export function tickStreak(uid: number): StreakTick {
 
   db.prepare('UPDATE users SET streak_current=?, streak_best=?, streak_last=?, streak_freezes=?, streak_perfect=?, streak_broke_value=?, streak_repair_until=? WHERE id=?')
     .run(current, best, today, freezes, perfect ? 1 : 0, brokeValue, repairUntil, uid)
+
+  tickFriendStreaks(uid) // §9.5: продвинуть общие серии с друзьями, кто уже сыграл сегодня
 
   credit(uid, streakDailyReward(current), 'streak_daily', today)
   if (milestone?.coins) {

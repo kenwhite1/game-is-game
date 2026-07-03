@@ -35,6 +35,16 @@ export interface SocialSnapshot {
   /** Сколько новых игроков пришло по моей реферальной ссылке. */
   invited: number
   coop: CoopView[]
+  friendStreaks: FriendStreak[]
+}
+
+export interface FriendStreak {
+  friendId: number
+  friendName: string
+  current: number
+  best: number
+  bothToday: boolean
+  canNudge: boolean
 }
 
 export const api = {
@@ -56,6 +66,7 @@ export const api = {
   rerollQuest: (questId: string) => req<{ quests: Quest[]; free: boolean; profile: Profile; rerollsLeft: number }>('/quests/reroll', { questId }),
   gift: (friendId: number, amount: number) => req<{ amount: number; profile: Profile; friends: Friend[] }>('/gift', { friendId, amount }),
   giftCosmetic: (friendId: number, itemId: string) => req<{ ok: boolean; itemId: string }>('/gift-cosmetic', { friendId, itemId }),
+  nudgeFriend: (friendId: number) => req<{ ok: boolean }>('/friend-streak/nudge', { friendId }),
   coopStart: (friendId: number) => req<{ coop: CoopView[] }>('/coop/start', { friendId }),
   coopClaim: (id: number) => req<{ profile: Profile; coop: CoopView[] }>('/coop/claim', { id }),
 

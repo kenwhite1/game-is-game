@@ -6,6 +6,7 @@ import { DEFAULT_EQUIP, cosmeticById, isTradeable, type Look } from '../../share
 import { getProfile } from './profiles'
 import { writeFeed } from './events'
 import { coopOf } from './coop'
+import { friendStreaksOf } from './friendstreak'
 import { invitedCount } from './referrals'
 import { presenceOf } from './presence'
 import { credit, debit } from './ledger'
@@ -244,6 +245,7 @@ export function socialSnapshot(uid: number) {
     leaderboard: leaderboard(uid),
     invited: invitedCount(uid),
     coop: coopOf(uid),
+    friendStreaks: friendStreaksOf(uid),
   }
 }
 

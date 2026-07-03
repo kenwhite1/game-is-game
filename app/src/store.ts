@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type { GameCard, GameMeta, Profile, ProfileDetail, Friend, ActivityItem, LeaderRow, Wardrobe, Slot, RatingValue, Quest } from '@shared/types'
 import type { AchievementsPayload } from '@shared/achievements'
 import type { CoopView } from '@shared/coop'
+import type { FriendStreak } from './api'
 import type { SeasonView } from '@shared/season'
 import type { FestivalView } from '@shared/festival'
 import type { RankedView, Boards } from '@shared/ranked'
@@ -51,6 +52,7 @@ interface S {
   /** Сколько новых игроков пришло по моей ссылке-приглашению. */
   invited: number
   coop: CoopView[]
+  friendStreaks: FriendStreak[]
   socialLoaded: boolean
   wardrobe: Wardrobe | null
   wardrobeLoaded: boolean
@@ -74,6 +76,7 @@ interface S {
   giftCosmetic(friendId: number, itemId: string): Promise<{ ok: boolean; error?: string }>
   coopStart(friendId: number): Promise<void>
   coopClaim(id: number): Promise<void>
+  nudgeFriend(friendId: number): Promise<void>
   openSheet(s: Sheet): void
   toggleSound(): void
   showToast(msg: string): void
@@ -145,6 +148,7 @@ export const useStore = create<S>((set, get) => ({
   leaderboard: [],
   invited: 0,
   coop: [],
+  friendStreaks: [],
   socialLoaded: false,
   wardrobe: null,
   wardrobeLoaded: false,
@@ -338,6 +342,18 @@ export const useStore = create<S>((set, get) => ({
     }
   },
 
+  async nudgeFriend(friendId) {
+    try {
+      await api.nudgeFriend(friendId)
+      set({ friendStreaks: get().friendStreaks.map(f => f.friendId === friendId ? { ...f, canNudge: false } : f) })
+      haptic('success')
+      get().showToast('Друг получил напоминание 🔥🤝')
+    } catch {
+      haptic('warn')
+      get().showToast('Уже напоминал(а) сегодня')
+    }
+  },
+
   async coopStart(friendId) {
     try {
       const r = await api.coopStart(friendId)
@@ -439,7 +455,7 @@ export const useStore = create<S>((set, get) => ({
   async loadSocial() {
     try {
       const r = await api.social()
-      set({ friends: r.friends, activity: r.activity, leaderboard: r.leaderboard, invited: r.invited ?? 0, coop: r.coop ?? [], socialLoaded: true })
+      set({ friends: r.friends, activity: r.activity, leaderboard: r.leaderboard, invited: r.invited ?? 0, coop: r.coop ?? [], friendStreaks: r.friendStreaks ?? [], socialLoaded: true })
     } catch { /* офлайн — оставляем что есть */ }
   },
 

@@ -45,6 +45,8 @@ export function Friends() {
   const coop = useStore(s => s.coop)
   const coopStart = useStore(s => s.coopStart)
   const coopClaim = useStore(s => s.coopClaim)
+  const friendStreaks = useStore(s => s.friendStreaks)
+  const nudgeFriend = useStore(s => s.nudgeFriend)
 
   const [seg, setSeg] = useState<Seg>('friends')
   const [code, setCode] = useState('')
@@ -99,6 +101,21 @@ export function Friends() {
             )}
             <button className="cbtn" onClick={onShare}><ShareIcon /> Пригласить друга</button>
           </div>
+
+          {friendStreaks.length > 0 && (
+            <>
+              <div className="sec"><h2>Дружеские серии 🔥🤝</h2><span className="sub">играйте в один день</span></div>
+              <div className="fs-row">
+                {friendStreaks.map(f => (
+                  <div className={`fs-chip ${f.bothToday ? 'lit' : ''}`} key={f.friendId}>
+                    <span className="fs-flame">🔥 {f.current}</span>
+                    <span className="fs-name">{f.friendName}</span>
+                    {f.canNudge && <button className="fs-nudge" onClick={() => void nudgeFriend(f.friendId)}>пни 👉</button>}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
 
           {coop.length > 0 && (
             <>

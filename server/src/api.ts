@@ -10,6 +10,7 @@ import { BOT_USERNAME, PRESENCE_KEY, ADMIN_IDS, gameOverrides, type Env } from '
 import { economyReport } from './econ'
 import { anomalyReport } from './anomaly'
 import { startCoop, claimCoop, coopOf } from './coop'
+import { nudgeFriend } from './friendstreak'
 import { touchPresence, clearPresence } from './presence'
 import { getOrCreateUser, getProfile, recordOpen, recentGames, profileDetail, setUsername, userExists } from './profiles'
 import { addFriendByCode, removeFriend, friendsOf, activityFeed, leaderboard, socialSnapshot, giftCoins, giftCosmetic, acceptChallenge } from './social'
@@ -412,6 +413,21 @@ api.post('/coop/claim', async c => {
   const r = claimCoop(uid, parsed.data.id)
   if (!r.ok) return c.json({ error: r.reason }, 400)
   return c.json({ profile: getProfile(uid), coop: coopOf(uid) })
+})
+
+// «Пни друга» (§9.5): напомнить про общую серию пушем от бота.
+const nudgeSchema = z.object({ friendId: z.number().int().positive() })
+api.post('/friend-streak/nudge', async c => {
+  const parsed = nudgeSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'bad_request' }, 400)
+  const uid = c.get('uid')
+  const r = nudgeFriend(uid, parsed.data.friendId)
+  if (!r.ok) return c.json({ error: r.reason }, 400)
+  const me = getProfile(uid)
+  if (bot && me) {
+    void bot.api.sendMessage(r.friendId, `🔥🤝 ${me.name} напоминает: ваша дружеская серия ${r.current} дн. Сыграй сегодня, чтобы не сгорела!`).catch(() => {})
+  }
+  return c.json({ ok: true })
 })
 
 // ─── Social: friends, activity, leaderboard ──────────────────────────────
