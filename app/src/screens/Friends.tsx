@@ -36,6 +36,8 @@ export function Friends() {
   const addFriend = useStore(s => s.addFriend)
   const removeFriend = useStore(s => s.removeFriend)
   const showToast = useStore(s => s.showToast)
+  const openSheet = useStore(s => s.openSheet)
+  const loadBoards = useStore(s => s.loadBoards)
 
   const [seg, setSeg] = useState<Seg>('friends')
   const [code, setCode] = useState('')
@@ -141,6 +143,11 @@ export function Friends() {
         </>
       )}
 
+      {seg === 'board' && (
+        <button className="btn block" style={{ marginBottom: 12 }} onClick={() => { void loadBoards(); openSheet('boards') }}>
+          🏆 Глобальные рейтинги
+        </button>
+      )}
       {seg === 'board' && (
         leaderboard.length === 0 ? (
           <div className="empty"><div className="em">🏆</div><div className="t">Таблица пустеет</div><div className="s">Добавь друзей и запускай игры — появится рейтинг по опыту.</div></div>

@@ -10,6 +10,7 @@ import { addFriendByCode, removeFriend, friendsOf, activityFeed, leaderboard, so
 import { questsOf, weeklyQuestsOf, claimQuest, rerollQuest, rerollsLeft } from './quests'
 import { seasonView, claimTier } from './season'
 import { festivalView, claimEventQuest, claimCommunity, buyEventItem } from './festival'
+import { rankedOf, boards } from './ranked'
 import { PASS_PREMIUM_STARS } from '../../shared/wallet'
 import { packById } from '../../shared/wallet'
 import { bot } from './bot'
@@ -326,6 +327,10 @@ api.post('/gift', async c => {
 // ─── Social: friends, activity, leaderboard ──────────────────────────────
 
 // One round trip for the Friends + Activity tabs.
+// ─── Ranked & Leaderboards (§13) ─────────────────────────────────────────
+api.get('/ranked', c => c.json({ ranked: rankedOf(c.get('uid')) }))
+api.get('/boards', c => c.json({ boards: boards(c.get('uid')) }))
+
 api.get('/social', c => c.json(socialSnapshot(c.get('uid'))))
 
 api.get('/friends', c => c.json({ friends: friendsOf(c.get('uid')) }))

@@ -91,10 +91,23 @@ Each phase is committed + deployed (Railway) before the next. Updated as the
   - Verified: quest claims (+tokens), not_done gating, token buy (−20) +
     too_poor, community tick on launch, community reward grant. UI OK.
 
+- **Phase 6 — Ranked & Leaderboards** (this commit):
+  - `shared/ranked.ts`: RANKED_GAMES (skill games), 7 divisions ×sub-tiers,
+    `divisionOf`, Elo-vs-field helpers, GG-Ladder contribution.
+  - `server/src/ranked.ts`: `updateRating` (Elo-vs-field, per game/season,
+    humans-only, peak), `rankedOf` (ranks + GG-Ladder), boards: GG Score /
+    GG-Ladder / weekly coins. Migration 019 `ranked_ratings`. Hooked into
+    `/sdk/result`.
+  - API `/ranked`, `/boards`. UI: "Рейтинги" sheet (self GG-Ladder + division,
+    tabbed boards) opened from Friends → Лидеры.
+  - Verified: 6 wins+1 loss vs humans in Сёги → 1078, Серебро II, peak Серебро I,
+    GG-Ladder 78; non-ranked win made no rating; all 3 boards populate. UI OK.
+  - Note: true Glicko-2 needs opponent ids in the SDK (schema extension later);
+    Elo-vs-field is the honest proxy from the current single-sided report.
+
 ## Next (bible build order §17.2)
 
-- **6 — Ranked/Glicko-2**;
-  **7 — Social (referral-on-qualify, challenges, clans)**; **8 — Marketplace**.
+- **7 — Social (referral-on-qualify, challenges, clans)**; **8 — Marketplace**.
 
 ## Needs the games (not hub-only)
 

@@ -102,8 +102,49 @@ function Sheets() {
         {sheet === 'editProfile' && <EditProfile onDone={close} />}
         {sheet === 'season' && <SeasonPass />}
         {sheet === 'festival' && <Festival />}
+        {sheet === 'boards' && <Boards />}
       </div>
     </div>
+  )
+}
+
+function Boards() {
+  const boards = useStore(s => s.boards)
+  const ranked = useStore(s => s.ranked)
+  const [tab, setTab] = useState<'ggScore' | 'weeklyCoins' | 'ggLadder'>('ggScore')
+  if (!boards) return <p className="soft">Загрузка рейтингов…</p>
+  const rows = boards[tab]
+  const unit = tab === 'ggScore' ? '' : tab === 'weeklyCoins' ? ' G' : ''
+  const TABS = [['ggScore', 'GG Score'], ['ggLadder', 'GG-лига'], ['weeklyCoins', 'Неделя']] as const
+  const medals = ['🥇', '🥈', '🥉']
+  return (
+    <>
+      <h2 style={{ marginBottom: 10 }}>Рейтинги</h2>
+      {ranked && (
+        <div className="lb-self">
+          <span>Моя GG-лига: <b>{ranked.ladder}</b></span>
+          {ranked.games.length > 0 && <span className="soft" style={{ fontWeight: 800 }}>{ranked.games.map(g => `${g.name}: ${g.division}`).join(' · ')}</span>}
+        </div>
+      )}
+      <div className="lb-tabs">
+        {TABS.map(([k, label]) => (
+          <button key={k} className={`lb-tab ${tab === k ? 'on' : ''}`} onClick={() => setTab(k)}>{label}</button>
+        ))}
+      </div>
+      {rows.length === 0 ? (
+        <div className="empty"><div className="em">🏆</div><div className="t">Пока пусто</div><div className="s">Играй и зарабатывай — рейтинг наполнится.</div></div>
+      ) : (
+        <div className="lb-list">
+          {rows.map((r, i) => (
+            <div className={`lb-row2 ${r.isMe ? 'me' : ''}`} key={r.id}>
+              <span className={`rank ${i < 3 ? 'top' : ''}`}>{i < 3 ? medals[i] : i + 1}</span>
+              <span className="lb-nm">{r.name}{r.isMe ? ' · ты' : ''}</span>
+              <span className="lb-val">{r.value.toLocaleString('ru')}{unit}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
   )
 }
 

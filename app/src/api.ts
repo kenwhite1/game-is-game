@@ -6,6 +6,7 @@ import type {
 import type { AchievementsPayload } from '@shared/achievements'
 import type { SeasonView, Reward } from '@shared/season'
 import type { FestivalView } from '@shared/festival'
+import type { RankedView, Boards } from '@shared/ranked'
 
 let token: string | null = sessionStorage.getItem('gg_jwt')
 
@@ -53,6 +54,9 @@ export const api = {
   profileDetail: () => req<ProfileDetail>('/profile/detail'),
   achievements: () => req<AchievementsPayload>('/achievements'),
   setUsername: (username: string) => req<{ profile: Profile }>('/profile/username', { username }),
+
+  ranked: () => req<{ ranked: RankedView }>('/ranked'),
+  boards: () => req<{ boards: Boards }>('/boards'),
 
   social: () => req<SocialSnapshot>('/social'),
   addFriend: (code: string) => req<{ friend: Friend; friends: Friend[] }>('/friends/add', { code }),

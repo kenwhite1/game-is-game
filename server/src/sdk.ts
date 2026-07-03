@@ -7,6 +7,7 @@ import { getProfile } from './profiles'
 import { syncAchievements } from './achievements'
 import { grantSeasonXp } from './season'
 import { SEASON_XP } from '../../shared/season'
+import { updateRating } from './ranked'
 import { matchReward, MATCH_COIN_CAP, type CoinReason } from '../../shared/economy'
 import type { MatchReport, ReportResponse } from '../../shared/sdk'
 
@@ -90,6 +91,8 @@ export function handleResult(launchToken: string | undefined, rawBody: unknown, 
   tickStreak(uid)
   // Победы двигают достижения (Центурион, мастера категорий, «люди»…).
   syncAchievements(uid)
+  // Ранговый рейтинг (только скилл-игры против людей).
+  updateRating(uid, gameId, rep.result, rep.humanPlayers)
 
   const p = getProfile(uid)
   return { status: 200, body: { ok: true, rewarded: reward.total > 0, coins: p?.coins ?? 0 } }

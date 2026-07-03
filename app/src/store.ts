@@ -3,6 +3,7 @@ import type { GameCard, GameMeta, Profile, ProfileDetail, Friend, ActivityItem, 
 import type { AchievementsPayload } from '@shared/achievements'
 import type { SeasonView } from '@shared/season'
 import type { FestivalView } from '@shared/festival'
+import type { RankedView, Boards } from '@shared/ranked'
 import { GAMES, defaultLink } from '@shared/games'
 import { api } from './api'
 import { haptic, openGame as openGameLink, openInvoice, getStartParam, inTelegram } from './telegram'
@@ -12,7 +13,7 @@ import { playSfx, isSoundOn, setSoundOn } from './sound'
 const STATIC_CATALOG: GameCard[] = GAMES.map(g => ({ ...g, link: defaultLink(g.bot) }))
 
 export type Tab = 'home' | 'shop' | 'style' | 'friends' | 'profile'
-type Sheet = 'about' | 'help' | 'settings' | 'editProfile' | 'season' | 'festival' | null
+type Sheet = 'about' | 'help' | 'settings' | 'editProfile' | 'season' | 'festival' | 'boards' | null
 
 interface S {
   ready: boolean
@@ -33,6 +34,8 @@ interface S {
   achievements: AchievementsPayload | null
   season: SeasonView | null
   festival: FestivalView | null
+  ranked: RankedView | null
+  boards: Boards | null
   friends: Friend[]
   activity: ActivityItem[]
   leaderboard: LeaderRow[]
@@ -72,6 +75,7 @@ interface S {
   claimEventQuest(questId: string): Promise<void>
   claimCommunity(): Promise<void>
   buyEventItem(itemId: string): Promise<void>
+  loadBoards(): Promise<void>
   loadWardrobe(): Promise<void>
   equip(slot: Slot, itemId: string): Promise<void>
   buy(itemId: string, name: string): Promise<boolean>
@@ -100,6 +104,8 @@ export const useStore = create<S>((set, get) => ({
   achievements: null,
   season: null,
   festival: null,
+  ranked: null,
+  boards: null,
   friends: [],
   activity: [],
   leaderboard: [],
@@ -399,6 +405,13 @@ export const useStore = create<S>((set, get) => ({
     try {
       const r = await api.festival()
       set({ festival: r.festival })
+    } catch { /* офлайн */ }
+  },
+
+  async loadBoards() {
+    try {
+      const [b, r] = await Promise.all([api.boards(), api.ranked()])
+      set({ boards: b.boards, ranked: r.ranked })
     } catch { /* офлайн */ }
   },
 
