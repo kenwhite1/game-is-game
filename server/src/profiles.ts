@@ -1,7 +1,7 @@
 import { db } from './db'
 import type { Profile, GameStat, ProfileDetail } from '../../shared/types'
 import { xpFromOpens, levelInfo, computeBadges } from '../../shared/progression'
-import { invitedCount } from './referrals'
+import { invitedCount, settleReferral } from './referrals'
 import { defaultColor } from '../../shared/avatars'
 import { DEFAULT_EQUIP, type Slot } from '../../shared/cosmetics'
 import { GAMES } from '../../shared/games'
@@ -243,6 +243,8 @@ export function recordOpen(id: number, gameId: string): Profile {
   // События: тикаем общую цель и конвертируем токены завершившихся событий.
   tickCommunity(1)
   settleExpired(id)
+  // Отложенная реферальная награда — выплачиваем, если новичок наиграл минимум.
+  settleReferral(id)
 
   return getProfile(id)!
 }

@@ -6,7 +6,7 @@ import type { FestivalView } from '@shared/festival'
 import type { RankedView, Boards } from '@shared/ranked'
 import { GAMES, defaultLink } from '@shared/games'
 import { api } from './api'
-import { haptic, openGame as openGameLink, openInvoice, getStartParam, inTelegram } from './telegram'
+import { haptic, openGame as openGameLink, openInvoice, getStartParam, inTelegram, shareInvite } from './telegram'
 import { playSfx, isSoundOn, setSoundOn } from './sound'
 
 // Статичный каталог на случай, если сервер недоступен (гость, офлайн).
@@ -81,6 +81,8 @@ interface S {
   buy(itemId: string, name: string): Promise<boolean>
   addFriend(code: string): Promise<{ ok: boolean; error?: string; name?: string }>
   removeFriend(id: number): Promise<void>
+  acceptChallenge(fromId: number, gameId: string): Promise<{ ok: boolean; reward: number } | null>
+  challengeFriend(friend: Friend): void
   chooseUsername(username: string): Promise<{ ok: boolean; error?: string }>
 }
 
@@ -161,11 +163,31 @@ export const useStore = create<S>((set, get) => ({
       ? startParam.slice(4)
       : null
 
+    // Вызов другу: chl_<gameId>_<fromId> — награда обоим и сразу запуск игры.
+    const challenge = startParam?.startsWith('chl_')
+      ? (() => {
+          const rest = startParam.slice(4)
+          const us = rest.lastIndexOf('_')
+          if (us <= 0) return null
+          const gameId = rest.slice(0, us)
+          const fromId = Number(rest.slice(us + 1))
+          return Number.isInteger(fromId) && fromId > 0 ? { gameId, fromId } : null
+        })()
+      : null
+
     if (referral) {
-      // Сервер уже засчитал приглашение: бонус начислен, дружба создана.
+      // Дружба создана; бонус придёт после квалификации новичка (5 игр).
       set({ tab: 'friends' })
       void get().loadSocial()
-      get().showToast(`${referral.by} пригласил(а) тебя: +${referral.bonus} Game 🎁`)
+      get().showToast(`${referral.by} пригласил(а) тебя! Сыграй 5 игр — получишь +${referral.bonus} Game 🎁`)
+    } else if (challenge && get().profile) {
+      // Принимаем вызов: награда обоим, затем открываем игру.
+      try {
+        const r = await get().acceptChallenge(challenge.fromId, challenge.gameId)
+        if (r?.ok) get().showToast(`Вызов принят: +${r.reward} Game ⚔️`)
+      } catch { /* ignore */ }
+      const card = get().catalog.find(g => g.id === challenge.gameId)
+      if (card && inTelegram) get().launch(card)
     } else if (inviteCode && get().profile) {
       // Старый игрок пришёл по ссылке: бонуса нет, но в друзья добавим.
       const res = await get().addFriend(inviteCode)
@@ -505,6 +527,28 @@ export const useStore = create<S>((set, get) => ({
       set({ friends: r.friends })
       haptic('tap')
     } catch { /* ignore */ }
+  },
+
+  async acceptChallenge(fromId, gameId) {
+    try {
+      const r = await api.acceptChallenge(fromId, gameId)
+      set({ profile: r.profile })
+      return { ok: true, reward: r.reward }
+    } catch { return null }
+  },
+
+  challengeFriend(friend) {
+    const profile = get().profile
+    if (!profile) return
+    // Игра для вызова: последняя игра друга либо флагман каталога.
+    const gameId = friend.playing ?? friend.lastGame ?? get().catalog[0]?.id
+    const card = get().catalog.find(g => g.id === gameId)
+    if (!card) return
+    haptic('tap')
+    shareInvite(
+      `https://t.me/${get().botUsername}?startapp=chl_${card.id}_${profile.id}`,
+      `Бросаю тебе вызов в «${card.name}» 🎮 Кто кого?`,
+    )
   },
 
   async chooseUsername(username) {

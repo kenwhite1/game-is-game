@@ -182,3 +182,24 @@ export function socialSnapshot(uid: number) {
     invited: invitedCount(uid),
   }
 }
+
+// ─── Вызов другу (§15.2) ─────────────────────────────────────────────────
+export const CHALLENGE_REWARD = 40
+
+/** Принять вызов: наградить обоих (один раз за пару+игру+день). */
+export function acceptChallenge(uid: number, fromId: number, gameId: string): { ok: boolean; reward?: number; reason?: string } {
+  if (!Number.isInteger(fromId) || fromId === uid) return { ok: false, reason: 'bad' }
+  if (!VALID_GAME_IDS.has(gameId)) return { ok: false, reason: 'bad' }
+  if (!db.prepare('SELECT 1 FROM users WHERE id=?').get(fromId)) return { ok: false, reason: 'bad' }
+  const day = new Date().toISOString().slice(0, 10)
+  let ok = false
+  db.transaction(() => {
+    const ins = db.prepare('INSERT OR IGNORE INTO challenges (from_id, to_id, game_id, day, ts) VALUES (?,?,?,?,?)')
+      .run(fromId, uid, gameId, day, Date.now())
+    if (ins.changes === 0) return // уже награждали сегодня — не фармим
+    credit(uid, CHALLENGE_REWARD, 'challenge', `from:${fromId}`)
+    credit(fromId, CHALLENGE_REWARD, 'challenge', `to:${uid}`)
+    ok = true
+  })()
+  return ok ? { ok: true, reward: CHALLENGE_REWARD } : { ok: false, reason: 'done' }
+}

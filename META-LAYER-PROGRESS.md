@@ -105,9 +105,23 @@ Each phase is committed + deployed (Railway) before the next. Updated as the
   - Note: true Glicko-2 needs opponent ids in the SDK (schema extension later);
     Elo-vs-field is the honest proxy from the current single-sided report.
 
+- **Phase 7 — Social deepening** (this commit, partial):
+  - Referral **pay-on-qualification** (§15.1 fraud fix): `applyReferral` only
+    befriends + records; `settleReferral` (called from recordOpen) pays both
+    once the newcomer plays ≥5 games. `invitedCount` now counts only qualified
+    (feeds Амбассадор ⑮). Migration 020 (`referral_paid`).
+  - Challenge-a-friend (§15.2): `⚔️` on friend rows shares a `chl_<game>_<uid>`
+    deep-link; on accept both get +40 (once per pair+game+day, no self, anti-
+    farm via `challenges` table). Store handles the deep-link on init → reward
+    + launch.
+  - Verified: referral pays on 5th game once (no double), qualified count,
+    challenge reward + done/bad gating, ⚔️ buttons render.
+  - Deferred: clans/teams, activity-feed enrichment (achievement/level events).
+
 ## Next (bible build order §17.2)
 
-- **7 — Social (referral-on-qualify, challenges, clans)**; **8 — Marketplace**.
+- **8 — Marketplace** (bound/tradeable split, gifting cosmetics, escrow + burn,
+  anti-fraud) — the deliberately-restrained last phase.
 
 ## Needs the games (not hub-only)
 

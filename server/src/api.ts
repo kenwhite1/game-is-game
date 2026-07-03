@@ -6,7 +6,7 @@ import { achievementsView } from './achievements'
 import { BOT_USERNAME, PRESENCE_KEY, gameOverrides, type Env } from './env'
 import { touchPresence, clearPresence } from './presence'
 import { getOrCreateUser, getProfile, recordOpen, recentGames, profileDetail, setUsername, userExists } from './profiles'
-import { addFriendByCode, removeFriend, friendsOf, activityFeed, leaderboard, socialSnapshot, giftCoins } from './social'
+import { addFriendByCode, removeFriend, friendsOf, activityFeed, leaderboard, socialSnapshot, giftCoins, acceptChallenge } from './social'
 import { questsOf, weeklyQuestsOf, claimQuest, rerollQuest, rerollsLeft } from './quests'
 import { seasonView, claimTier } from './season'
 import { festivalView, claimEventQuest, claimCommunity, buyEventItem } from './festival'
@@ -332,6 +332,17 @@ api.get('/ranked', c => c.json({ ranked: rankedOf(c.get('uid')) }))
 api.get('/boards', c => c.json({ boards: boards(c.get('uid')) }))
 
 api.get('/social', c => c.json(socialSnapshot(c.get('uid'))))
+
+// Принять вызов друга (deep-link chl_<gameId>_<fromId>): награда обоим.
+const challengeSchema = z.object({ fromId: z.number().int().positive(), gameId: z.string().min(1).max(32) })
+api.post('/challenge/accept', async c => {
+  const parsed = challengeSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'bad_request' }, 400)
+  const uid = c.get('uid')
+  const r = acceptChallenge(uid, parsed.data.fromId, parsed.data.gameId)
+  if (!r.ok) return c.json({ error: r.reason }, 400)
+  return c.json({ reward: r.reward, profile: getProfile(uid) })
+})
 
 api.get('/friends', c => c.json({ friends: friendsOf(c.get('uid')) }))
 

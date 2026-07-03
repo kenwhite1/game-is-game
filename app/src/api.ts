@@ -60,6 +60,7 @@ export const api = {
 
   social: () => req<SocialSnapshot>('/social'),
   addFriend: (code: string) => req<{ friend: Friend; friends: Friend[] }>('/friends/add', { code }),
+  acceptChallenge: (fromId: number, gameId: string) => req<{ reward: number; profile: Profile }>('/challenge/accept', { fromId, gameId }),
   removeFriend: (friendId: number) => req<{ friends: Friend[] }>('/friends/remove', { friendId }),
 
   profile: () => req<{ profile: Profile; recent: string[] }>('/profile'),

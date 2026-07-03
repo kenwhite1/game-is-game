@@ -38,6 +38,7 @@ export function Friends() {
   const showToast = useStore(s => s.showToast)
   const openSheet = useStore(s => s.openSheet)
   const loadBoards = useStore(s => s.loadBoards)
+  const challengeFriend = useStore(s => s.challengeFriend)
 
   const [seg, setSeg] = useState<Seg>('friends')
   const [code, setCode] = useState('')
@@ -135,6 +136,7 @@ export function Friends() {
                   </div>
                 </div>
                 <span className="lvl-badge">Ур. {f.level}</span>
+                <button className="iconbtn" style={{ width: 36, height: 36, fontSize: 16 }} onClick={() => challengeFriend(f)} aria-label={`Бросить вызов: ${f.name}`}>⚔️</button>
                 <button className="iconbtn" style={{ width: 36, height: 36, fontSize: 17 }} onClick={() => setGiftFor(f)} aria-label={`Подарить Game: ${f.name}`}>🎁</button>
                 <button className="iconbtn" style={{ width: 36, height: 36, color: 'var(--red)' }} onClick={() => removeFriend(f.id)} aria-label="Удалить из друзей"><CloseIcon /></button>
               </div>
