@@ -4,6 +4,8 @@
 // КОНФИГ: квесты + магазин + общая цель. Никаких новых подсистем: композиция
 // уже готовых квестов (§8) и косметики (§10).
 
+import type { Category } from './games'
+
 export type EventStat = 'distinct_since' | 'opens_since' | 'rate_since'
 
 export interface EventQuestDef {
@@ -35,6 +37,8 @@ export interface Festival {
   quests: EventQuestDef[]
   shop: EventShopItem[]
   community: CommunityGoal
+  /** «Множитель-уикенд» (§12.2): победа в этом жанре даёт бонусные 🎟. */
+  spotlight?: { category: Category; tokens: number }
 }
 
 /** Доля номинала 🎟, что вернётся монетами при сгорании токенов. */
@@ -57,6 +61,76 @@ export const FESTIVALS: Festival[] = [
       { itemId: 'frame_summer', tokens: 60 },
     ],
     community: { title: 'Сообщество: 50 000 запусков за лето', metric: 'opens', target: 50_000, rewardItemId: 'title_community' },
+    spotlight: { category: 'arcade', tokens: 3 },
+  },
+  {
+    id: 'halloween26',
+    name: 'Хэллоуин',
+    emoji: '🎃',
+    startMs: Date.parse('2026-10-25T00:00:00Z'),
+    endMs: Date.parse('2026-11-02T00:00:00Z'),
+    quests: [
+      { id: 'hw_breadth5', title: 'Открой 5 разных игр', emoji: '🧭', target: 5, tokens: 20, stat: 'distinct_since' },
+      { id: 'hw_play13', title: 'Сыграй 13 раз', emoji: '👻', target: 13, tokens: 20, stat: 'opens_since' },
+    ],
+    shop: [
+      { itemId: 'title_hw', tokens: 20 },
+      { itemId: 'frame_hw', tokens: 60 },
+    ],
+    community: { title: 'Сообщество: 100 000 партий на Хэллоуин', metric: 'opens', target: 100_000, rewardItemId: 'title_hw_community' },
+    spotlight: { category: 'party', tokens: 4 },
+  },
+  {
+    id: 'newyear27',
+    name: 'Новый год',
+    emoji: '🎄',
+    startMs: Date.parse('2026-12-28T00:00:00Z'),
+    endMs: Date.parse('2027-01-11T00:00:00Z'),
+    quests: [
+      { id: 'ny_breadth7', title: 'Открой 7 разных игр', emoji: '🎁', target: 7, tokens: 25, stat: 'distinct_since' },
+      { id: 'ny_play20', title: 'Сыграй 20 раз за праздники', emoji: '❄️', target: 20, tokens: 25, stat: 'opens_since' },
+      { id: 'ny_rate5', title: 'Оцени 5 игр', emoji: '⭐', target: 5, tokens: 20, stat: 'rate_since' },
+    ],
+    shop: [
+      { itemId: 'title_ny', tokens: 25 },
+      { itemId: 'frame_ny', tokens: 70 },
+    ],
+    community: { title: 'Сообщество: 200 000 партий за праздники', metric: 'opens', target: 200_000, rewardItemId: 'title_ny_community' },
+    spotlight: { category: 'board', tokens: 4 },
+  },
+  {
+    id: 'victory27',
+    name: 'День Победы',
+    emoji: '🎖️',
+    startMs: Date.parse('2027-05-07T00:00:00Z'),
+    endMs: Date.parse('2027-05-11T00:00:00Z'),
+    quests: [
+      { id: 'vd_breadth5', title: 'Открой 5 разных игр', emoji: '🕊️', target: 5, tokens: 20, stat: 'distinct_since' },
+      { id: 'vd_play9', title: 'Сыграй 9 раз', emoji: '🎖️', target: 9, tokens: 20, stat: 'opens_since' },
+    ],
+    shop: [
+      { itemId: 'title_victory', tokens: 20 },
+      { itemId: 'frame_victory', tokens: 60 },
+    ],
+    community: { title: 'Сообщество: 150 000 партий к 9 мая', metric: 'opens', target: 150_000, rewardItemId: 'title_victory_community' },
+    spotlight: { category: 'strategy', tokens: 4 },
+  },
+  {
+    id: 'maslenitsa27',
+    name: 'Масленица',
+    emoji: '🥞',
+    startMs: Date.parse('2027-02-16T00:00:00Z'),
+    endMs: Date.parse('2027-02-23T00:00:00Z'),
+    quests: [
+      { id: 'ms_breadth5', title: 'Открой 5 разных игр', emoji: '🥞', target: 5, tokens: 20, stat: 'distinct_since' },
+      { id: 'ms_play10', title: 'Сыграй 10 раз', emoji: '☀️', target: 10, tokens: 15, stat: 'opens_since' },
+    ],
+    shop: [
+      { itemId: 'title_maslenitsa', tokens: 20 },
+      { itemId: 'frame_maslenitsa', tokens: 60 },
+    ],
+    community: { title: 'Сообщество: 120 000 партий на Масленицу', metric: 'opens', target: 120_000, rewardItemId: 'title_maslenitsa_community' },
+    spotlight: { category: 'word', tokens: 3 },
   },
 ]
 

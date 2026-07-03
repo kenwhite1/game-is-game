@@ -168,8 +168,12 @@ export const FRAME_ITEMS: FrameItem[] = [
   // Заслуженные рамки (§10.3): открываются за достижения/серию, не покупаются.
   F('frame_catalog', 'Каталог', 'legendary', 'Заслуги', { kind: 'achievement', achId: 'catalogue', tierIndex: 3 }, 'conic-gradient(from 0deg,#ff5d5d,#ffb24d,#5ad06e,#3a82f7,#9b6cff,#ff5d5d)', 'rgba(90,208,110,.6)', 'spin'),
   F('frame_streak30', 'Огонь-30', 'epic', 'Заслуги', { kind: 'streak', days: 30 }, 'conic-gradient(from 0deg,#ffd166,#f2762a,#e2574c,#ffd166)', 'rgba(242,118,42,.8)', 'pulse'),
-  // Событийная рамка (§12): только из магазина летнего события за 🎟.
+  // Событийные рамки (§12): только из магазина соответствующего события за 🎟.
   F('frame_summer', 'Лето', 'epic', 'События', { kind: 'event', event: 'summer26' }, 'linear-gradient(135deg,#ffe259,#ffa751,#ff5e7e)', 'rgba(255,167,81,.7)', 'shimmer'),
+  F('frame_hw', 'Жуть', 'epic', 'События', { kind: 'event', event: 'halloween26' }, 'linear-gradient(135deg,#ff7a18,#7b2ff7)', 'rgba(255,122,24,.7)', 'shimmer'),
+  F('frame_ny', 'Морозко', 'epic', 'События', { kind: 'event', event: 'newyear27' }, 'linear-gradient(135deg,#a8e6ff,#5b8cff,#ffffff)', 'rgba(120,180,255,.7)', 'shimmer'),
+  F('frame_victory', 'Знамя', 'epic', 'События', { kind: 'event', event: 'victory27' }, 'linear-gradient(135deg,#c0392b,#f2a93b)', 'rgba(240,169,59,.7)', 'shimmer'),
+  F('frame_maslenitsa', 'Блины', 'epic', 'События', { kind: 'event', event: 'maslenitsa27' }, 'linear-gradient(135deg,#ffcf6b,#ff8a3c)', 'rgba(255,138,60,.7)', 'shimmer'),
 ]
 
 // ─── Шляпы ─────────────────────────────────────────────────────────────
@@ -326,6 +330,14 @@ export const TITLE_ITEMS: TitleItem[] = [
   // Событийные (§12): только из магазина события за 🎟, либо общая цель.
   T('title_summer', 'Летний', 'rare', 'События', { kind: 'event', event: 'summer26' }),
   T('title_community', 'Соучастник', 'epic', 'События', { kind: 'event', event: 'summer26' }),
+  T('title_hw', 'Тыквенный', 'rare', 'События', { kind: 'event', event: 'halloween26' }),
+  T('title_hw_community', 'Дух хаба', 'epic', 'События', { kind: 'event', event: 'halloween26' }),
+  T('title_ny', 'Снежный', 'rare', 'События', { kind: 'event', event: 'newyear27' }),
+  T('title_ny_community', 'Дед Мороз хаба', 'epic', 'События', { kind: 'event', event: 'newyear27' }),
+  T('title_victory', 'Победитель', 'rare', 'События', { kind: 'event', event: 'victory27' }),
+  T('title_victory_community', 'Помним', 'epic', 'События', { kind: 'event', event: 'victory27' }),
+  T('title_maslenitsa', 'Блинный', 'rare', 'События', { kind: 'event', event: 'maslenitsa27' }),
+  T('title_maslenitsa_community', 'Широкая душа', 'epic', 'События', { kind: 'event', event: 'maslenitsa27' }),
 ]
 
 export const COSMETICS: Cosmetic[] = [

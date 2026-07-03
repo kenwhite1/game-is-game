@@ -1,10 +1,13 @@
 import { db } from './db'
 import { credit } from './ledger'
 import { cosmeticById } from '../../shared/cosmetics'
+import { GAMES } from '../../shared/games'
 import {
   activeFestival, festivalById, TOKEN_TO_COIN,
   type Festival, type EventStat, type FestivalView,
 } from '../../shared/festival'
+
+const GAME_CAT = new Map(GAMES.map(g => [g.id, g.category]))
 
 // Движок событий: токены, событийные квесты, магазин за 🎟 и общая цель.
 // Грант предметов инлайном (без server/cosmetics) — чтобы не плодить цикл.
@@ -56,6 +59,16 @@ export function tickCommunity(amount = 1): void {
 }
 function communityValue(eventId: string): number {
   return (db.prepare('SELECT value FROM event_community WHERE event_id=?').get(eventId) as { value: number } | undefined)?.value ?? 0
+}
+
+/** §12.2 множитель-уикенд: победа в spotlight-жанре активного события даёт
+ *  бонусные 🎟. Возвращает начисленные токены (0 — если не подошло). */
+export function awardMatchTokens(uid: number, gameId: string, result: string): number {
+  if (result !== 'win') return 0
+  const f = activeFestival(Date.now())
+  if (!f?.spotlight || GAME_CAT.get(gameId) !== f.spotlight.category) return 0
+  addTokens(uid, f.id, f.spotlight.tokens)
+  return f.spotlight.tokens
 }
 
 /** Сгоревшие токены завершившихся событий -> 10% монетами (лениво, идемпотентно). */
