@@ -246,7 +246,7 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 .feature .ft .play svg { width: 12px; height: 12px; }
 
 /* recent strip */
-.strip { display: flex; gap: 10px; width: 100%; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.strip { display: flex; gap: 10px; width: auto; margin-right: -16px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
 .strip::-webkit-scrollbar { display: none; }
 .chip-game { flex-shrink: 0; cursor: pointer; border: none; background: var(--card); border-radius: 18px; padding: 10px 14px 10px 10px;
   display: flex; align-items: center; gap: 9px; box-shadow: var(--shadow-lip), inset 0 0 0 1px rgba(255,255,255,.5); transition: transform .1s ease; }
@@ -437,9 +437,9 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
   padding: 20px 3px; border-radius: 22px;
   background: #e9ffa0; backdrop-filter: blur(14px) saturate(1.3);
   box-shadow: var(--shadow-pop), inset 0 0 0 1px rgba(255,255,255,.5); }
-.nav-group { display: flex; flex-direction: column; align-items: center; gap: 22px; }
+.nav-group { display: flex; flex-direction: column; align-items: center; gap: 34px; }
 .tab { cursor: pointer; border: none; background: transparent; display: grid; place-items: center;
-  width: 30px; height: 38px; padding: 0; border-radius: 11px; color: #d9cef2; transition: color .15s ease, background .15s ease; }
+  width: 30px; height: 38px; padding: 0; border-radius: 11px; color: #14100a; transition: color .15s ease, background .15s ease; }
 .tab svg { width: 20px; height: 20px; }
 .tab.active { color: #fff; background: var(--blue); }
 .tab:active { transform: scale(.94); }
