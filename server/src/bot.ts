@@ -7,6 +7,7 @@ import { getOrCreateUser } from './profiles'
 import { followerIds } from './catalog'
 import { recordPayment, paymentByCharge, markRefunded, packById } from './wallet'
 import { unlockPremium } from './season'
+import { economyReportText } from './econ'
 
 export const bot = BOT_TOKEN ? new Bot(BOT_TOKEN) : null
 
@@ -135,6 +136,12 @@ if (bot) {
   })
 
   // Новость по игре всем её подписчикам: /announce <gameId> <текст>.
+  // Дашборд экономики оператору (§16.3). Только для админов.
+  bot.command('econ', async ctx => {
+    if (!ctx.from || !ADMIN_IDS.has(ctx.from.id)) return
+    await ctx.reply(economyReportText())
+  })
+
   // Только для админов (ADMIN_IDS); это движок «подписался — узнал первым».
   bot.command('announce', async ctx => {
     if (!ctx.from || !ADMIN_IDS.has(ctx.from.id)) return

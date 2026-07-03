@@ -151,6 +151,12 @@ Each phase is committed + deployed (Railway) before the next. Updated as the
   from Shop with progress bars. Verified: Базовые 27/27 → +1080, idempotent,
   incomplete-guard.
 
+- **Economy-health dashboard** (§16.3, this commit): `server/src/econ.ts`
+  aggregates `coin_ledger` — circulation, per-source faucet/sink volumes,
+  sink/faucet ratio (7d/30d), wallet P50/P90/P99, money-supply growth rate.
+  Admin-gated `GET /admin/economy` (ADMIN_IDS / DEV) + operator bot `/econ`
+  command. Verified in dev.
+
 ## Status: hub-buildable meta-layer COMPLETE (Phases 0–9 + economy foundation)
 
 All bible phases that live in the hub are shipped & deployed. Remaining bible

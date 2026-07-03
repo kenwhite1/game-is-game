@@ -3,7 +3,8 @@ import { z } from 'zod'
 import { validateInitData, issueToken, verifyToken, signLaunch, verifyLaunch, DEV_MODE } from './auth'
 import { handleResult } from './sdk'
 import { achievementsView } from './achievements'
-import { BOT_USERNAME, PRESENCE_KEY, gameOverrides, type Env } from './env'
+import { BOT_USERNAME, PRESENCE_KEY, ADMIN_IDS, gameOverrides, type Env } from './env'
+import { economyReport } from './econ'
 import { touchPresence, clearPresence } from './presence'
 import { getOrCreateUser, getProfile, recordOpen, recentGames, profileDetail, setUsername, userExists } from './profiles'
 import { addFriendByCode, removeFriend, friendsOf, activityFeed, leaderboard, socialSnapshot, giftCoins, acceptChallenge } from './social'
@@ -333,6 +334,13 @@ api.post('/gift', async c => {
 // ─── Ranked & Leaderboards (§13) ─────────────────────────────────────────
 api.get('/ranked', c => c.json({ ranked: rankedOf(c.get('uid')) }))
 api.get('/boards', c => c.json({ boards: boards(c.get('uid')) }))
+
+// Здоровье экономики (§16.3) — только операторам (ADMIN_IDS) или в DEV.
+api.get('/admin/economy', c => {
+  const uid = c.get('uid')
+  if (!DEV_MODE && !ADMIN_IDS.has(uid)) return c.json({ error: 'forbidden' }, 403)
+  return c.json(economyReport())
+})
 
 // ─── Marketplace (§14) ───────────────────────────────────────────────────
 // ─── Collections & set bonuses (§10.5) ───────────────────────────────────
