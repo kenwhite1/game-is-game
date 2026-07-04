@@ -39,6 +39,15 @@
   --grad-hero: radial-gradient(120% 120% at 12% 0%, rgba(255,255,255,.28), rgba(255,255,255,0) 55%),
                linear-gradient(135deg, var(--blue-hi) 0%, var(--blue) 56%, var(--blue-deeper) 100%);
 
+  /* фиолетовый — активные вкладки и кнопки стиля */
+  --purple-hi: #a86bff;
+  --purple: #8b3ff0;
+  --purple-deep: #6a25c9;
+  --purple-lite: #b983ff;
+  /* розовый герой — код друга */
+  --grad-pink: radial-gradient(120% 120% at 12% 0%, rgba(255,255,255,.30), rgba(255,255,255,0) 55%),
+               linear-gradient(135deg, #ff6ec7 0%, #ff2d95 56%, #e01e7b 100%);
+
   --green: #7fb069;
   --green-deep: #5e8e4a;
   --red: #e2574c;
@@ -245,6 +254,33 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
   color: #fff; padding: 8px 16px; border-radius: 999px; background: var(--a); box-shadow: 0 3px 0 var(--ad); }
 .feature .ft .play svg { width: 12px; height: 12px; }
 
+/* game of the week — hero card with weekly rotation */
+.gotw {
+  position: relative; overflow: hidden; width: 100%; cursor: pointer; text-align: left;
+  display: flex; align-items: center; gap: 16px; padding: 26px 18px 18px; margin: 8px 0 4px;
+  border-radius: var(--radius-lg); background: var(--card);
+  box-shadow: var(--shadow-soft), inset 0 0 0 1px rgba(255,255,255,.5), inset 0 0 0 2px var(--glow);
+  transition: transform .12s ease;
+}
+.gotw::before { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(130% 150% at 86% 18%, var(--glow), transparent 60%); }
+.gotw:active { transform: scale(.985); }
+.gotw-ribbon { position: absolute; top: 0; left: 0; z-index: 2;
+  font-size: 11px; font-weight: 900; letter-spacing: .2px; color: #fff;
+  padding: 5px 13px; border-bottom-right-radius: 13px;
+  background: var(--a); box-shadow: 0 2px 0 var(--ad); }
+.gotw-info { position: absolute; top: 8px; right: 10px; z-index: 2;
+  width: 26px; height: 26px; border: none; border-radius: 999px; cursor: pointer;
+  font-size: 13px; font-weight: 900; font-style: italic; color: var(--brown-deep);
+  background: rgba(255,255,255,.55); box-shadow: inset 0 0 0 1px rgba(255,255,255,.6); }
+.gotw .gi-img { position: relative; z-index: 1; box-shadow: 0 8px 18px rgba(74,46,16,.24); }
+.gotw-tx { position: relative; z-index: 1; flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; }
+.gotw-name { font-size: 21px; font-weight: 900; color: var(--brown-deep); }
+.gotw-tag { font-size: 13px; font-weight: 700; color: var(--ink-soft); margin-top: 2px; }
+.gotw-play { margin-top: 12px; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 900;
+  color: #fff; padding: 8px 16px; border-radius: 999px; background: var(--a); box-shadow: 0 3px 0 var(--ad); }
+.gotw-play svg { width: 12px; height: 12px; }
+
 /* recent strip */
 .strip { display: flex; gap: 10px; width: auto; margin-right: -16px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
 .strip::-webkit-scrollbar { display: none; }
@@ -324,7 +360,7 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 /* -- friend code card ---------------------------------------- */
 .code-card { width: 100%; border-radius: var(--radius-lg); padding: 18px; margin-bottom: 14px; color: #fff;
   box-shadow: var(--shadow-pop); position: relative; overflow: hidden;
-  background: var(--grad-hero); }
+  background: var(--grad-pink); }
 .code-card .lab { font-size: 11.5px; font-weight: 900; letter-spacing: 1.4px; text-transform: uppercase; color: rgba(255,255,255,.82); }
 .code-card .code { font-size: 34px; font-weight: 900; letter-spacing: 6px; margin: 4px 0 14px; text-shadow: 0 2px 6px rgba(0,0,0,.18); }
 .code-card .acts { display: flex; gap: 10px; }
@@ -353,7 +389,7 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 .act .tx .when { font-size: 11.5px; font-weight: 800; color: var(--ink-soft); margin-top: 1px; }
 
 /* -- stats / bars -------------------------------------------- */
-.stat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; width: 100%; margin-bottom: 13px; }
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; width: 100%; margin-top: 14px; margin-bottom: 13px; }
 .stat { background: var(--card); border-radius: var(--radius); padding: 14px 10px; text-align: center;
   box-shadow: var(--shadow-lip), inset 0 0 0 1px rgba(255,255,255,.5); }
 .stat .v { font-size: 23px; font-weight: 900; color: var(--blue-deep); letter-spacing: -.02em; }
@@ -363,6 +399,13 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 .gstat .nm { width: 96px; flex-shrink: 0; font-size: 13.5px; font-weight: 900; color: var(--brown-deep); }
 .gstat .track { flex: 1; height: 10px; border-radius: 999px; background: var(--card-2); overflow: hidden; box-shadow: inset 0 0 0 1px var(--line); }
 .gstat .bar { display: block; height: 100%; min-width: 10px; border-radius: 999px; background: linear-gradient(90deg, var(--a), var(--ad)); transition: width .6s cubic-bezier(.2,.8,.3,1); }
+/* неоновая палитра статистики — циклично по строкам */
+.gstat:nth-child(6n+1) .bar { background: linear-gradient(90deg, #ff2d95, #ff6ec7); box-shadow: 0 0 10px rgba(255,45,149,.6); }
+.gstat:nth-child(6n+2) .bar { background: linear-gradient(90deg, #00e0ff, #22d3ee); box-shadow: 0 0 10px rgba(0,224,255,.55); }
+.gstat:nth-child(6n+3) .bar { background: linear-gradient(90deg, #22e06b, #7dff5c); box-shadow: 0 0 10px rgba(52,224,107,.55); }
+.gstat:nth-child(6n+4) .bar { background: linear-gradient(90deg, #9b4dff, #c86bff); box-shadow: 0 0 10px rgba(155,77,255,.6); }
+.gstat:nth-child(6n+5) .bar { background: linear-gradient(90deg, #ff7a00, #ffb400); box-shadow: 0 0 10px rgba(255,122,0,.55); }
+.gstat:nth-child(6n+6) .bar { background: linear-gradient(90deg, #ffe600, #b6ff00); box-shadow: 0 0 10px rgba(210,255,0,.5); }
 .gstat .n { width: 28px; text-align: right; flex-shrink: 0; font-size: 13px; font-weight: 900; color: var(--ink-soft); }
 
 /* -- badges --------------------------------------------------- */
@@ -441,7 +484,7 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 .tab { cursor: pointer; border: none; background: transparent; display: grid; place-items: center;
   width: 30px; height: 38px; padding: 0; border-radius: 11px; color: #14100a; transition: color .15s ease, background .15s ease; }
 .tab svg { width: 20px; height: 20px; }
-.tab.active { color: #fff; background: var(--blue); }
+.tab.active { color: #fff; background: var(--purple); }
 .tab:active { transform: scale(.94); }
 .railcoin { cursor: pointer; border: none; background: transparent; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 0; color: var(--brown-deep); }
 .railcoin:active { transform: scale(.94); }
@@ -521,9 +564,9 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 /* -- slot strip (wardrobe categories) ------------------------ */
 .slot-strip { display: flex; gap: 8px; width: 100%; overflow-x: auto; padding-bottom: 4px; margin-bottom: 14px; scrollbar-width: none; }
 .slot-strip::-webkit-scrollbar { display: none; }
-.slot-chip { flex-shrink: 0; cursor: pointer; border: none; background: var(--card-2); color: var(--ink-soft); font-weight: 900; font-size: 13.5px;
-  padding: 9px 15px; border-radius: 14px; box-shadow: inset 0 0 0 1px var(--line); transition: all .12s ease; }
-.slot-chip.on { background: var(--blue); color: #fff; box-shadow: 0 3px 0 var(--blue-deep); }
+.slot-chip { flex-shrink: 0; cursor: pointer; border: none; background: var(--purple-lite); color: #fff; font-weight: 900; font-size: 13.5px;
+  padding: 9px 15px; border-radius: 14px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.4), 0 2px 8px rgba(139,63,240,.28); transition: all .12s ease; text-shadow: 0 1px 2px rgba(80,20,140,.45); }
+.slot-chip.on { background: var(--purple); color: #fff; box-shadow: 0 3px 0 var(--purple-deep); }
 
 /* -- wardrobe / locker --------------------------------------- */
 .banner.preview { margin-bottom: 14px; }
@@ -624,7 +667,7 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
   width: 24px; height: 24px; border-radius: 999px; font-size: 11px; font-weight: 900;
   display: grid; place-items: center; }
 
-.cat-chips { display: flex; gap: 8px; width: 100%; overflow-x: auto; margin-top: 12px;
+.cat-chips { display: flex; gap: 8px; width: auto; margin-right: -16px; overflow-x: auto; margin-top: 12px;
   padding: 2px; scrollbar-width: none; }
 .cat-chips::-webkit-scrollbar { display: none; }
 .chip-cat { flex-shrink: 0; border: none; cursor: pointer; background: var(--card);

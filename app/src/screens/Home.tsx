@@ -98,6 +98,8 @@ export function Home() {
     <div className="tab-page stagger">
       {profile && <PlayerBanner onOpen={() => setTab('profile')} />}
 
+      <GameOfWeekCard />
+
       {profile && <FestivalCard />}
       {profile && <SeasonCard />}
       {profile && quests.length > 0 && <QuestsCard />}
@@ -360,6 +362,37 @@ function QuestsCard() {
       {quests.map(q => (
         <QuestRow key={q.id} q={q} onReroll={() => void rerollQuest(q.id)} />
       ))}
+    </div>
+  )
+}
+
+/** Игра недели: одна игра из каталога, детерминированно ротируется раз в неделю.
+ *  Неделя привязана к эпохе Unix (шаг 7 дней), поэтому выбор стабилен всю неделю
+ *  и одинаков на всех устройствах — без обращения к серверу. */
+function GameOfWeekCard() {
+  const catalog = useStore(s => s.catalog)
+  const launch = useStore(s => s.launch)
+  const openGameSheet = useStore(s => s.openGameSheet)
+  const pick = useMemo(() => {
+    if (catalog.length === 0) return null
+    const week = Math.floor(Date.now() / 604_800_000)
+    return catalog[week % catalog.length]
+  }, [catalog])
+  if (!pick) return null
+  return (
+    <div
+      className="gotw" style={gameStyle(pick)} onClick={() => launch(pick)}
+      role="button" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') launch(pick) }}
+      aria-label={`Игра недели: ${pick.name}`}
+    >
+      <span className="gotw-ribbon">⭐ Игра недели</span>
+      <button className="gotw-info" onClick={e => { e.stopPropagation(); openGameSheet(pick.id) }} aria-label={`Об игре ${pick.name}`}>i</button>
+      <GameTileIcon id={pick.id} emoji={pick.emoji} size={74} />
+      <span className="gotw-tx">
+        <span className="gotw-name">{pick.name}</span>
+        <span className="gotw-tag">{pick.tagline}</span>
+        <span className="gotw-play"><PlayIcon /> Играть</span>
+      </span>
     </div>
   )
 }

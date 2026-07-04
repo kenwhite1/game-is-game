@@ -450,7 +450,7 @@ function About() {
     <>
       <div className="splash-inner" style={{ marginBottom: 6 }}><BrandLogo size="small" /></div>
       <h2>Game is Game</h2>
-      <p className="soft">Один аккаунт — все наши игры. Открываешь хаб, выбираешь игру, и она запускается сразу. Друзья, уровни и значки общие для всех игр.</p>
+      <p className="soft">Один аккаунт, все наши игры. Открываешь хаб, выбираешь игру, и она запускается сразу. Друзья, уровни и значки общие для всех игр.</p>
       <div style={{ marginTop: 8 }}>
         {catalog.map(g => (
           <div className="setting" key={g.id}>
@@ -467,7 +467,7 @@ function Help() {
   return (
     <>
       <h2>Как это работает</h2>
-      <p className="soft">Выбери игру в «Доме» — она откроется сразу. Добавляй друзей по коду, соревнуйся в «Ленте» и качай уровень за запуски игр.</p>
+      <p className="soft">Выбери игру в «Доме», она откроется сразу. Добавляй друзей по коду, соревнуйся в «Ленте» и качай уровень за запуски игр.</p>
       <div style={{ marginTop: 8 }}>
         <div className="cmd"><code>/start</code><span>открыть хаб</span></div>
         <div className="cmd"><code>/play</code><span>открыть хаб</span></div>
