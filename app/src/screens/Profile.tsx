@@ -61,7 +61,7 @@ export function Profile() {
             <div className="tag2">{titleText(profile.title)}</div>
           </div>
           {profile.prestige > 0 && <span className="streak-chip" title={`Престиж ${profile.prestige}`}>⭐ {profile.prestige}</span>}
-          {profile.streak > 0 && <span className={`streak-chip ${profile.streakPerfect ? 'streak-gold' : ''}`} title={profile.streakPerfect ? `Идеальная серия: ${profile.streak} дн. — ни одной заморозки` : `Серия: ${profile.streak} дн.`}>🔥 {profile.streak}</span>}
+          {profile.streak > 0 && <span className={`streak-chip ${profile.streakPerfect ? 'streak-gold' : ''}`} title={profile.streakPerfect ? `Идеальная серия: ${profile.streak} дн., ни одной заморозки` : `Серия: ${profile.streak} дн.`}>🔥 {profile.streak}</span>}
           <button className="banner-edit" onClick={() => openSheet('editProfile')} aria-label="Редактировать имя">
             <EditIcon />
           </button>
@@ -83,10 +83,10 @@ export function Profile() {
 
       {profile.streakRepair && (
         <div className="repair-card">
-          <div className="rc-tx">🔧 Серия <b>{profile.streakRepair.value} дней</b> порвалась — восстанови за 24 ч!</div>
+          <div className="rc-tx">🔧 Серия <b>{profile.streakRepair.value} дней</b> порвалась, восстанови за 24 ч!</div>
           <div className="rc-btns">
             <button className="btn sm" disabled={!profile.streakRepair.canPlayFree} onClick={() => void repairStreak('play')}>
-              {profile.streakRepair.canPlayFree ? '▶ 3 игры — даром' : `▶ Игры ${profile.streakRepair.plays}/${profile.streakRepair.playsNeeded}`}
+              {profile.streakRepair.canPlayFree ? '▶ 3 игры даром' : `▶ Игры ${profile.streakRepair.plays}/${profile.streakRepair.playsNeeded}`}
             </button>
             <button className="btn sm accent" onClick={() => void repairStreak('pay')}>💰 {profile.streakRepair.cost} Game</button>
           </div>
@@ -95,7 +95,7 @@ export function Profile() {
 
       {lv.level >= 100 && (
         <button className="btn block" style={{ marginBottom: 13, background: 'linear-gradient(135deg,#ffd166,#ff9d00)', boxShadow: '0 4px 0 #d99a1f', color: '#2a1640' }} onClick={() => void prestige()}>
-          ⭐ Престиж — сбросить уровень за звезду
+          ⭐ Престиж: сбросить уровень за звезду
         </button>
       )}
 
@@ -165,7 +165,7 @@ function AchievementCard({ a }: { a: AchView }) {
           <span className="ach-title">{done ? cur!.name : masked ? 'Секрет' : a.title}</span>
           {rare && <span className="ach-rare">редкое · {Math.round(a.rarity * 100)}%</span>}
         </div>
-        <div className="ach-desc">{masked ? 'Скрытое достижение — открой, чтобы узнать' : maxed ? 'Максимум взят' : a.desc}</div>
+        <div className="ach-desc">{masked ? 'Скрытое достижение: открой, чтобы узнать' : maxed ? 'Максимум взят' : a.desc}</div>
         {!masked && (
           <>
             <div className="ach-bar"><div className="ach-fill" style={{ width: `${pct}%` }} /></div>

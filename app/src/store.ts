@@ -217,7 +217,7 @@ export const useStore = create<S>((set, get) => ({
       // Дружба создана; бонус придёт после квалификации новичка (5 игр).
       set({ tab: 'friends' })
       void get().loadSocial()
-      get().showToast(`${referral.by} пригласил(а) тебя! Сыграй 5 игр — получишь +${referral.bonus} Game 🎁`)
+      get().showToast(`${referral.by} пригласил(а) тебя! Сыграй 5 игр и получишь +${referral.bonus} Game 🎁`)
     } else if (challenge && get().profile) {
       // Принимаем вызов: награда обоим, затем открываем игру.
       try {
@@ -473,7 +473,7 @@ export const useStore = create<S>((set, get) => ({
       void get().loadDetail()
       haptic('success')
       if (get().soundOn) playSfx('open')
-      get().showToast(`Престиж ${r.profile.prestige} ⭐ Уровень сброшен — вперёд по новой!`)
+      get().showToast(`Престиж ${r.profile.prestige} ⭐ Уровень сброшен, вперёд по новой!`)
     } catch (e) {
       haptic('warn')
       get().showToast((e as { message?: string }).message === 'too_low' ? 'Престиж откроется на 100 уровне' : 'Не удалось')

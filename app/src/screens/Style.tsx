@@ -42,7 +42,7 @@ export function Style() {
     if (s.equipped) return
     if (s.owned) { void equip(slot, s.item.id); return }
     if (s.price != null) {
-      if (coins < s.price) { showToast('Не хватает Game 💰 — загляни в Магазин'); return }
+      if (coins < s.price) { showToast('Не хватает Game 💰, загляни в Магазин'); return }
       const ok = await buy(s.item.id, s.item.name)
       if (ok) void equip(slot, s.item.id)
       return

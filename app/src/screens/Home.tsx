@@ -315,7 +315,7 @@ function GameSheet() {
           className="rate-btn fav-row"
           onClick={() => shareInvite(
             `https://t.me/${botUsername}?startapp=${g.id}`,
-            `Играю в «${g.name}» в Game is Game — залетай! 🎮`,
+            `Играю в «${g.name}» в Game is Game, залетай! 🎮`,
           )}
         >📤 Поделиться с друзьями</button>
         <button className="btn accent" style={{ width: '100%', marginTop: 10 }} onClick={() => { openGameSheet(null); launch(g) }}>
@@ -469,7 +469,7 @@ function PlayerBanner({ onOpen }: { onOpen(): void }) {
           <div className="tag2">{titleText(profile.title)}</div>
         </div>
         {profile.prestige > 0 && <span className="streak-chip" title={`Престиж ${profile.prestige}`}>⭐ {profile.prestige}</span>}
-        {profile.streak > 0 && <span className={`streak-chip ${profile.streakPerfect ? 'streak-gold' : ''}`} title={profile.streakPerfect ? `Идеальная серия: ${profile.streak} дн. — ни одной заморозки` : `Серия: ${profile.streak} дн.`}>🔥 {profile.streak}</span>}
+        {profile.streak > 0 && <span className={`streak-chip ${profile.streakPerfect ? 'streak-gold' : ''}`} title={profile.streakPerfect ? `Идеальная серия: ${profile.streak} дн., ни одной заморозки` : `Серия: ${profile.streak} дн.`}>🔥 {profile.streak}</span>}
         <span style={{ fontSize: 13, fontWeight: 900, background: 'rgba(255,255,255,.2)', padding: '6px 12px', borderRadius: 999, boxShadow: 'inset 0 0 0 1.5px rgba(255,255,255,.35)' }}>
           Ур. {lv.level}
         </span>

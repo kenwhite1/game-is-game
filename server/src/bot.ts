@@ -91,7 +91,7 @@ if (bot) {
     await ctx.reply(
       (invited
         ? `Привет, ${name}! Тебя пригласили в Game is Game 🎁\n\n` +
-          `Открой приложение по кнопке ниже — приглашение засчитается, и ты получишь +${REFERRED_BONUS} Game на старте.\n\n`
+          `Открой приложение по кнопке ниже, приглашение засчитается, и ты получишь +${REFERRED_BONUS} Game на старте.\n\n`
         : `Привет, ${name}! Это Game is Game 🎮\n\n`) +
         `Если совсем просто, это одно приложение со всеми нашими играми: ${GAME_COUNT} игр на любое настроение. ` +
         'Карты и настольные, игры для компании, слова, аркады, головоломки и стратегии.\n\n' +
@@ -107,10 +107,10 @@ if (bot) {
     const name = [ctx.from.first_name, ctx.from.last_name].filter(Boolean).join(' ').slice(0, 40) || 'Игрок'
     const user = getOrCreateUser(ctx.from.id, name, ctx.from.username)
     const link = inviteLink(BOT_USERNAME, user.friend_code ?? '')
-    const shareText = `Залетай в Game is Game — все наши игры в одном месте! Получишь +${REFERRED_BONUS} Game на старте 🎁`
+    const shareText = `Залетай в Game is Game, все наши игры в одном месте! Получишь +${REFERRED_BONUS} Game на старте 🎁`
     const share = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(shareText)}`
     await ctx.reply(
-      'Зови друзей — получай Game! 🎁\n\n' +
+      'Зови друзей, получай Game! 🎁\n\n' +
         `За каждого нового игрока, который зайдёт по твоей ссылке, ты получишь +${REFERRER_REWARD} Game, ` +
         `а друг +${REFERRED_BONUS} Game на старте. Вы сразу окажетесь друг у друга в друзьях.\n\n` +
         `Твоя ссылка:\n${link}`,

@@ -118,7 +118,7 @@ function Collections() {
   return (
     <>
       <h2 style={{ marginBottom: 2 }}>Коллекции</h2>
-      <p className="soft" style={{ fontSize: 12.5, fontWeight: 800, marginBottom: 12 }}>Собери все предметы коллекции — получи бонус Game.</p>
+      <p className="soft" style={{ fontSize: 12.5, fontWeight: 800, marginBottom: 12 }}>Собери все предметы коллекции и получи бонус Game.</p>
       <div className="lb-list">
         {collections.map(c => {
           const pct = Math.round((c.owned / c.total) * 100)
@@ -218,7 +218,7 @@ function Clan() {
 
       <div className="kicker" style={{ margin: '18px 0 8px' }}>Найти команду</div>
       {board.length === 0 ? (
-        <p className="soft" style={{ fontSize: 12.5 }}>Пока команд нет — создай первую!</p>
+        <p className="soft" style={{ fontSize: 12.5 }}>Пока команд нет, создай первую!</p>
       ) : (
         <div className="lb-list">
           {board.map(c => (
@@ -256,7 +256,7 @@ function Market() {
             <option value="">Выбери образ…</option>
             {market.sellable.map(s => <option key={s.itemId} value={s.itemId}>{s.name} ({s.rarity})</option>)}
           </select>
-          <input className="input" type="number" inputMode="numeric" placeholder={sell ? `${sell.floor}–${sell.ceil}` : 'Цена'}
+          <input className="input" type="number" inputMode="numeric" placeholder={sell ? `${sell.floor}-${sell.ceil}` : 'Цена'}
             value={price} onChange={e => setPrice(e.target.value)} style={{ width: 96 }} disabled={!sell} />
           <button className="btn sm" disabled={!sell || !price} onClick={() => { if (sell) { void listItem(sell.itemId, Number(price)); setSellId(''); setPrice('') } }}>Продать</button>
         </div>
@@ -277,7 +277,7 @@ function Market() {
 
       <div className="kicker" style={{ margin: '16px 0 8px' }}>Лоты игроков</div>
       {market.listings.length === 0 ? (
-        <div className="empty"><div className="em">🏷️</div><div className="t">Пока пусто</div><div className="s">Загляни позже — тут появятся образы игроков.</div></div>
+        <div className="empty"><div className="em">🏷️</div><div className="t">Пока пусто</div><div className="s">Загляни позже, тут появятся образы игроков.</div></div>
       ) : (
         market.listings.map(l => (
           <div className="mk-row" key={l.id}>
@@ -315,7 +315,7 @@ function Boards() {
         ))}
       </div>
       {rows.length === 0 ? (
-        <div className="empty"><div className="em">🏆</div><div className="t">Пока пусто</div><div className="s">Играй и зарабатывай — рейтинг наполнится.</div></div>
+        <div className="empty"><div className="em">🏆</div><div className="t">Пока пусто</div><div className="s">Играй и зарабатывай, рейтинг наполнится.</div></div>
       ) : (
         <div className="lb-list">
           {rows.map((r, i) => (
@@ -392,7 +392,7 @@ function Festival() {
 
 /** Иконка-подпись награды тира пропуска. */
 function rewardChip(reward: { kind: string; amount?: number; count?: number; itemId?: string } | null): string {
-  if (!reward) return '—'
+  if (!reward) return '·'
   if (reward.kind === 'coins') return `${reward.amount} G`
   if (reward.kind === 'freeze') return `❄ ${reward.count}`
   return cosmeticById(reward.itemId ?? '')?.name ?? 'Предмет'
@@ -435,7 +435,7 @@ function SeasonCell({ reward, claimed, can, locked, onClaim }: {
   reward: { kind: string; amount?: number; count?: number; itemId?: string } | null
   claimed: boolean; can: boolean; locked?: boolean; onClaim(): void
 }) {
-  if (!reward) return <span className="sp-cell empty">—</span>
+  if (!reward) return <span className="sp-cell empty">·</span>
   return (
     <button className={`sp-cell ${claimed ? 'claimed' : can ? 'can' : ''}`} disabled={!can} onClick={onClaim}>
       <span className="sp-rw">{rewardChip(reward)}</span>
@@ -516,12 +516,12 @@ function EditProfile({ onDone }: { onDone(): void }) {
   const hasUsername = !!profile.username
 
   const save = async () => {
-    if (!ok) { showToast('Ник: 3–32 символа, латиница, цифры и _'); return }
+    if (!ok) { showToast('Ник: 3-32 символа, латиница, цифры и _'); return }
     setBusy(true)
     const r = await chooseUsername(clean)
     setBusy(false)
     if (!r.ok) {
-      showToast(r.error === 'username_taken' ? 'Этот ник уже занят — придумай другой'
+      showToast(r.error === 'username_taken' ? 'Этот ник уже занят, придумай другой'
         : r.error === 'username_locked' ? 'Ник уже закреплён'
         : 'Недопустимый ник')
     }
@@ -551,7 +551,7 @@ function EditProfile({ onDone }: { onDone(): void }) {
             />
           </div>
           <p className="soft" style={{ marginTop: 10 }}>
-            В Telegram у тебя нет @username, поэтому выбери свой — 3–32 символа: латиница, цифры и «_».
+            В Telegram у тебя нет @username, поэтому выбери свой, 3-32 символа: латиница, цифры и «_».
             Его больше никто не сможет занять.
           </p>
           <button className="btn block" style={{ marginTop: 16 }} onClick={save} disabled={busy || !ok}>

@@ -58,7 +58,7 @@ export function Friends() {
   // Одна ссылка на всё: новому игроку засчитает приглашение (+Game обоим),
   // уже играющего просто добавит в друзья.
   const inviteUrl = inviteLink(botUsername, myCode)
-  const shareText = `Залетай в Game is Game — все наши игры в одном месте! Получишь +${REFERRED_BONUS} Game на старте 🎁 Мой код: ${myCode}`
+  const shareText = `Залетай в Game is Game, все наши игры в одном месте! Получишь +${REFERRED_BONUS} Game на старте 🎁 Мой код: ${myCode}`
   const onCopy = async () => { const ok = await copyText(myCode); showToast(ok ? 'Код скопирован ✨' : myCode) }
   const onShare = () => shareInvite(inviteUrl, shareText)
 
@@ -90,7 +90,7 @@ export function Friends() {
             <div className="ic-top">
               <span className="ic-gift">🎁</span>
               <div>
-                <div className="ic-head">Зови друзей — получай Game</div>
+                <div className="ic-head">Зови друзей, получай Game</div>
                 <div className="ic-sub">+{REFERRER_REWARD} тебе и +{REFERRED_BONUS} другу за каждого нового игрока по твоей ссылке</div>
               </div>
             </div>
@@ -124,7 +124,7 @@ export function Friends() {
                 const pct = Math.min(100, Math.round((c.progress / c.target) * 100))
                 return (
                   <div className="coop-card" key={c.id}>
-                    <div className="cc-top">С <b>{c.partnerName}</b> — вместе выиграть {c.target} за неделю</div>
+                    <div className="cc-top">С <b>{c.partnerName}</b>: вместе выиграть {c.target} за неделю</div>
                     <div className="ach-bar"><div className="ach-fill" style={{ width: `${pct}%` }} /></div>
                     <div className="cc-bot">
                       <span>{c.progress} / {c.target}</span>
@@ -165,7 +165,7 @@ export function Friends() {
 
           <div className="sec"><h2>Мои друзья</h2><span className="sub">{friends.length}</span></div>
           {friends.length === 0 ? (
-            <div className="empty"><div className="em">🫂</div><div className="t">Пока никого</div><div className="s">Поделись кодом или добавь друга — и играйте вместе.</div></div>
+            <div className="empty"><div className="em">🫂</div><div className="t">Пока никого</div><div className="s">Поделись кодом или добавь друга, и играйте вместе.</div></div>
           ) : friends.map(f => {
             const liveGame = gameById(catalog, f.playing)
             const game = liveGame ?? gameById(catalog, f.lastGame)
@@ -200,7 +200,7 @@ export function Friends() {
       )}
       {seg === 'board' && (
         leaderboard.length === 0 ? (
-          <div className="empty"><div className="em">🏆</div><div className="t">Таблица пустеет</div><div className="s">Добавь друзей и запускай игры — появится рейтинг по опыту.</div></div>
+          <div className="empty"><div className="em">🏆</div><div className="t">Таблица пустеет</div><div className="s">Добавь друзей и запускай игры. Появится рейтинг по опыту.</div></div>
         ) : leaderboard.map((r, i) => (
           <div className={`lb-row ${r.isMe ? 'me' : ''}`} key={r.id}>
             <span className={`rank ${i < 3 ? 'top' : ''}`}>{i < 3 ? MEDALS[i] : i + 1}</span>
@@ -332,7 +332,7 @@ function GiftSheet({ friend, onClose }: { friend: Friend; onClose(): void }) {
                 </button>
               ))}
             </div>
-            <p className="soft" style={{ marginTop: 8 }}>Дарить можно только покупные вещи — заслуги остаются с тобой.</p>
+            <p className="soft" style={{ marginTop: 8 }}>Дарить можно только покупные вещи, заслуги остаются с тобой.</p>
           </>
         )}
       </div>

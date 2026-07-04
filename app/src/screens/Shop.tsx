@@ -35,7 +35,7 @@ export function Shop() {
   items.sort((a, b) => order(a) - order(b))
 
   const onTap = async (s: CosmeticState) => {
-    if (s.owned) { showToast('Уже куплено — надень во вкладке «Аватар»'); return }
+    if (s.owned) { showToast('Уже куплено, надень во вкладке «Аватар»'); return }
     if (s.price == null) { showToast('Скоро в продаже ✨'); return }
     if (coins < s.price) { showToast('Не хватает Game 💰'); return }
     const ok = await buy(s.item.id, s.item.name)
@@ -46,7 +46,7 @@ export function Shop() {
   const onDeal = async (d: DailyDeal) => {
     const s = byId.get(d.itemId)
     if (!s) return
-    if (s.owned) { showToast('Уже куплено — надень во вкладке «Аватар»'); return }
+    if (s.owned) { showToast('Уже куплено, надень во вкладке «Аватар»'); return }
     if (coins < d.price) { showToast('Не хватает Game 💰'); return }
     const ok = await buy(s.item.id, s.item.name)
     if (ok) void equip(s.item.slot, s.item.id)
