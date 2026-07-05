@@ -9,7 +9,8 @@ import { BrandLogo } from './screens/Logo'
 import { TabIcons, CheckIcon, SoundOnIcon, SoundOffIcon, HelpIcon } from './art/icons'
 import { validUsername, normalizeUsername } from '@shared/username'
 import { cosmeticById } from '@shared/cosmetics'
-import { PASS_PREMIUM_STARS } from '@shared/wallet'
+import { t, useLang, setLang, getLang } from './i18n'
+import { PASS_PREMIUM_STARS, PASS_PLUS_STARS, PASS_PLUS_TIERS, TIER_BOOST_STARS, TIER_BOOST_TIERS } from '@shared/wallet'
 
 const TABS: { key: Tab; ru: string }[] = [
   { key: 'home', ru: 'Дом' },
@@ -20,6 +21,7 @@ const TABS: { key: Tab; ru: string }[] = [
 ]
 
 export function App() {
+  useLang() // перерисовать всё дерево при смене языка
   const ready = useStore(s => s.ready)
   const init = useStore(s => s.init)
   const tab = useStore(s => s.tab)
@@ -38,7 +40,7 @@ export function App() {
         <div className="splash">
           <div className="splash-inner">
             <BrandLogo />
-            <div className="soft" style={{ fontWeight: 800, fontSize: 15, marginTop: 8 }}>Открываем игровую…</div>
+            <div className="soft" style={{ fontWeight: 800, fontSize: 15, marginTop: 8 }}>{t('Открываем игровую…')}</div>
           </div>
         </div>
       </div>
@@ -62,19 +64,19 @@ export function App() {
       <nav className="nav">
         <div className="nav-inner">
           <div className="nav-group">
-            {TABS.map(t => (
-              <button key={t.key} className={`tab ${tab === t.key ? 'active' : ''}`} onClick={() => setTab(t.key)} aria-label={t.ru}>
-                {TabIcons[t.key]}
+            {TABS.map(tb => (
+              <button key={tb.key} className={`tab ${tab === tb.key ? 'active' : ''}`} onClick={() => setTab(tb.key)} aria-label={t(tb.ru)}>
+                {TabIcons[tb.key]}
               </button>
             ))}
           </div>
           <div className="nav-group">
-            <button className="tab" onClick={toggleSound} aria-label="Звук">
+            <button className="tab" onClick={toggleSound} aria-label={t('Звук')}>
               {soundOn ? <SoundOnIcon /> : <SoundOffIcon />}
             </button>
-            <button className="tab" onClick={() => openSheet('help')} aria-label="Помощь"><HelpIcon /></button>
+            <button className="tab" onClick={() => openSheet('help')} aria-label={t('Помощь')}><HelpIcon /></button>
             {profile && (
-              <button className="railcoin" onClick={() => setTab('style')} aria-label="Магазин стиля">
+              <button className="railcoin" onClick={() => setTab('style')} aria-label={t('Магазин стиля')}>
                 <span className="coin">G</span>
                 <span className="railnum">{profile.coins.toLocaleString('ru')}</span>
               </button>
@@ -114,11 +116,11 @@ function Sheets() {
 function Collections() {
   const collections = useStore(s => s.collections)
   const claim = useStore(s => s.claimCollection)
-  if (collections.length === 0) return <p className="soft">Загрузка коллекций…</p>
+  if (collections.length === 0) return <p className="soft">{t('Загрузка коллекций…')}</p>
   return (
     <>
-      <h2 style={{ marginBottom: 2 }}>Коллекции</h2>
-      <p className="soft" style={{ fontSize: 12.5, fontWeight: 800, marginBottom: 12 }}>Собери все предметы коллекции и получи бонус Game.</p>
+      <h2 style={{ marginBottom: 2 }}>{t('Коллекции')}</h2>
+      <p className="soft" style={{ fontSize: 12.5, fontWeight: 800, marginBottom: 12 }}>{t('Собери все предметы коллекции и получи бонус Game.')}</p>
       <div className="lb-list">
         {collections.map(c => {
           const pct = Math.round((c.owned / c.total) * 100)
@@ -160,24 +162,24 @@ function Clan() {
         <div className="sp-head">
           <div>
             <h2 style={{ marginBottom: 2 }}>[{clan.tag}] {clan.name}</h2>
-            <div className="soft" style={{ fontSize: 12.5, fontWeight: 800 }}>{clan.memberCount} участников · ты {clan.role === 'owner' ? 'лидер' : 'участник'}</div>
+            <div className="soft" style={{ fontSize: 12.5, fontWeight: 800 }}>{clan.memberCount} {t('участников')} · {t('ты')} {clan.role === 'owner' ? t('лидер') : t('участник')}</div>
           </div>
-          <button className="btn sm ghost" onClick={() => void leaveClan()}>Выйти</button>
+          <button className="btn sm ghost" onClick={() => void leaveClan()}>{t('Выйти')}</button>
         </div>
 
-        <div className="kicker" style={{ margin: '4px 0 8px' }}>Общая цель недели</div>
+        <div className="kicker" style={{ margin: '4px 0 8px' }}>{t('Общая цель недели')}</div>
         <div className="fest-comm">
-          <div className="fest-comm-t">Вместе запустите {w.target} игр за неделю</div>
+          <div className="fest-comm-t">{getLang() === 'en' ? `Launch ${w.target} games together this week` : `Вместе запустите ${w.target} игр за неделю`}</div>
           <div className="q-bar" style={{ marginTop: 6 }}><div className="q-fill" style={{ width: `${pct}%`, background: 'linear-gradient(90deg,#5ad0a0,#3a82f7)' }} /></div>
           <div className="fest-comm-f">
             <span>{w.value} / {w.target}</span>
             {w.reached && (w.claimed
-              ? <span className="soft" style={{ fontWeight: 900 }}>✓ +{w.reward} G получено</span>
-              : <button className="q-claim" onClick={() => void claimWeekly()}>Забрать +{w.reward} G</button>)}
+              ? <span className="soft" style={{ fontWeight: 900 }}>✓ +{w.reward} G {t('получено')}</span>
+              : <button className="q-claim" onClick={() => void claimWeekly()}>{t('Забрать')} +{w.reward} G</button>)}
           </div>
         </div>
 
-        <div className="kicker" style={{ margin: '16px 0 8px' }}>Состав</div>
+        <div className="kicker" style={{ margin: '16px 0 8px' }}>{t('Состав')}</div>
         <div className="lb-list">
           {clan.members.map(m => (
             <div className="lb-row2" key={m.id}>
@@ -188,7 +190,7 @@ function Clan() {
           ))}
         </div>
 
-        <div className="kicker" style={{ margin: '16px 0 8px' }}>Топ команд</div>
+        <div className="kicker" style={{ margin: '16px 0 8px' }}>{t('Топ команд')}</div>
         <div className="lb-list">
           {board.map((c, i) => (
             <div className={`lb-row2 ${c.isMine ? 'me' : ''}`} key={c.id}>
@@ -204,27 +206,27 @@ function Clan() {
 
   return (
     <>
-      <h2 style={{ marginBottom: 2 }}>Команды</h2>
-      <p className="soft" style={{ fontSize: 12.5, fontWeight: 800, marginBottom: 12 }}>Собери команду, бейте общие цели и поднимайтесь в топе.</p>
+      <h2 style={{ marginBottom: 2 }}>{t('Команды')}</h2>
+      <p className="soft" style={{ fontSize: 12.5, fontWeight: 800, marginBottom: 12 }}>{t('Собери команду, бейте общие цели и поднимайтесь в топе.')}</p>
 
-      <div className="kicker" style={{ margin: '4px 0 8px' }}>Создать команду</div>
+      <div className="kicker" style={{ margin: '4px 0 8px' }}>{t('Создать команду')}</div>
       <div className="field">
-        <input className="input" value={name} maxLength={24} onChange={e => setName(e.target.value)} placeholder="Название" style={{ flex: 1 }} />
-        <input className="input" value={tag} maxLength={5} onChange={e => setTag(e.target.value.toUpperCase())} placeholder="ТЕГ" style={{ width: 88, textAlign: 'center' }} autoCapitalize="characters" />
+        <input className="input" value={name} maxLength={24} onChange={e => setName(e.target.value)} placeholder={t('Название')} style={{ flex: 1 }} />
+        <input className="input" value={tag} maxLength={5} onChange={e => setTag(e.target.value.toUpperCase())} placeholder={t('ТЕГ')} style={{ width: 88, textAlign: 'center' }} autoCapitalize="characters" />
       </div>
       <button className="btn block" style={{ marginTop: 10 }} disabled={name.trim().length < 3 || tag.trim().length < 2} onClick={() => void createClan(name, tag)}>
-        🛡️ Создать
+        🛡️ {t('Создать')}
       </button>
 
-      <div className="kicker" style={{ margin: '18px 0 8px' }}>Найти команду</div>
+      <div className="kicker" style={{ margin: '18px 0 8px' }}>{t('Найти команду')}</div>
       {board.length === 0 ? (
-        <p className="soft" style={{ fontSize: 12.5 }}>Пока команд нет, создай первую!</p>
+        <p className="soft" style={{ fontSize: 12.5 }}>{t('Пока команд нет, создай первую!')}</p>
       ) : (
         <div className="lb-list">
           {board.map(c => (
             <div className="lb-row2" key={c.id}>
               <span className="lb-nm">[{c.tag}] {c.name} · {c.members}👥 · GG {c.score}</span>
-              <button className="btn sm" onClick={() => void joinClan(c.id)}>Вступить</button>
+              <button className="btn sm" onClick={() => void joinClan(c.id)}>{t('Вступить')}</button>
             </div>
           ))}
         </div>
@@ -240,50 +242,50 @@ function Market() {
   const cancelListing = useStore(s => s.cancelListing)
   const [sellId, setSellId] = useState('')
   const [price, setPrice] = useState('')
-  if (!market) return <p className="soft">Загрузка барахолки…</p>
+  if (!market) return <p className="soft">{t('Загрузка барахолки…')}</p>
   const sell = market.sellable.find(s => s.itemId === sellId)
   return (
     <>
-      <h2 style={{ marginBottom: 2 }}>Барахолка</h2>
-      <p className="soft" style={{ fontSize: 12, fontWeight: 800, marginBottom: 12 }}>Обмен покупными образами за Game. Комиссия {market.feePct}% сгорает. Заслуги не продаются.</p>
+      <h2 style={{ marginBottom: 2 }}>{t('Барахолка')}</h2>
+      <p className="soft" style={{ fontSize: 12, fontWeight: 800, marginBottom: 12 }}>{getLang() === 'en' ? `Trade purchased looks for Game. A ${market.feePct}% fee is burned. Earned items can't be sold.` : `Обмен покупными образами за Game. Комиссия ${market.feePct}% сгорает. Заслуги не продаются.`}</p>
 
-      <div className="kicker" style={{ margin: '4px 0 8px' }}>Выставить свой образ</div>
+      <div className="kicker" style={{ margin: '4px 0 8px' }}>{t('Выставить свой образ')}</div>
       {market.sellable.length === 0 ? (
-        <p className="soft" style={{ fontSize: 12.5 }}>Нет торгуемых образов. Купи что-нибудь в магазине.</p>
+        <p className="soft" style={{ fontSize: 12.5 }}>{t('Нет торгуемых образов. Купи что-нибудь в магазине.')}</p>
       ) : (
         <div className="mk-sell">
           <select className="input" value={sellId} onChange={e => { setSellId(e.target.value); setPrice('') }} style={{ flex: 1 }}>
-            <option value="">Выбери образ…</option>
-            {market.sellable.map(s => <option key={s.itemId} value={s.itemId}>{s.name} ({s.rarity})</option>)}
+            <option value="">{t('Выбери образ…')}</option>
+            {market.sellable.map(s => <option key={s.itemId} value={s.itemId}>{t(s.name)} ({t(s.rarity)})</option>)}
           </select>
-          <input className="input" type="number" inputMode="numeric" placeholder={sell ? `${sell.floor}-${sell.ceil}` : 'Цена'}
+          <input className="input" type="number" inputMode="numeric" placeholder={sell ? `${sell.floor}-${sell.ceil}` : t('Цена')}
             value={price} onChange={e => setPrice(e.target.value)} style={{ width: 96 }} disabled={!sell} />
-          <button className="btn sm" disabled={!sell || !price} onClick={() => { if (sell) { void listItem(sell.itemId, Number(price)); setSellId(''); setPrice('') } }}>Продать</button>
+          <button className="btn sm" disabled={!sell || !price} onClick={() => { if (sell) { void listItem(sell.itemId, Number(price)); setSellId(''); setPrice('') } }}>{t('Продать')}</button>
         </div>
       )}
 
       {market.mine.length > 0 && (
         <>
-          <div className="kicker" style={{ margin: '16px 0 8px' }}>Мои лоты</div>
+          <div className="kicker" style={{ margin: '16px 0 8px' }}>{t('Мои лоты')}</div>
           {market.mine.map(l => (
             <div className="mk-row" key={l.id}>
-              <span className="mk-nm">{l.itemName} <span className="mk-rar">{l.rarity}</span></span>
+              <span className="mk-nm">{t(l.itemName)} <span className="mk-rar">{t(l.rarity)}</span></span>
               <span className="mk-price"><span className="coin">G</span>{l.price}</span>
-              <button className="btn sm ghost" onClick={() => void cancelListing(l.id)}>Снять</button>
+              <button className="btn sm ghost" onClick={() => void cancelListing(l.id)}>{t('Снять')}</button>
             </div>
           ))}
         </>
       )}
 
-      <div className="kicker" style={{ margin: '16px 0 8px' }}>Лоты игроков</div>
+      <div className="kicker" style={{ margin: '16px 0 8px' }}>{t('Лоты игроков')}</div>
       {market.listings.length === 0 ? (
-        <div className="empty"><div className="em">🏷️</div><div className="t">Пока пусто</div><div className="s">Загляни позже, тут появятся образы игроков.</div></div>
+        <div className="empty"><div className="em">🏷️</div><div className="t">{t('Пока пусто')}</div><div className="s">{t('Загляни позже, тут появятся образы игроков.')}</div></div>
       ) : (
         market.listings.map(l => (
           <div className="mk-row" key={l.id}>
-            <span className="mk-nm">{l.itemName} <span className="mk-rar">{l.rarity}</span><span className="mk-seller"> · {l.sellerName}</span></span>
+            <span className="mk-nm">{t(l.itemName)} <span className="mk-rar">{t(l.rarity)}</span><span className="mk-seller"> · {l.sellerName}</span></span>
             <span className="mk-price"><span className="coin">G</span>{l.price}</span>
-            <button className="btn sm" disabled={market.coins < l.price} onClick={() => void buyListing(l.id)}>Купить</button>
+            <button className="btn sm" disabled={market.coins < l.price} onClick={() => void buyListing(l.id)}>{t('Купить')}</button>
           </div>
         ))
       )}
@@ -295,18 +297,18 @@ function Boards() {
   const boards = useStore(s => s.boards)
   const ranked = useStore(s => s.ranked)
   const [tab, setTab] = useState<'ggScore' | 'weeklyCoins' | 'ggLadder'>('ggScore')
-  if (!boards) return <p className="soft">Загрузка рейтингов…</p>
+  if (!boards) return <p className="soft">{t('Загрузка рейтингов…')}</p>
   const rows = boards[tab]
   const unit = tab === 'ggScore' ? '' : tab === 'weeklyCoins' ? ' G' : ''
-  const TABS = [['ggScore', 'GG Score'], ['ggLadder', 'GG-лига'], ['weeklyCoins', 'Неделя']] as const
+  const TABS = [['ggScore', 'GG Score'], ['ggLadder', t('GG-лига')], ['weeklyCoins', t('Неделя')]] as const
   const medals = ['🥇', '🥈', '🥉']
   return (
     <>
-      <h2 style={{ marginBottom: 10 }}>Рейтинги</h2>
+      <h2 style={{ marginBottom: 10 }}>{t('Рейтинги')}</h2>
       {ranked && (
         <div className="lb-self">
-          <span>Моя GG-лига: <b>{ranked.ladder}</b></span>
-          {ranked.games.length > 0 && <span className="soft" style={{ fontWeight: 800 }}>{ranked.games.map(g => `${g.name}: ${g.division}`).join(' · ')}</span>}
+          <span>{t('Моя GG-лига:')} <b>{ranked.ladder}</b></span>
+          {ranked.games.length > 0 && <span className="soft" style={{ fontWeight: 800 }}>{ranked.games.map(g => `${t(g.name)}: ${t(g.division)}`).join(' · ')}</span>}
         </div>
       )}
       <div className="lb-tabs">
@@ -315,13 +317,13 @@ function Boards() {
         ))}
       </div>
       {rows.length === 0 ? (
-        <div className="empty"><div className="em">🏆</div><div className="t">Пока пусто</div><div className="s">Играй и зарабатывай, рейтинг наполнится.</div></div>
+        <div className="empty"><div className="em">🏆</div><div className="t">{t('Пока пусто')}</div><div className="s">{t('Играй и зарабатывай, рейтинг наполнится.')}</div></div>
       ) : (
         <div className="lb-list">
           {rows.map((r, i) => (
             <div className={`lb-row2 ${r.isMe ? 'me' : ''}`} key={r.id}>
               <span className={`rank ${i < 3 ? 'top' : ''}`}>{i < 3 ? medals[i] : i + 1}</span>
-              <span className="lb-nm">{r.name}{r.isMe ? ' · ты' : ''}</span>
+              <span className="lb-nm">{r.name}{r.isMe ? ` · ${t('ты')}` : ''}</span>
               <span className="lb-val">{r.value.toLocaleString('ru')}{unit}</span>
             </div>
           ))}
@@ -336,37 +338,37 @@ function Festival() {
   const claimQuest = useStore(s => s.claimEventQuest)
   const claimCommunity = useStore(s => s.claimCommunity)
   const buy = useStore(s => s.buyEventItem)
-  if (!f) return <p className="soft">Событие завершилось.</p>
+  if (!f) return <p className="soft">{t('Событие завершилось.')}</p>
   const days = Math.max(0, Math.ceil((f.endsMs - Date.now()) / 86_400_000))
   const cpct = Math.min(100, Math.round((f.community.value / f.community.target) * 100))
   return (
     <>
       <div className="sp-head">
         <div>
-          <h2 style={{ marginBottom: 2 }}>{f.emoji} {f.name}</h2>
-          <div className="soft" style={{ fontSize: 12.5, fontWeight: 800 }}>осталось {days} дн.</div>
+          <h2 style={{ marginBottom: 2 }}>{f.emoji} {t(f.name)}</h2>
+          <div className="soft" style={{ fontSize: 12.5, fontWeight: 800 }}>{t('осталось')} {days} {t('дн.')}</div>
         </div>
         <span className="fest-tokens">🎟 {f.tokens}</span>
       </div>
 
-      <div className="kicker" style={{ margin: '4px 0 8px' }}>Общая цель</div>
+      <div className="kicker" style={{ margin: '4px 0 8px' }}>{t('Общая цель')}</div>
       <div className="fest-comm">
-        <div className="fest-comm-t">{f.community.title}</div>
+        <div className="fest-comm-t">{t(f.community.title)}</div>
         <div className="q-bar" style={{ marginTop: 6 }}><div className="q-fill" style={{ width: `${cpct}%`, background: 'linear-gradient(90deg,#ffd166,#ff7a00)' }} /></div>
         <div className="fest-comm-f">
           <span>{f.community.value.toLocaleString('ru')} / {f.community.target.toLocaleString('ru')}</span>
           {f.community.reached && (f.community.claimed
-            ? <span className="soft" style={{ fontWeight: 900 }}>✓ {f.community.rewardName}</span>
-            : <button className="q-claim" onClick={() => void claimCommunity()}>Забрать «{f.community.rewardName}»</button>)}
+            ? <span className="soft" style={{ fontWeight: 900 }}>✓ {t(f.community.rewardName)}</span>
+            : <button className="q-claim" onClick={() => void claimCommunity()}>{t('Забрать')} «{t(f.community.rewardName)}»</button>)}
         </div>
       </div>
 
-      <div className="kicker" style={{ margin: '16px 0 8px' }}>Задания события</div>
+      <div className="kicker" style={{ margin: '16px 0 8px' }}>{t('Задания события')}</div>
       {f.quests.map(q => (
         <div className="q-row" key={q.id} style={{ borderTop: 'none' }}>
           <span className="q-emoji">{q.emoji}</span>
           <div className="q-tx">
-            <div className="q-name" style={{ color: 'var(--ink)' }}>{q.title}</div>
+            <div className="q-name" style={{ color: 'var(--ink)' }}>{t(q.title)}</div>
             <div className="q-bar"><div className="q-fill" style={{ width: `${Math.round((q.progress / q.target) * 100)}%` }} /></div>
           </div>
           {q.claimed
@@ -377,12 +379,12 @@ function Festival() {
         </div>
       ))}
 
-      <div className="kicker" style={{ margin: '16px 0 8px' }}>Магазин события</div>
+      <div className="kicker" style={{ margin: '16px 0 8px' }}>{t('Магазин события')}</div>
       <div className="fest-shop">
         {f.shop.map(s => (
           <button key={s.itemId} className={`fest-item ${s.owned ? 'owned' : ''}`} disabled={s.owned} onClick={() => void buy(s.itemId)}>
-            <span className="fest-item-n">{s.name}</span>
-            {s.owned ? <span className="fest-item-p owned">Куплено</span> : <span className="fest-item-p">🎟 {s.tokens}</span>}
+            <span className="fest-item-n">{t(s.name)}</span>
+            {s.owned ? <span className="fest-item-p owned">{t('Куплено')}</span> : <span className="fest-item-p">🎟 {s.tokens}</span>}
           </button>
         ))}
       </div>
@@ -393,33 +395,75 @@ function Festival() {
 /** Иконка-подпись награды тира пропуска. */
 function rewardChip(reward: { kind: string; amount?: number; count?: number; itemId?: string } | null): string {
   if (!reward) return '·'
-  if (reward.kind === 'coins') return `${reward.amount} G`
+  if (reward.kind === 'coins') return `🪙 ${reward.amount}`
   if (reward.kind === 'freeze') return `❄ ${reward.count}`
-  return cosmeticById(reward.itemId ?? '')?.name ?? 'Предмет'
+  return t(cosmeticById(reward.itemId ?? '')?.name ?? 'Предмет')
 }
 
 function SeasonPass() {
   const season = useStore(s => s.season)
   const claim = useStore(s => s.claimSeasonTier)
   const buyPremium = useStore(s => s.buyPremium)
-  if (!season) return <p className="soft">Загрузка сезона…</p>
+  const buyPremiumPlus = useStore(s => s.buyPremiumPlus)
+  const buyTierBoost = useStore(s => s.buyTierBoost)
+  if (!season) return <p className="soft">{t('Загрузка сезона…')}</p>
   const daysLeft = Math.max(0, Math.ceil((season.endsMs - Date.now()) / 86_400_000))
+  const atMax = season.tier >= season.tiers
+  const intoTier = season.xp - season.tier * season.xpPerTier
+  const toNext = season.xpPerTier - intoTier
+  const pct = atMax ? 100 : Math.round((intoTier / season.xpPerTier) * 100)
+  const nextRow = season.rows.find(r => r.tier === season.tier + 1)
+  const nextReward = nextRow ? (season.premium && nextRow.premium ? nextRow.premium : nextRow.free) : null
+  const isMilestone = (t: number) => t % 10 === 0 || t === season.tiers
   return (
     <>
-      <div className="sp-head">
-        <div>
-          <h2 style={{ marginBottom: 2 }}>{season.season.name}</h2>
-          <div className="soft" style={{ fontSize: 12.5, fontWeight: 800 }}>Тир {season.tier}/{season.tiers} · осталось {daysLeft} дн.</div>
+      <div className="sp-hero">
+        <div className="sp-hero-top">
+          <div>
+            <h2 style={{ marginBottom: 2 }}>{t(season.season.name)}</h2>
+            <div className="sp-hero-sub">{getLang() === 'en' ? `${daysLeft}d. left · claimable: ${season.claimable}` : `Осталось ${daysLeft} дн. · можно забрать: ${season.claimable}`}</div>
+          </div>
+          <div className={`sp-tierbadge ${season.premium ? 'prem' : ''}`}>
+            <span className="sp-tierbadge-n">{season.tier}</span>
+            <span className="sp-tierbadge-l">{t('тир')}</span>
+          </div>
         </div>
-        {season.premium
-          ? <span className="sp-prem on">Премиум ✨</span>
-          : <button className="sp-prem" onClick={() => void buyPremium()}>Премиум · {PASS_PREMIUM_STARS} ⭐</button>}
+        <div className="sp-hero-bar"><div className="sp-hero-fill" style={{ width: `${pct}%` }} /></div>
+        <div className="sp-hero-foot">
+          <span>{atMax ? t('Пропуск пройден 🏆') : (getLang() === 'en' ? `${intoTier}/${season.xpPerTier} XP · to tier ${season.tier + 1}: ${toNext}` : `${intoTier}/${season.xpPerTier} XP · до тира ${season.tier + 1}: ${toNext}`)}</span>
+          {nextReward && <span className="sp-hero-next">{t('дальше:')} {rewardChip(nextReward)}</span>}
+        </div>
       </div>
-      <div className="sp-legend"><span>Тир</span><span>Бесплатно</span><span>Премиум</span></div>
+
+      <div className="sp-buys">
+        {season.premium
+          ? <div className="sp-prem on">{t('Премиум активен ✨')}</div>
+          : <>
+              <button className="sp-buy" onClick={() => void buyPremium()}>
+                <span className="sp-buy-t">{t('Премиум')}</span>
+                <span className="sp-buy-d">{t('все награды премиум-трека')}</span>
+                <span className="sp-buy-p">{PASS_PREMIUM_STARS} ⭐</span>
+              </button>
+              <button className="sp-buy hot" onClick={() => void buyPremiumPlus()}>
+                <span className="sp-buy-t">{t('Пропуск+ 🔥')}</span>
+                <span className="sp-buy-d">{getLang() === 'en' ? `premium and +${PASS_PLUS_TIERS} tiers now` : `премиум и сразу +${PASS_PLUS_TIERS} тиров`}</span>
+                <span className="sp-buy-p">{PASS_PLUS_STARS} ⭐</span>
+              </button>
+            </>}
+        {!atMax && (
+          <button className="sp-buy boost" onClick={() => void buyTierBoost()}>
+            <span className="sp-buy-t">{getLang() === 'en' ? `Boost +${TIER_BOOST_TIERS} tiers 🚀` : `Буст +${TIER_BOOST_TIERS} тиров 🚀`}</span>
+            <span className="sp-buy-d">{t('мгновенно продвинуться по пропуску')}</span>
+            <span className="sp-buy-p">{TIER_BOOST_STARS} ⭐</span>
+          </button>
+        )}
+      </div>
+
+      <div className="sp-legend"><span>{t('Тир')}</span><span>{t('Бесплатно')}</span><span>{t('Премиум')}</span></div>
       <div className="sp-track">
         {season.rows.map(r => (
-          <div className={`sp-row ${r.unlocked ? 'on' : ''}`} key={r.tier}>
-            <span className="sp-tier">{r.tier}</span>
+          <div className={`sp-row ${r.unlocked ? 'on' : ''} ${isMilestone(r.tier) ? 'milestone' : ''}`} key={r.tier}>
+            <span className="sp-tier">{isMilestone(r.tier) && <span className="sp-star">★</span>}{r.tier}</span>
             <SeasonCell reward={r.free} claimed={r.freeClaimed} can={r.unlocked && !r.freeClaimed && !!r.free}
               onClaim={() => void claim(r.tier, 'free')} />
             <SeasonCell reward={r.premium} claimed={r.premiumClaimed} can={r.unlocked && season.premium && !r.premiumClaimed && !!r.premium}
@@ -436,10 +480,11 @@ function SeasonCell({ reward, claimed, can, locked, onClaim }: {
   claimed: boolean; can: boolean; locked?: boolean; onClaim(): void
 }) {
   if (!reward) return <span className="sp-cell empty">·</span>
+  const big = reward.kind === 'item'
   return (
-    <button className={`sp-cell ${claimed ? 'claimed' : can ? 'can' : ''}`} disabled={!can} onClick={onClaim}>
+    <button className={`sp-cell ${claimed ? 'claimed' : can ? 'can' : ''} ${big ? 'item' : ''}`} disabled={!can} onClick={onClaim}>
       <span className="sp-rw">{rewardChip(reward)}</span>
-      {claimed ? <span className="sp-tag">✓</span> : can ? <span className="sp-tag">забрать</span> : locked ? <span className="sp-tag">🔒</span> : null}
+      {claimed ? <span className="sp-tag">✓</span> : can ? <span className="sp-tag">{t('забрать')}</span> : locked ? <span className="sp-tag">🔒</span> : null}
     </button>
   )
 }
@@ -450,15 +495,15 @@ function About() {
     <>
       <div className="splash-inner" style={{ marginBottom: 6 }}><BrandLogo size="small" /></div>
       <h2>Game is Game</h2>
-      <p className="soft">Один аккаунт, все наши игры. Открываешь хаб, выбираешь игру, и она запускается сразу. Друзья, уровни и значки общие для всех игр.</p>
+      <p className="soft">{t('Один аккаунт, все наши игры. Открываешь хаб, выбираешь игру, и она запускается сразу. Друзья, уровни и значки общие для всех игр.')}</p>
       <div style={{ marginTop: 8 }}>
         {catalog.map(g => (
           <div className="setting" key={g.id}>
-            <div className="tx"><div className="t">{g.name}</div><div className="s">{g.blurb}</div></div>
+            <div className="tx"><div className="t">{t(g.name)}</div><div className="s">{t(g.blurb)}</div></div>
           </div>
         ))}
       </div>
-      <button className="btn block" style={{ marginTop: 14 }} onClick={() => useStore.setState({ sheet: null })}>Понятно</button>
+      <button className="btn block" style={{ marginTop: 14 }} onClick={() => useStore.setState({ sheet: null })}>{t('Понятно')}</button>
     </>
   )
 }
@@ -466,15 +511,15 @@ function About() {
 function Help() {
   return (
     <>
-      <h2>Как это работает</h2>
-      <p className="soft">Выбери игру в «Доме», она откроется сразу. Добавляй друзей по коду, соревнуйся в «Ленте» и качай уровень за запуски игр.</p>
+      <h2>{t('Как это работает')}</h2>
+      <p className="soft">{t('Выбери игру в «Доме», она откроется сразу. Добавляй друзей по коду, соревнуйся в «Ленте» и качай уровень за запуски игр.')}</p>
       <div style={{ marginTop: 8 }}>
-        <div className="cmd"><code>/start</code><span>открыть хаб</span></div>
-        <div className="cmd"><code>/play</code><span>открыть хаб</span></div>
-        <div className="cmd"><code>/games</code><span>список игр</span></div>
-        <div className="cmd"><code>/help</code><span>помощь</span></div>
+        <div className="cmd"><code>/start</code><span>{t('открыть хаб')}</span></div>
+        <div className="cmd"><code>/play</code><span>{t('открыть хаб')}</span></div>
+        <div className="cmd"><code>/games</code><span>{t('список игр')}</span></div>
+        <div className="cmd"><code>/help</code><span>{t('помощь')}</span></div>
       </div>
-      <button className="btn block" style={{ marginTop: 16 }} onClick={() => useStore.setState({ sheet: null })}>Закрыть</button>
+      <button className="btn block" style={{ marginTop: 16 }} onClick={() => useStore.setState({ sheet: null })}>{t('Закрыть')}</button>
     </>
   )
 }
@@ -483,22 +528,41 @@ function Settings() {
   const soundOn = useStore(s => s.soundOn)
   const toggleSound = useStore(s => s.toggleSound)
   const openSheet = useStore(s => s.openSheet)
+  const lang = getLang()
   return (
     <>
-      <h2>Настройки</h2>
+      <h2>{t('Настройки')}</h2>
       <div style={{ marginTop: 8 }}>
         <div className="setting">
-          <div className="tx"><div className="t">Звук</div><div className="s">Тихие щелчки в интерфейсе</div></div>
-          <button className={`switch ${soundOn ? 'on' : ''}`} onClick={toggleSound} aria-label="Звук"><i /></button>
+          <div className="tx"><div className="t">{t('Язык')}</div><div className="s">{t('Русский или English')}</div></div>
+          <div role="group" aria-label={t('Язык')} style={{ display: 'flex', gap: 4, background: 'rgba(0,0,0,.06)', borderRadius: 999, padding: 3 }}>
+            {(['ru', 'en'] as const).map(code => (
+              <button
+                key={code}
+                onClick={() => setLang(code)}
+                aria-pressed={lang === code}
+                style={{
+                  border: 'none', cursor: 'pointer', fontWeight: 900, fontSize: 13, letterSpacing: 0.5,
+                  padding: '6px 14px', borderRadius: 999,
+                  background: lang === code ? 'var(--blue, #3a82f7)' : 'transparent',
+                  color: lang === code ? '#fff' : 'var(--ink-soft, #6b5a44)',
+                }}
+              >{code.toUpperCase()}</button>
+            ))}
+          </div>
+        </div>
+        <div className="setting">
+          <div className="tx"><div className="t">{t('Звук')}</div><div className="s">{t('Тихие щелчки в интерфейсе')}</div></div>
+          <button className={`switch ${soundOn ? 'on' : ''}`} onClick={toggleSound} aria-label={t('Звук')}><i /></button>
         </div>
         <button className="setting" style={{ border: 'none', background: 'none', cursor: 'pointer', width: '100%', textAlign: 'left', borderBottom: '1.5px solid var(--line)' }} onClick={() => openSheet('about')}>
-          <div className="tx"><div className="t">Об этом приложении</div><div className="s">Что такое Game is Game</div></div>
+          <div className="tx"><div className="t">{t('Об этом приложении')}</div><div className="s">{t('Что такое Game is Game')}</div></div>
         </button>
         <button className="setting" style={{ border: 'none', background: 'none', cursor: 'pointer', width: '100%', textAlign: 'left' }} onClick={() => openSheet('help')}>
-          <div className="tx"><div className="t">Помощь</div><div className="s">Как пользоваться хабом</div></div>
+          <div className="tx"><div className="t">{t('Помощь')}</div><div className="s">{t('Как пользоваться хабом')}</div></div>
         </button>
       </div>
-      <div className="soft" style={{ textAlign: 'center', fontSize: 12.5, fontWeight: 700, marginTop: 16 }}>Сделано с любовью ♥</div>
+      <div className="soft" style={{ textAlign: 'center', fontSize: 12.5, fontWeight: 700, marginTop: 16 }}>{t('Сделано с любовью ♥')}</div>
     </>
   )
 }
@@ -516,52 +580,51 @@ function EditProfile({ onDone }: { onDone(): void }) {
   const hasUsername = !!profile.username
 
   const save = async () => {
-    if (!ok) { showToast('Ник: 3-32 символа, латиница, цифры и _'); return }
+    if (!ok) { showToast(t('Ник: 3-32 символа, латиница, цифры и _')); return }
     setBusy(true)
     const r = await chooseUsername(clean)
     setBusy(false)
     if (!r.ok) {
-      showToast(r.error === 'username_taken' ? 'Этот ник уже занят, придумай другой'
-        : r.error === 'username_locked' ? 'Ник уже закреплён'
-        : 'Недопустимый ник')
+      showToast(r.error === 'username_taken' ? t('Этот ник уже занят, придумай другой')
+        : r.error === 'username_locked' ? t('Ник уже закреплён')
+        : t('Недопустимый ник'))
     }
   }
   const toStyle = () => { onDone(); setTab('style') }
 
   return (
     <>
-      <h2>Профиль</h2>
+      <h2>{t('Профиль')}</h2>
 
       {hasUsername ? (
         <>
-          <div className="kicker" style={{ margin: '14px 0 8px' }}>Ник</div>
+          <div className="kicker" style={{ margin: '14px 0 8px' }}>{t('Ник')}</div>
           <div className="uname-fixed">@{profile.username}</div>
-          <p className="soft" style={{ marginTop: 10 }}>Ник берётся из твоего Telegram и общий для всех наших игр.</p>
+          <p className="soft" style={{ marginTop: 10 }}>{t('Ник берётся из твоего Telegram и общий для всех наших игр.')}</p>
         </>
       ) : (
         <>
-          <div className="kicker" style={{ margin: '14px 0 8px' }}>Придумай ник</div>
+          <div className="kicker" style={{ margin: '14px 0 8px' }}>{t('Придумай ник')}</div>
           <div className="field">
             <span className="uname-at">@</span>
             <input
               className="input" value={uname} maxLength={32} autoFocus
-              onChange={e => setUname(e.target.value)} placeholder="ник"
+              onChange={e => setUname(e.target.value)} placeholder={t('ник')}
               autoCapitalize="off" autoCorrect="off" spellCheck={false} enterKeyHint="done"
               onKeyDown={e => { if (e.key === 'Enter' && ok) void save() }}
             />
           </div>
           <p className="soft" style={{ marginTop: 10 }}>
-            В Telegram у тебя нет @username, поэтому выбери свой, 3-32 символа: латиница, цифры и «_».
-            Его больше никто не сможет занять.
+            {t('В Telegram у тебя нет @username, поэтому выбери свой, 3-32 символа: латиница, цифры и «_». Его больше никто не сможет занять.')}
           </p>
           <button className="btn block" style={{ marginTop: 16 }} onClick={save} disabled={busy || !ok}>
-            <CheckIcon /> Закрепить ник
+            <CheckIcon /> {t('Закрепить ник')}
           </button>
         </>
       )}
 
       <button className="btn block ghost" style={{ marginTop: 10 }} onClick={toStyle}>
-        ✨ Сменить образ
+        ✨ {t('Сменить образ')}
       </button>
     </>
   )

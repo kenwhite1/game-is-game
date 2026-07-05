@@ -11,6 +11,13 @@ import { CATEGORIES, categoryRu, type Category } from '@shared/games'
 import type { GameCard, Quest } from '@shared/types'
 import { shareInvite } from '../telegram'
 import { isOnline } from '../util'
+import { t, getLang } from '../i18n'
+
+/** «5 игр» по-русски, «5 games» по-английски. */
+function gamesCount(n: number): string {
+  if (getLang() === 'en') return `${n} ${n === 1 ? 'game' : 'games'}`
+  return ruGames(n)
+}
 
 export function bannerBg(id: string): string | undefined {
   const c = cosmeticById(id)
@@ -18,7 +25,7 @@ export function bannerBg(id: string): string | undefined {
 }
 export function titleText(id: string): string {
   const c = cosmeticById(id)
-  return c && c.slot === 'title' ? (c as TitleItem).text : 'Игрок'
+  return c && c.slot === 'title' ? t((c as TitleItem).text) : t('Игрок')
 }
 
 function glow(hex: string, a = 0.22): string {
@@ -110,41 +117,41 @@ export function Home() {
         <input
           value={query}
           onChange={e => setQuery(e.target.value)}
-          placeholder="Найти игру…"
-          aria-label="Поиск по играм"
+          placeholder={t('Найти игру…')}
+          aria-label={t('Поиск по играм')}
           enterKeyHint="search"
         />
-        {query && <button className="search-x" onClick={() => setQuery('')} aria-label="Очистить">✕</button>}
+        {query && <button className="search-x" onClick={() => setQuery('')} aria-label={t('Очистить')}>✕</button>}
       </div>
 
       <div className="cat-chips">
-        <button className={`chip-cat ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>Все</button>
-        <button className={`chip-cat ${filter === 'fav' ? 'active' : ''}`} onClick={() => setFilter('fav')}>⭐ Избранное</button>
+        <button className={`chip-cat ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>{t('Все')}</button>
+        <button className={`chip-cat ${filter === 'fav' ? 'active' : ''}`} onClick={() => setFilter('fav')}>⭐ {t('Избранное')}</button>
         {CATEGORIES.map(c => (
           <button key={c.id} className={`chip-cat ${filter === c.id ? 'active' : ''}`} onClick={() => setFilter(c.id)}>
-            {c.emoji} {c.ru}
+            {c.emoji} {t(c.ru)}
           </button>
         ))}
       </div>
 
       {!browsing && onlineFriends.length > 0 && (
         <>
-          <div className="sec"><h2>Друзья в сети 🟢</h2></div>
+          <div className="sec"><h2>{t('Друзья в сети 🟢')}</h2></div>
           <div className="strip">
             {onlineFriends.map(f => {
               const liveId = f.playing ?? f.lastGame
               const game = liveId ? catalog.find(g => g.id === liveId) : null
-              const label = f.playing ? `играет · зайти` : game ? `в ${game.name} · зайти` : 'в сети'
+              const label = f.playing ? t('играет · зайти') : game ? `${t('в')} ${t(game.name)} · ${t('зайти')}` : t('в сети')
               return (
                 <button
                   key={f.id} className="chip-game chip-friend" style={game ? gameStyle(game) : undefined}
                   onClick={() => { if (game) launch(game); else setTab('friends') }}
-                  aria-label={game ? `${f.name}: ${game.name}, зайти` : f.name}
+                  aria-label={game ? `${f.name}: ${t(game.name)}` : f.name}
                 >
                   <Avatar look={f.look} seed={f.id} size={34} />
                   <span className="of-tx">
                     <span className="nm">{f.name.split(' ')[0]}</span>
-                    <span className="of-sub">{f.playing && game ? `🟢 в ${game.name}` : label}</span>
+                    <span className="of-sub">{f.playing && game ? `🟢 ${t('в')} ${t(game.name)}` : label}</span>
                   </span>
                 </button>
               )
@@ -155,12 +162,12 @@ export function Home() {
 
       {!browsing && recentCards.length > 0 && (
         <>
-          <div className="sec"><h2>Продолжить</h2></div>
+          <div className="sec"><h2>{t('Продолжить')}</h2></div>
           <div className="strip">
             {recentCards.map(g => (
               <button key={g.id} className="chip-game" style={gameStyle(g)} onClick={() => launch(g)}>
                 <GameTileIcon id={g.id} emoji={g.emoji} size={36} />
-                <span className="nm">{g.name}</span>
+                <span className="nm">{t(g.name)}</span>
               </button>
             ))}
           </div>
@@ -169,12 +176,12 @@ export function Home() {
 
       {!browsing && popular.length > 0 && (
         <>
-          <div className="sec"><h2>Популярное <img src="https://cdn.jsdelivr.net/npm/emoji-datasource-apple/img/apple/64/1f525.png" alt="🔥" style={{ width: 19, height: 19, verticalAlign: -3, display: 'inline-block' }} /></h2></div>
+          <div className="sec"><h2>{t('Популярное')} <img src="https://cdn.jsdelivr.net/npm/emoji-datasource-apple/img/apple/64/1f525.png" alt="🔥" style={{ width: 19, height: 19, verticalAlign: -3, display: 'inline-block' }} /></h2></div>
           <div className="strip">
             {popular.map(g => (
               <button key={g.id} className="chip-game" style={gameStyle(g)} onClick={() => launch(g)}>
                 <GameTileIcon id={g.id} emoji={g.emoji} size={36} />
-                <span className="nm">{g.name}</span>
+                <span className="nm">{t(g.name)}</span>
               </button>
             ))}
           </div>
@@ -183,12 +190,12 @@ export function Home() {
 
       {!browsing && similar.length > 0 && (
         <>
-          <div className="sec"><h2>Похоже на «{recentCards[0]!.name}»</h2></div>
+          <div className="sec"><h2>{getLang() === 'en' ? `More like “${t(recentCards[0]!.name)}”` : `Похоже на «${recentCards[0]!.name}»`}</h2></div>
           <div className="strip">
             {similar.map(g => (
               <button key={g.id} className="chip-game" style={gameStyle(g)} onClick={() => launch(g)}>
                 <GameTileIcon id={g.id} emoji={g.emoji} size={36} />
-                <span className="nm">{g.name}</span>
+                <span className="nm">{t(g.name)}</span>
               </button>
             ))}
           </div>
@@ -197,46 +204,46 @@ export function Home() {
 
       {!browsing && featured && (
         <>
-          <div className="sec"><h2>{recentCards.length ? 'Снова в деле' : 'Начни здесь'}</h2></div>
+          <div className="sec"><h2>{recentCards.length ? t('Снова в деле') : t('Начни здесь')}</h2></div>
           <button className="feature" style={gameStyle(featured)} onClick={() => launch(featured)}>
             <GameTileIcon id={featured.id} emoji={featured.emoji} size={76} />
             <span className="ft">
-              <span className="t">{featured.name}</span>
-              <span className="s">{featured.tagline}</span>
-              <span className="play"><PlayIcon /> Играть</span>
+              <span className="t">{t(featured.name)}</span>
+              <span className="s">{t(featured.tagline)}</span>
+              <span className="play"><PlayIcon /> {t('Играть')}</span>
             </span>
           </button>
         </>
       )}
 
       <div className="sec">
-        <h2>{browsing ? 'Найдено' : 'Все игры'}</h2>
-        <span className="sub">{ruGames(browsing ? filtered.length : catalog.length)}</span>
+        <h2>{browsing ? t('Найдено') : t('Все игры')}</h2>
+        <span className="sub">{gamesCount(browsing ? filtered.length : catalog.length)}</span>
       </div>
       {grid.length === 0 && (
         <div className="empty">
           <div className="em">{filter === 'fav' ? '⭐' : '🔎'}</div>
-          <div className="t">{filter === 'fav' ? 'В избранном пусто' : 'Ничего не нашлось'}</div>
-          <div className="s">{filter === 'fav' ? 'Отмечай игры звёздочкой, и они соберутся здесь.' : 'Попробуй другое название или сними фильтры.'}</div>
+          <div className="t">{filter === 'fav' ? t('В избранном пусто') : t('Ничего не нашлось')}</div>
+          <div className="s">{filter === 'fav' ? t('Отмечай игры звёздочкой, и они соберутся здесь.') : t('Попробуй другое название или сними фильтры.')}</div>
         </div>
       )}
       <div className="game-grid">
         {grid.map(g => (
           <div key={g.id} className="game-card" style={gameStyle(g)} onClick={() => launch(g)} role="button" tabIndex={0}
-            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') launch(g) }} aria-label={`Открыть ${g.name}`}>
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') launch(g) }} aria-label={`${t('Открыть')} ${t(g.name)}`}>
             <button
               className={`gc-star ${favorites.includes(g.id) ? 'on' : ''}`}
               onClick={e => { e.stopPropagation(); void toggleFavorite(g.id) }}
-              aria-label={favorites.includes(g.id) ? 'Убрать из избранного' : 'В избранное'}
+              aria-label={favorites.includes(g.id) ? t('Убрать из избранного') : t('В избранное')}
             >★</button>
-            {recent[0] === g.id ? <span className="gc-flag">Недавнее</span>
+            {recent[0] === g.id ? <span className="gc-flag">{t('Недавнее')}</span>
               : g.adult ? <span className="gc-flag gc-flag--18">18+</span> : null}
             <span className="gc-icon"><GameTileIcon id={g.id} emoji={g.emoji} size={58} /></span>
-            <span className="gc-title">{g.name}</span>
-            <span className="gc-sub">{g.tagline}</span>
+            <span className="gc-title">{t(g.name)}</span>
+            <span className="gc-sub">{t(g.tagline)}</span>
             <span className="gc-foot">
-              <span className="gc-play"><PlayIcon /> Играть</span>
-              <button className="gc-info" onClick={e => { e.stopPropagation(); openGameSheet(g.id) }} aria-label={`Об игре ${g.name}`}>i</button>
+              <span className="gc-play"><PlayIcon /> {t('Играть')}</span>
+              <button className="gc-info" onClick={e => { e.stopPropagation(); openGameSheet(g.id) }} aria-label={`${t('Открыть')} ${t(g.name)}`}>i</button>
             </span>
           </div>
         ))}
@@ -271,7 +278,7 @@ function GameSheet() {
   const my = ratings[g.id]
   const fav = favorites.includes(g.id)
   const followed = follows.includes(g.id)
-  const playersRu = g.players === 'solo' ? 'Одиночная' : g.players === 'multi' ? 'С друзьями' : 'Один и с друзьями'
+  const playersRu = g.players === 'solo' ? t('Одиночная') : g.players === 'multi' ? t('С друзьями') : t('Один и с друзьями')
 
   return (
     <div className="scrim" onClick={() => openGameSheet(null)}>
@@ -280,46 +287,46 @@ function GameSheet() {
         <div className="gsheet-head">
           <GameTileIcon id={g.id} emoji={g.emoji} size={64} />
           <div className="tx">
-            <h2>{g.name}</h2>
-            <div className="s">{g.tagline}</div>
+            <h2>{t(g.name)}</h2>
+            <div className="s">{t(g.tagline)}</div>
           </div>
         </div>
         <div className="gsheet-tags">
-          <span className="tag-pill">{categoryRu(g.category)}</span>
+          <span className="tag-pill">{t(categoryRu(g.category))}</span>
           <span className="tag-pill">{playersRu}</span>
           {g.adult && <span className="tag-pill warn">18+</span>}
         </div>
-        <p className="soft">{g.blurb}</p>
+        <p className="soft">{t(g.blurb)}</p>
         <div className="gsheet-stats">
-          {m.playing > 0 && <span>🟢 {m.playing} в игре</span>}
-          <span>🚀 {m.opens.toLocaleString('ru')} {m.opens === 1 ? 'запуск' : 'запусков'}</span>
-          <span>{likePct !== null ? `👍 ${likePct}% (${votes})` : '👍 Оцени первым'}</span>
+          {m.playing > 0 && <span>🟢 {m.playing} {t('в игре')}</span>}
+          <span>🚀 {m.opens.toLocaleString('ru')} {m.opens === 1 ? t('запуск') : t('запусков')}</span>
+          <span>{likePct !== null ? `👍 ${likePct}% (${votes})` : `👍 ${t('Оцени первым')}`}</span>
         </div>
         <div className="rate-row">
           <button className={`rate-btn ${my === 1 ? 'on-like' : ''}`} onClick={() => void rate(g.id, my === 1 ? 0 : 1)}>
-            👍 Нравится{m.likes > 0 ? ` · ${m.likes}` : ''}
+            👍 {t('Нравится')}{m.likes > 0 ? ` · ${m.likes}` : ''}
           </button>
           <button className={`rate-btn ${my === -1 ? 'on-dislike' : ''}`} onClick={() => void rate(g.id, my === -1 ? 0 : -1)}>
-            👎 Не очень{m.dislikes > 0 ? ` · ${m.dislikes}` : ''}
+            👎 {t('Не очень')}{m.dislikes > 0 ? ` · ${m.dislikes}` : ''}
           </button>
         </div>
         <div className="rate-row" style={{ marginTop: 10 }}>
           <button className={`rate-btn ${fav ? 'on-fav' : ''}`} onClick={() => void toggleFavorite(g.id)}>
-            {fav ? '⭐ В избранном' : '☆ В избранное'}
+            {fav ? `⭐ ${t('В избранном')}` : `☆ ${t('В избранное')}`}
           </button>
           <button className={`rate-btn ${followed ? 'on-fav' : ''}`} onClick={() => void toggleFollow(g.id)}>
-            {followed ? '🔔 Слежу' : '🔕 Следить'}{m.followers > 0 ? ` · ${m.followers}` : ''}
+            {followed ? `🔔 ${t('Слежу')}` : `🔕 ${t('Следить')}`}{m.followers > 0 ? ` · ${m.followers}` : ''}
           </button>
         </div>
         <button
           className="rate-btn fav-row"
           onClick={() => shareInvite(
             `https://t.me/${botUsername}?startapp=${g.id}`,
-            `Играю в «${g.name}» в Game is Game, залетай! 🎮`,
+            getLang() === 'en' ? `Playing “${t(g.name)}” on Game is Game — come join! 🎮` : `Играю в «${g.name}» в Game is Game, залетай! 🎮`,
           )}
-        >📤 Поделиться с друзьями</button>
+        >📤 {t('Поделиться с друзьями')}</button>
         <button className="btn accent" style={{ width: '100%', marginTop: 10 }} onClick={() => { openGameSheet(null); launch(g) }}>
-          <PlayIcon /> Играть
+          <PlayIcon /> {t('Играть')}
         </button>
       </div>
     </div>
@@ -333,7 +340,7 @@ function QuestRow({ q, onReroll }: { q: Quest; onReroll?: () => void }) {
     <div className="q-row">
       <span className="q-emoji">{q.emoji}</span>
       <div className="q-tx">
-        <div className="q-name">{q.title}</div>
+        <div className="q-name">{t(q.title)}</div>
         <div className="q-bar"><div className="q-fill" style={{ width: `${Math.round((q.progress / q.target) * 100)}%` }} /></div>
       </div>
       {q.claimed
@@ -342,7 +349,7 @@ function QuestRow({ q, onReroll }: { q: Quest; onReroll?: () => void }) {
           ? <button className="q-claim" onClick={() => void claimQuest(q.id)}>+{q.reward} G</button>
           : <span className="q-right">
               <span className="q-prog">{q.progress}/{q.target}</span>
-              {onReroll && <button className="q-reroll" onClick={onReroll} aria-label="Заменить задание">♻</button>}
+              {onReroll && <button className="q-reroll" onClick={onReroll} aria-label={t('Заменить задание')}>♻</button>}
             </span>}
     </div>
   )
@@ -356,8 +363,8 @@ function QuestsCard() {
   return (
     <div className="card quests">
       <div className="q-head">
-        <span className="q-title-main">Задания дня</span>
-        <span className="q-sub">{unclaimed > 0 ? `можно забрать: ${unclaimed}` : rerollsLeft > 0 ? 'замена: 1 бесплатно' : 'новые каждый день'}</span>
+        <span className="q-title-main">{t('Задания дня')}</span>
+        <span className="q-sub">{unclaimed > 0 ? `${t('можно забрать:')} ${unclaimed}` : rerollsLeft > 0 ? t('замена: 1 бесплатно') : t('новые каждый день')}</span>
       </div>
       {quests.map(q => (
         <QuestRow key={q.id} q={q} onReroll={() => void rerollQuest(q.id)} />
@@ -383,15 +390,15 @@ function GameOfWeekCard() {
     <div
       className="gotw" style={gameStyle(pick)} onClick={() => launch(pick)}
       role="button" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') launch(pick) }}
-      aria-label={`Игра недели: ${pick.name}`}
+      aria-label={`${t('Игра недели')}: ${t(pick.name)}`}
     >
-      <span className="gotw-ribbon">⭐ Игра недели</span>
-      <button className="gotw-info" onClick={e => { e.stopPropagation(); openGameSheet(pick.id) }} aria-label={`Об игре ${pick.name}`}>i</button>
+      <span className="gotw-ribbon">⭐ {t('Игра недели')}</span>
+      <button className="gotw-info" onClick={e => { e.stopPropagation(); openGameSheet(pick.id) }} aria-label={`${t('Открыть')} ${t(pick.name)}`}>i</button>
       <GameTileIcon id={pick.id} emoji={pick.emoji} size={74} />
       <span className="gotw-tx">
-        <span className="gotw-name">{pick.name}</span>
-        <span className="gotw-tag">{pick.tagline}</span>
-        <span className="gotw-play"><PlayIcon /> Играть</span>
+        <span className="gotw-name">{t(pick.name)}</span>
+        <span className="gotw-tag">{t(pick.tagline)}</span>
+        <span className="gotw-play"><PlayIcon /> {t('Играть')}</span>
       </span>
     </div>
   )
@@ -407,10 +414,10 @@ function FestivalCard() {
     <button className="card fest-card" onClick={() => openSheet('festival')}>
       <span className="fest-emoji">{festival.emoji}</span>
       <span className="fest-tx">
-        <span className="fest-name">{festival.name}</span>
-        <span className="fest-sub">🎟 {festival.tokens} · осталось {days} дн.</span>
+        <span className="fest-name">{t(festival.name)}</span>
+        <span className="fest-sub">🎟 {festival.tokens} · {t('осталось')} {days} {t('дн.')}</span>
       </span>
-      {claimable > 0 ? <span className="fest-badge">забрать: {claimable}</span> : <span className="fest-open">Открыть →</span>}
+      {claimable > 0 ? <span className="fest-badge">{t('забрать:')} {claimable}</span> : <span className="fest-open">{t('Открыть →')}</span>}
     </button>
   )
 }
@@ -424,15 +431,15 @@ function SeasonCard() {
   return (
     <button className="card season-card" onClick={() => openSheet('season')}>
       <div className="sc-head">
-        <span className="sc-title">{season.season.name} · Пропуск{season.premium ? ' ⭐' : ''}</span>
+        <span className="sc-title">{t(season.season.name)} · {t('Пропуск')}{season.premium ? ' ⭐' : ''}</span>
         {season.claimable > 0
-          ? <span className="sc-badge">забрать: {season.claimable}</span>
-          : <span className="sc-sub">тир {season.tier}/{season.tiers}</span>}
+          ? <span className="sc-badge">{t('забрать:')} {season.claimable}</span>
+          : <span className="sc-sub">{t('тир')} {season.tier}/{season.tiers}</span>}
       </div>
       <div className="sc-bar"><div className="sc-fill" style={{ width: `${pct}%` }} /></div>
       <div className="sc-foot">
-        <span>Тир {season.tier} · {season.tier >= season.tiers ? 'максимум' : `${intoTier}/${season.xpPerTier} XP`}</span>
-        <span className="sc-open">Открыть →</span>
+        <span>{t('Тир')} {season.tier} · {season.tier >= season.tiers ? t('максимум') : `${intoTier}/${season.xpPerTier} XP`}</span>
+        <span className="sc-open">{t('Открыть →')}</span>
       </div>
     </button>
   )
@@ -445,8 +452,8 @@ function WeeklyCard() {
   return (
     <div className="card quests weekly">
       <div className="q-head">
-        <span className="q-title-main">Задания недели</span>
-        <span className="q-sub">{unclaimed > 0 ? `можно забрать: ${unclaimed}` : 'сброс в понедельник'}</span>
+        <span className="q-title-main">{t('Задания недели')}</span>
+        <span className="q-sub">{unclaimed > 0 ? `${t('можно забрать:')} ${unclaimed}` : t('сброс в понедельник')}</span>
       </div>
       {weekly.map(q => <QuestRow key={q.id} q={q} />)}
     </div>
@@ -468,15 +475,15 @@ function PlayerBanner({ onOpen }: { onOpen(): void }) {
           <div className="nm2">{profile.username ? `@${profile.username}` : profile.name}</div>
           <div className="tag2">{titleText(profile.title)}</div>
         </div>
-        {profile.prestige > 0 && <span className="streak-chip" title={`Престиж ${profile.prestige}`}>⭐ {profile.prestige}</span>}
-        {profile.streak > 0 && <span className={`streak-chip ${profile.streakPerfect ? 'streak-gold' : ''}`} title={profile.streakPerfect ? `Идеальная серия: ${profile.streak} дн., ни одной заморозки` : `Серия: ${profile.streak} дн.`}>🔥 {profile.streak}</span>}
+        {profile.prestige > 0 && <span className="streak-chip" title={`${t('Престиж')} ${profile.prestige}`}>⭐ {profile.prestige}</span>}
+        {profile.streak > 0 && <span className={`streak-chip ${profile.streakPerfect ? 'streak-gold' : ''}`} title={profile.streakPerfect ? `${t('Идеальная серия')}: ${profile.streak} ${t('дн.')}` : `${t('Серия')}: ${profile.streak} ${t('дн.')}`}>🔥 {profile.streak}</span>}
         <span style={{ fontSize: 13, fontWeight: 900, background: 'rgba(255,255,255,.2)', padding: '6px 12px', borderRadius: 999, boxShadow: 'inset 0 0 0 1.5px rgba(255,255,255,.35)' }}>
-          Ур. {lv.level}
+          {t('Ур.')} {lv.level}
         </span>
       </div>
       <div className="xp">
         <div className="xp-row">
-          <span className="l">Уровень {lv.level}</span>
+          <span className="l">{t('Уровень')} {lv.level}</span>
           <span className="r">{lv.into} / {lv.span} XP</span>
         </div>
         <div className="xp-bar"><div className="xp-fill" style={{ width: `${Math.round(lv.pct * 100)}%` }} /></div>

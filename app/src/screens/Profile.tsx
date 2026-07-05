@@ -8,6 +8,7 @@ import { bannerBg, titleText } from './Home'
 import { TIER_META } from '@shared/achievements'
 import type { AchView } from '@shared/achievements'
 import type { GameCard } from '@shared/types'
+import { t } from '../i18n'
 
 function gameStyle(card?: GameCard): CSSProperties {
   return { '--a': card?.accent ?? 'var(--blue)', '--ad': card?.accentDeep ?? 'var(--blue-deep)' } as CSSProperties
@@ -24,7 +25,7 @@ export function Profile() {
   const repairStreak = useStore(s => s.repairStreak)
 
   if (!profile) {
-    return <div className="tab-page"><div className="empty"><div className="em">👤</div><div className="t">Загрузка профиля…</div></div></div>
+    return <div className="tab-page"><div className="empty"><div className="em">👤</div><div className="t">{t('Загрузка профиля…')}</div></div></div>
   }
 
   const lv = levelInfo(profile.xp)
@@ -35,15 +36,15 @@ export function Profile() {
 
   const onCopy = async () => {
     const ok = await copyText(profile.friendCode)
-    showToast(ok ? 'Код скопирован ✨' : profile.friendCode)
+    showToast(ok ? t('Код скопирован ✨') : profile.friendCode)
   }
 
   return (
     <div className="tab-page stagger">
       <div className="topbar">
-        <div className="hello"><div className="hi">Хаб</div><div className="nm">Профиль</div></div>
-        <button className="coin-chip" onClick={() => setTab('style')} aria-label="Магазин стиля"><span className="coin">G</span>{profile.coins.toLocaleString('ru')}</button>
-        <button className="iconbtn" onClick={() => openSheet('settings')} aria-label="Настройки"><SettingsIcon /></button>
+        <div className="hello"><div className="hi">{t('Хаб')}</div><div className="nm">{t('Профиль')}</div></div>
+        <button className="coin-chip" onClick={() => setTab('style')} aria-label={t('Магазин стиля')}><span className="coin">G</span>{profile.coins.toLocaleString('ru')}</button>
+        <button className="iconbtn" onClick={() => openSheet('settings')} aria-label={t('Настройки')}><SettingsIcon /></button>
       </div>
 
       {/* identity card */}
@@ -60,15 +61,15 @@ export function Profile() {
             <div className="nm2">{profile.username ? `@${profile.username}` : profile.name}</div>
             <div className="tag2">{titleText(profile.title)}</div>
           </div>
-          {profile.prestige > 0 && <span className="streak-chip" title={`Престиж ${profile.prestige}`}>⭐ {profile.prestige}</span>}
-          {profile.streak > 0 && <span className={`streak-chip ${profile.streakPerfect ? 'streak-gold' : ''}`} title={profile.streakPerfect ? `Идеальная серия: ${profile.streak} дн., ни одной заморозки` : `Серия: ${profile.streak} дн.`}>🔥 {profile.streak}</span>}
-          <button className="banner-edit" onClick={() => openSheet('editProfile')} aria-label="Редактировать имя">
+          {profile.prestige > 0 && <span className="streak-chip" title={`${t('Престиж')} ${profile.prestige}`}>⭐ {profile.prestige}</span>}
+          {profile.streak > 0 && <span className={`streak-chip ${profile.streakPerfect ? 'streak-gold' : ''}`} title={profile.streakPerfect ? `${t('Идеальная серия')}: ${profile.streak} ${t('дн.')}` : `${t('Серия')}: ${profile.streak} ${t('дн.')}`}>🔥 {profile.streak}</span>}
+          <button className="banner-edit" onClick={() => openSheet('editProfile')} aria-label={t('Редактировать имя')}>
             <EditIcon />
           </button>
         </div>
         <div className="xp">
           <div className="xp-row">
-            <span className="l">Уровень {lv.level}</span>
+            <span className="l">{t('Уровень')} {lv.level}</span>
             <span className="r">{lv.into} / {lv.span} XP</span>
           </div>
           <div className="xp-bar"><div className="xp-fill" style={{ width: `${Math.round(lv.pct * 100)}%` }} /></div>
@@ -76,17 +77,17 @@ export function Profile() {
       </div>
 
       <div className="stat-grid">
-        <div className="stat"><div className="v">{lv.level}</div><div className="k">Уровень{profile.prestige > 0 ? ` · ⭐${profile.prestige}` : ''}</div></div>
-        <div className="stat"><div className="v">🔥 {profile.streak}</div><div className="k">Серия{profile.streakBest > profile.streak ? ` · рек. ${profile.streakBest}` : ''}</div></div>
-        <div className="stat"><div className="v">{detail?.friendCount ?? 0}</div><div className="k">Друзей</div></div>
+        <div className="stat"><div className="v">{lv.level}</div><div className="k">{t('Уровень')}{profile.prestige > 0 ? ` · ⭐${profile.prestige}` : ''}</div></div>
+        <div className="stat"><div className="v">🔥 {profile.streak}</div><div className="k">{t('Серия')}{profile.streakBest > profile.streak ? ` · ${t('рек.')} ${profile.streakBest}` : ''}</div></div>
+        <div className="stat"><div className="v">{detail?.friendCount ?? 0}</div><div className="k">{t('Друзей')}</div></div>
       </div>
 
       {profile.streakRepair && (
         <div className="repair-card">
-          <div className="rc-tx">🔧 Серия <b>{profile.streakRepair.value} дней</b> порвалась, восстанови за 24 ч!</div>
+          <div className="rc-tx">🔧 {t('Серия')} <b>{profile.streakRepair.value} {t('дней')}</b> {t('порвалась, восстанови за 24 ч!')}</div>
           <div className="rc-btns">
             <button className="btn sm" disabled={!profile.streakRepair.canPlayFree} onClick={() => void repairStreak('play')}>
-              {profile.streakRepair.canPlayFree ? '▶ 3 игры даром' : `▶ Игры ${profile.streakRepair.plays}/${profile.streakRepair.playsNeeded}`}
+              {profile.streakRepair.canPlayFree ? t('▶ 3 игры даром') : `▶ ${t('Игры')} ${profile.streakRepair.plays}/${profile.streakRepair.playsNeeded}`}
             </button>
             <button className="btn sm accent" onClick={() => void repairStreak('pay')}>💰 {profile.streakRepair.cost} Game</button>
           </div>
@@ -95,13 +96,13 @@ export function Profile() {
 
       {lv.level >= 100 && (
         <button className="btn block" style={{ marginBottom: 13, background: 'linear-gradient(135deg,#ffd166,#ff9d00)', boxShadow: '0 4px 0 #d99a1f', color: '#2a1640' }} onClick={() => void prestige()}>
-          ⭐ Престиж: сбросить уровень за звезду
+          ⭐ {t('Престиж: сбросить уровень за звезду')}
         </button>
       )}
 
       <button className="row" onClick={onCopy} style={{ cursor: 'pointer', textAlign: 'left' }}>
         <div className="tx">
-          <div className="s" style={{ color: 'var(--blue-deep)', fontWeight: 900, letterSpacing: 1 }}>КОД ДРУГА</div>
+          <div className="s" style={{ color: 'var(--blue-deep)', fontWeight: 900, letterSpacing: 1 }}>{t('КОД ДРУГА')}</div>
           <div className="t" style={{ fontSize: 19, letterSpacing: 2 }}>{profile.friendCode}</div>
         </div>
         <span className="iconbtn" style={{ width: 38, height: 38, color: 'var(--blue-deep)' }}><CopyIcon /></span>
@@ -109,13 +110,13 @@ export function Profile() {
 
       {stats.some(s => s.opens > 0) && (
         <>
-          <div className="sec"><h2>Статистика игр</h2></div>
+          <div className="sec"><h2>{t('Статистика игр')}</h2></div>
           <div className="card">
             {stats.map(s => {
               const card = catalog.find(g => g.id === s.id)
               return (
                 <div className="gstat" key={s.id} style={gameStyle(card)}>
-                  <span className="nm">{card?.name ?? s.id}</span>
+                  <span className="nm">{card ? t(card.name) : s.id}</span>
                   <span className="track"><span className="bar" style={{ width: `${Math.round((s.opens / maxOpens) * 100)}%` }} /></span>
                   <span className="n">{s.opens}</span>
                 </div>
@@ -127,14 +128,14 @@ export function Profile() {
 
       <Achievements />
 
-      <div className="sec"><h2>Значки</h2><span className="sub">{earned} / {badges.length}</span></div>
+      <div className="sec"><h2>{t('Значки')}</h2><span className="sub">{earned} / {badges.length}</span></div>
       <div className="badge-grid">
         {badges.map(b => (
           <div className={`badge ${b.earned ? '' : 'locked'}`} key={b.id}>
             <span className="em">{b.emoji}</span>
             <div style={{ minWidth: 0 }}>
-              <div className="bt">{b.name}</div>
-              <div className="bd">{b.desc}</div>
+              <div className="bt">{t(b.name)}</div>
+              <div className="bd">{t(b.desc)}</div>
             </div>
           </div>
         ))}
@@ -162,10 +163,10 @@ function AchievementCard({ a }: { a: AchView }) {
       <span className="ach-em">{masked ? '❓' : tierEmoji}</span>
       <div className="ach-tx">
         <div className="ach-top">
-          <span className="ach-title">{done ? cur!.name : masked ? 'Секрет' : a.title}</span>
-          {rare && <span className="ach-rare">редкое · {Math.round(a.rarity * 100)}%</span>}
+          <span className="ach-title">{done ? t(cur!.name) : masked ? t('Секрет') : t(a.title)}</span>
+          {rare && <span className="ach-rare">{t('редкое')} · {Math.round(a.rarity * 100)}%</span>}
         </div>
-        <div className="ach-desc">{masked ? 'Скрытое достижение: открой, чтобы узнать' : maxed ? 'Максимум взят' : a.desc}</div>
+        <div className="ach-desc">{masked ? t('Скрытое достижение: открой, чтобы узнать') : maxed ? t('Максимум взят') : t(a.desc)}</div>
         {!masked && (
           <>
             <div className="ach-bar"><div className="ach-fill" style={{ width: `${pct}%` }} /></div>
@@ -220,14 +221,14 @@ function Achievements() {
   return (
     <>
       <div className="sec">
-        <h2>Достижения</h2>
+        <h2>{t('Достижения')}</h2>
         <span className="sub">GG {ach.score.toLocaleString('ru')} · {ach.unlocked}/{ach.total}</span>
       </div>
       <div className="ach-grid">
         {cross.map(a => <AchievementCard key={a.id} a={a} />)}
       </div>
 
-      <div className="sec"><h2>По играм</h2><span className="sub">{games.length} игр</span></div>
+      <div className="sec"><h2>{t('По играм')}</h2><span className="sub">{games.length} {t('игр')}</span></div>
       <div className="ach-games">
         {games.map(g => {
           const card = cardOf.get(g.id)
@@ -236,7 +237,7 @@ function Achievements() {
             <div className="ach-game" key={g.id}>
               <button className={`ach-game-h ${g.mastered ? 'mst' : ''}`} onClick={() => toggle(g.id)} style={gameStyle(card)}>
                 <span className="em">{card?.emoji ?? '🎮'}</span>
-                <span className="nm">{card?.name ?? g.id}</span>
+                <span className="nm">{card ? t(card.name) : g.id}</span>
                 {g.mastered && <span className="crown">💎</span>}
                 <span className="cnt">{g.earned}/{g.total}</span>
                 <span className="chev">{isOpen ? '▾' : '▸'}</span>

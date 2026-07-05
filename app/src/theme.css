@@ -755,9 +755,34 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 .sc-open { color: #ffd166; }
 
 .sp-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.sp-prem { margin-left: auto; border: none; cursor: pointer; font: inherit; font-size: 12.5px; font-weight: 900; color: #2a1640;
-  background: #ffd166; padding: 8px 14px; border-radius: 999px; box-shadow: 0 3px 0 #d99a1f; }
-.sp-prem.on { background: rgba(123,59,208,.16); color: var(--brown-deep); box-shadow: none; cursor: default; }
+.sp-prem.on { display: block; text-align: center; font-size: 12.5px; font-weight: 900; padding: 10px 14px; border-radius: 14px;
+  background: rgba(123,59,208,.16); color: var(--brown-deep); }
+
+/* hero header */
+.sp-hero { border-radius: 18px; padding: 14px 16px; margin-bottom: 14px; color: #fff;
+  background: linear-gradient(135deg, #2a1640, #4b2a8f 60%, #7b3bd0); }
+.sp-hero-top { display: flex; align-items: center; gap: 10px; }
+.sp-hero-sub { font-size: 12px; font-weight: 800; color: rgba(255,255,255,.82); margin-top: 2px; }
+.sp-tierbadge { margin-left: auto; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px;
+  background: rgba(255,255,255,.14); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.28); }
+.sp-tierbadge.prem { background: linear-gradient(135deg, #ffd166, #ff9d00); color: #2a1640; box-shadow: 0 3px 0 #d99a1f; }
+.sp-tierbadge-n { font-size: 22px; font-weight: 900; line-height: 1; }
+.sp-tierbadge-l { font-size: 9.5px; font-weight: 900; text-transform: uppercase; letter-spacing: .5px; opacity: .8; }
+.sp-hero-bar { height: 9px; border-radius: 999px; background: rgba(255,255,255,.2); overflow: hidden; margin: 12px 0 8px; }
+.sp-hero-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #ffd166, #ff9d00); transition: width .4s ease; }
+.sp-hero-foot { display: flex; justify-content: space-between; gap: 8px; font-size: 11.5px; font-weight: 800; color: rgba(255,255,255,.9); }
+.sp-hero-next { color: #ffd166; flex-shrink: 0; }
+
+/* buy cards */
+.sp-buys { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.sp-buy { position: relative; border: none; cursor: pointer; font: inherit; text-align: left; padding: 11px 14px; border-radius: 14px;
+  background: var(--card-2); box-shadow: inset 0 0 0 1.5px var(--line); display: grid; grid-template-columns: 1fr auto; row-gap: 2px; align-items: center; }
+.sp-buy.hot { background: linear-gradient(135deg, rgba(255,157,0,.12), rgba(255,209,102,.12)); box-shadow: inset 0 0 0 1.5px #ff9d00; }
+.sp-buy.boost { background: rgba(0,122,255,.08); box-shadow: inset 0 0 0 1.5px var(--blue); }
+.sp-buy-t { font-size: 14px; font-weight: 900; color: var(--brown-deep); }
+.sp-buy-d { grid-column: 1; font-size: 11.5px; font-weight: 700; color: var(--ink-soft); }
+.sp-buy-p { grid-column: 2; grid-row: 1 / span 2; font-size: 14px; font-weight: 900; color: #2a1640;
+  background: #ffd166; padding: 7px 12px; border-radius: 999px; box-shadow: 0 3px 0 #d99a1f; white-space: nowrap; }
 .sp-legend { display: grid; grid-template-columns: 34px 1fr 1fr; gap: 8px; font-size: 10.5px; font-weight: 900;
   color: var(--ink-soft); text-transform: uppercase; letter-spacing: .5px; padding: 0 2px 6px; }
 .sp-track { max-height: 60vh; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
@@ -773,6 +798,10 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 .sp-rw { font-size: 12px; font-weight: 900; color: var(--brown-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sp-tag { font-size: 10px; font-weight: 900; color: var(--blue-deep); flex-shrink: 0; }
 .sp-cell.claimed .sp-tag { color: var(--green-deep); }
+.sp-cell.item { background: linear-gradient(135deg, rgba(255,209,102,.22), rgba(123,59,208,.12)); box-shadow: inset 0 0 0 1.5px #ffd166; }
+.sp-cell.item.claimed { background: rgba(52,199,89,.14); box-shadow: inset 0 0 0 1px var(--line); }
+.sp-row.milestone .sp-tier { background: linear-gradient(135deg, #ffd166, #ff9d00); color: #2a1640; box-shadow: none; }
+.sp-star { font-size: 9px; margin-right: 1px; }
 
 /* -- cross-game events (festival) ----------------------------- */
 .fest-card { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; cursor: pointer; margin-top: 12px;

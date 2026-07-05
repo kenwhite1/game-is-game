@@ -21,7 +21,7 @@ import { rankedOf, boards } from './ranked'
 import { marketView, listItem, buyListing, cancelListing } from './market'
 import { clanView, clanBoard, createClan, joinClan, leaveClan, claimClanWeekly } from './clans'
 import { collectionsOf, claimCollection } from './collections'
-import { PASS_PREMIUM_STARS, PASS_PLUS_STARS } from '../../shared/wallet'
+import { PASS_PREMIUM_STARS, PASS_PLUS_STARS, TIER_BOOST_STARS, TIER_BOOST_TIERS } from '../../shared/wallet'
 import { packById } from '../../shared/wallet'
 import { packsBought } from './wallet'
 import { bot } from './bot'
@@ -376,6 +376,25 @@ api.post('/season/premium-plus', async c => {
     return c.json({ link })
   } catch (e) {
     console.error('pass+ invoice failed', e)
+    return c.json({ error: 'invoice_failed' }, 502)
+  }
+})
+
+// «Буст тиров»: разовая покупка за ⭐ — мгновенно +N тиров по пропуску.
+api.post('/season/boost', async c => {
+  if (!bot) return c.json({ error: 'unavailable' }, 503)
+  try {
+    const link = await bot.api.createInvoiceLink(
+      `Буст +${TIER_BOOST_TIERS} тиров`,
+      `Мгновенно продвигает на ${TIER_BOOST_TIERS} тиров вперёд по пропуску сезона`,
+      JSON.stringify({ kind: 'tier_boost', uid: c.get('uid') }),
+      '',
+      'XTR',
+      [{ label: `Буст +${TIER_BOOST_TIERS} тиров`, amount: TIER_BOOST_STARS }],
+    )
+    return c.json({ link })
+  } catch (e) {
+    console.error('boost invoice failed', e)
     return c.json({ error: 'invoice_failed' }, 502)
   }
 })

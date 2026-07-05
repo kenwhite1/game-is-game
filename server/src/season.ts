@@ -2,7 +2,7 @@ import { db } from './db'
 import { credit } from './ledger'
 import { bumpProgress } from './events'
 import { FREEZE_CAP } from '../../shared/economy'
-import { PASS_PLUS_TIERS } from '../../shared/wallet'
+import { PASS_PLUS_TIERS, TIER_BOOST_TIERS } from '../../shared/wallet'
 import { cosmeticById } from '../../shared/cosmetics'
 import {
   currentSeason, tierOf, TRACK, TIERS, XP_PER_TIER, FULL_PASS_XP,
@@ -97,6 +97,11 @@ export function unlockPremium(uid: number): boolean {
 export function unlockPremiumPlus(uid: number): void {
   unlockPremium(uid)
   grantSeasonXp(uid, PASS_PLUS_TIERS * XP_PER_TIER)
+}
+
+/** «Буст тиров»: разовая покупка за ⭐ — мгновенно продвинуть по пропуску. */
+export function boostTiers(uid: number): void {
+  grantSeasonXp(uid, TIER_BOOST_TIERS * XP_PER_TIER)
 }
 
 export function seasonView(uid: number): SeasonView {

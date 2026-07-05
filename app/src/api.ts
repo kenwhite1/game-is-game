@@ -105,6 +105,8 @@ export const api = {
   claimSeasonTier: (tier: number, track: 'free' | 'premium') =>
     req<{ reward: Reward; season: SeasonView; profile: Profile }>('/season/claim', { tier, track }),
   passInvoice: () => req<{ link: string }>('/season/premium'),
+  passPlusInvoice: () => req<{ link: string }>('/season/premium-plus'),
+  boostInvoice: () => req<{ link: string }>('/season/boost'),
 
   festival: () => req<{ festival: FestivalView | null }>('/festival'),
   claimEventQuest: (questId: string) => req<{ tokens: number; festival: FestivalView }>('/festival/quest/claim', { questId }),

@@ -27,6 +27,11 @@ export const PASS_PLUS_STARS = 700
 /** Сколько тиров даёт «Пропуск+» мгновенно. */
 export const PASS_PLUS_TIERS = 10
 
+/** «Буст тиров»: разовая покупка за ⭐ — мгновенно прыгнуть вперёд по пропуску.
+ * Доступна в любой момент (и без премиума), помогает добить сезон под конец. */
+export const TIER_BOOST_TIERS = 5
+export const TIER_BOOST_STARS = 150
+
 export function packById(id: string): CoinPack | undefined {
   return PACKS.find(p => p.id === id)
 }

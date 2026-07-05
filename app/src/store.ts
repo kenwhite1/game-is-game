@@ -13,6 +13,7 @@ import { GAMES, defaultLink } from '@shared/games'
 import { api } from './api'
 import { haptic, openGame as openGameLink, openInvoice, getStartParam, inTelegram, shareInvite } from './telegram'
 import { playSfx, isSoundOn, setSoundOn } from './sound'
+import { t } from './i18n'
 
 // Статичный каталог на случай, если сервер недоступен (гость, офлайн).
 const STATIC_CATALOG: GameCard[] = GAMES.map(g => ({ ...g, link: defaultLink(g.bot) }))
@@ -89,6 +90,8 @@ interface S {
   loadSeason(): Promise<void>
   claimSeasonTier(tier: number, track: 'free' | 'premium'): Promise<void>
   buyPremium(): Promise<void>
+  buyPremiumPlus(): Promise<void>
+  buyTierBoost(): Promise<void>
   loadFestival(): Promise<void>
   claimEventQuest(questId: string): Promise<void>
   claimCommunity(): Promise<void>
@@ -217,12 +220,12 @@ export const useStore = create<S>((set, get) => ({
       // Дружба создана; бонус придёт после квалификации новичка (5 игр).
       set({ tab: 'friends' })
       void get().loadSocial()
-      get().showToast(`${referral.by} пригласил(а) тебя! Сыграй 5 игр и получишь +${referral.bonus} Game 🎁`)
+      get().showToast(`${referral.by} ${t('пригласил(а) тебя! Сыграй 5 игр и получишь')} +${referral.bonus} Game 🎁`)
     } else if (challenge && get().profile) {
       // Принимаем вызов: награда обоим, затем открываем игру.
       try {
         const r = await get().acceptChallenge(challenge.fromId, challenge.gameId)
-        if (r?.ok) get().showToast(`Вызов принят: +${r.reward} Game ⚔️`)
+        if (r?.ok) get().showToast(`${t('Вызов принят:')} +${r.reward} Game ⚔️`)
       } catch { /* ignore */ }
       const card = get().catalog.find(g => g.id === challenge.gameId)
       if (card && inTelegram) get().launch(card)
@@ -231,7 +234,7 @@ export const useStore = create<S>((set, get) => ({
       const res = await get().addFriend(inviteCode)
       if (res.ok) {
         set({ tab: 'friends' })
-        get().showToast(`${res.name ?? 'Друг'} теперь в друзьях 🎉`)
+        get().showToast(`${res.name ?? t('Друг')} ${t('теперь в друзьях 🎉')}`)
       }
     } else if (startParam && get().catalog.some(g => g.id === startParam) && inTelegram) {
       // Прямая ссылка на игру через хаб: ?startapp=<gameId>
@@ -277,7 +280,7 @@ export const useStore = create<S>((set, get) => ({
       set({ profile: r.profile, quests: r.quests, weeklyQuests: r.weekly })
       haptic('success')
       if (get().soundOn) playSfx('open')
-      get().showToast(`Задание выполнено: +${r.reward} Game 🎉`)
+      get().showToast(`${t('Задание выполнено:')} +${r.reward} Game 🎉`)
     } catch (e) {
       haptic('warn')
       const reason = (e as { message?: string }).message
@@ -447,7 +450,8 @@ export const useStore = create<S>((set, get) => ({
   },
 
   showToast(msg) {
-    set({ toast: msg })
+    // t() переводит известные строки, а неизвестные (например с интерполяцией) отдаёт как есть.
+    set({ toast: t(msg) })
     if (toastTimer) clearTimeout(toastTimer)
     toastTimer = setTimeout(() => set({ toast: null }), 2400)
   },
@@ -473,7 +477,7 @@ export const useStore = create<S>((set, get) => ({
       void get().loadDetail()
       haptic('success')
       if (get().soundOn) playSfx('open')
-      get().showToast(`Престиж ${r.profile.prestige} ⭐ Уровень сброшен, вперёд по новой!`)
+      get().showToast(`${t('Престиж')} ${r.profile.prestige} ⭐ ${t('Уровень сброшен, вперёд по новой!')}`)
     } catch (e) {
       haptic('warn')
       get().showToast((e as { message?: string }).message === 'too_low' ? 'Престиж откроется на 100 уровне' : 'Не удалось')
@@ -485,7 +489,7 @@ export const useStore = create<S>((set, get) => ({
       const r = await api.repairStreak(method)
       set({ profile: r.profile })
       haptic('success')
-      get().showToast(`Серия восстановлена 🔧🔥 ${r.profile.streak} дней`)
+      get().showToast(`${t('Серия восстановлена 🔧🔥')} ${r.profile.streak} ${t('дней')}`)
     } catch (e) {
       haptic('warn')
       const msg = (e as { message?: string }).message
@@ -513,8 +517,8 @@ export const useStore = create<S>((set, get) => ({
       haptic('success')
       if (get().soundOn) playSfx('open')
       const rw = r.reward
-      const label = rw.kind === 'coins' ? `+${rw.amount} Game` : rw.kind === 'freeze' ? `+${rw.count} заморозка` : 'предмет'
-      get().showToast(`Награда получена: ${label} 🎉`)
+      const label = rw.kind === 'coins' ? `+${rw.amount} Game` : rw.kind === 'freeze' ? `+${rw.count} ${t('заморозка')}` : t('предмет')
+      get().showToast(`${t('Награда получена:')} ${label} 🎉`)
     } catch (e) {
       haptic('warn')
       const reason = (e as { message?: string }).message
@@ -532,6 +536,38 @@ export const useStore = create<S>((set, get) => ({
         void get().loadSeason()
       })
       if (!opened) get().showToast('Покупка пропуска работает внутри Telegram')
+    } catch {
+      haptic('warn')
+      get().showToast('Не получилось открыть счёт')
+    }
+  },
+
+  async buyPremiumPlus() {
+    try {
+      const { link } = await api.passPlusInvoice()
+      const opened = openInvoice(link, status => {
+        if (status !== 'paid') return
+        haptic('success')
+        get().showToast('Пропуск+ активирован ✨ +10 тиров!')
+        void get().loadSeason()
+      })
+      if (!opened) get().showToast('Покупка пропуска работает внутри Telegram')
+    } catch {
+      haptic('warn')
+      get().showToast('Не получилось открыть счёт')
+    }
+  },
+
+  async buyTierBoost() {
+    try {
+      const { link } = await api.boostInvoice()
+      const opened = openInvoice(link, status => {
+        if (status !== 'paid') return
+        haptic('success')
+        get().showToast('Буст засчитан 🚀 тиры прибавились!')
+        void get().loadSeason()
+      })
+      if (!opened) get().showToast('Буст работает внутри Telegram')
     } catch {
       haptic('warn')
       get().showToast('Не получилось открыть счёт')
@@ -608,7 +644,7 @@ export const useStore = create<S>((set, get) => ({
       set({ collections: r.collections, profile: r.profile })
       haptic('success')
       if (get().soundOn) playSfx('open')
-      get().showToast(`Коллекция собрана: +${r.bonus} Game 🎉`)
+      get().showToast(`${t('Коллекция собрана:')} +${r.bonus} Game 🎉`)
     } catch (e) {
       haptic('warn')
       get().showToast((e as { message?: string }).message === 'claimed' ? 'Уже получено' : 'Коллекция ещё не собрана')
@@ -627,7 +663,7 @@ export const useStore = create<S>((set, get) => ({
       const r = await api.clanCreate(name, tag)
       set({ clan: r.clan, clanBoard: r.board, profile: r.profile })
       haptic('success')
-      get().showToast(`Команда «${r.clan.name}» создана 🛡️`)
+      get().showToast(`${t('Команда')} «${r.clan.name}» ${t('создана 🛡️')}`)
     } catch (e) {
       haptic('warn')
       const m = (e as { message?: string }).message
@@ -640,7 +676,7 @@ export const useStore = create<S>((set, get) => ({
       const r = await api.clanJoin(clanId)
       set({ clan: r.clan, clanBoard: r.board })
       haptic('success')
-      get().showToast(`Ты в команде «${r.clan.name}» 🎉`)
+      get().showToast(`${t('Ты в команде')} «${r.clan.name}» 🎉`)
     } catch (e) {
       haptic('warn')
       const m = (e as { message?: string }).message
@@ -675,7 +711,7 @@ export const useStore = create<S>((set, get) => ({
       set({ festival: r.festival })
       haptic('success')
       if (get().soundOn) playSfx('open')
-      get().showToast(`Награда события: +${r.tokens} 🎟`)
+      get().showToast(`${t('Награда события:')} +${r.tokens} 🎟`)
     } catch (e) {
       haptic('warn')
       get().showToast((e as { message?: string }).message === 'claimed' ? 'Уже получено' : 'Задание ещё не выполнено')
@@ -743,7 +779,7 @@ export const useStore = create<S>((set, get) => ({
       const r = await api.buy(itemId)
       set({ profile: r.profile, wardrobe: r.wardrobe, socialLoaded: false, detail: null })
       haptic('success')
-      get().showToast(`«${name}» куплено 🎉`)
+      get().showToast(`«${t(name)}» ${t('куплено 🎉')}`)
       return true
     } catch (e) {
       haptic('warn')
@@ -801,7 +837,7 @@ export const useStore = create<S>((set, get) => ({
       // обновим производные данные (профиль, лидерборд показывают ник)
       void get().loadDetail()
       haptic('success')
-      get().showToast(`Ник @${r.profile.username} закреплён ✨`)
+      get().showToast(`${t('Ник')} @${r.profile.username} ${t('закреплён ✨')}`)
       return { ok: true }
     } catch (e) {
       haptic('warn')
