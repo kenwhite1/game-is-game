@@ -355,9 +355,25 @@ const petSet = (g: GameDef): Achievement[] => [
   A(g.id, 'master', 'meta', `master_${g.id}`, 'Мастер Шарика', 'Открой все достижения «Шарика»', [r('platinum', 1, 'Мастер Шарика')]),
 ]
 
+// ПОМНИ рапортует result:'finish', mode:'solo' и числовые stats (recognized,
+// buried, clues, year) — побед и живых соперников тут нет, поэтому шаблонные
+// «Против людей»/«Камбэк» были бы недостижимы. Набор строго под то, что игра шлёт.
+const pomniSet = (g: GameDef): Achievement[] => [
+  A(g.id, 'firstwin', 'progression', `successes_game_${g.id}`, 'Первая жизнь', 'Проживи первую жизнь в «Помни»', [r('bronze', 1, 'Первая жизнь')]),
+  A(g.id, 'regular', 'dedication', `matches_game_${g.id}`, 'Завсегдатай', 'Возвращайся в «Помни»', [r('bronze', 25, 'Гость'), r('silver', 100, 'Завсегдатай')]),
+  A(g.id, 'winner', 'progression', `successes_game_${g.id}`, 'Тот, кто помнит', 'Проживай жизни до конца', [r('silver', 10, 'Тот, кто помнит'), r('gold', 50, 'Хранитель памяти'), r('diamond', 200, 'Вечный')]),
+  A(g.id, 'cycle', 'progression', `finishes_game_${g.id}`, 'Круг перерождений', 'Перерождайся снова и снова', [r('bronze', 5, 'Круг'), r('silver', 25, 'Колесо'), r('gold', 100, 'Бесконечность')]),
+  A(g.id, 'recognized', 'skill', `s_${g.id}_recognized`, 'Узнавание', 'Узнай родную душу в незнакомце', [r('silver', 1, 'Узнавание'), r('gold', 10, 'Родные души'), r('diamond', 50, 'Связь сквозь время')]),
+  A(g.id, 'buried', 'collection', `s_${g.id}_buried`, 'Письма сквозь века', 'Оставляй письма тем, кто придёт после', [r('silver', 1, 'Первое письмо'), r('gold', 10, 'Летописец'), r('diamond', 50, 'Голос из прошлого')]),
+  A(g.id, 'clues', 'collection', `s_${g.id}_clues`, 'Следы памяти', 'Собирай зацепки о прошлых жизнях', [r('silver', 25, 'Следы памяти'), r('gold', 100, 'Архивариус'), r('diamond', 500, 'Всё сходится')]),
+  A(g.id, 'ages', 'dedication', `s_${g.id}_year`, 'Сквозь века', 'Пройди сквозь года мира', [r('silver', 5000, 'Сквозь века'), r('gold', 50000, 'Странник времени')]),
+  A(g.id, 'collector', 'collection', `modes_game_${g.id}`, 'Знаток режимов', 'Сыграй во всех режимах «Помни»', [r('silver', 1, 'Знаток режимов')]),
+  A(g.id, 'master', 'meta', `master_${g.id}`, 'Мастер: Помни', 'Открой все достижения «Помни»', [r('platinum', 1, 'Мастер «Помни»')]),
+]
+
 const BESPOKE: Record<string, (g: GameDef) => Achievement[]> = {
   maniac: maniacSet, nitroliga: nitroSet, neontide: neonSet, chekharda: chekSet,
-  pauk: paukSet, pet: petSet,
+  pauk: paukSet, pet: petSet, pomni: pomniSet,
 }
 
 /** Достижения уровня игры для всех 41 игры (флагманы/соло — авторские, прочее — шаблон). */
