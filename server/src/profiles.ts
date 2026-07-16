@@ -39,6 +39,7 @@ interface UserRow {
   friend_code: string | null
   opens: number
   created_at: string
+  lang: string | null
 }
 
 const VALID_GAME_IDS = new Set(GAMES.map(g => g.id))
@@ -94,7 +95,7 @@ export function userExists(id: number): boolean {
   return !!db.prepare('SELECT 1 FROM users WHERE id=?').get(id)
 }
 
-export function getOrCreateUser(id: number, name: string, username?: string): UserRow {
+export function getOrCreateUser(id: number, name: string, username?: string, languageCode?: string): UserRow {
   const existing = db.prepare('SELECT * FROM users WHERE id=?').get(id) as UserRow | undefined
   if (existing) {
     db.prepare("UPDATE users SET name=?, last_seen=datetime('now') WHERE id=?").run(name, id)
@@ -118,9 +119,12 @@ export function getOrCreateUser(id: number, name: string, username?: string): Us
   // конфликт по UNIQUE не роняет регистрацию (ник просто останется пустым).
   // Вставляем с нулём монет, затем начисляем стартовый бонус через ledger,
   // чтобы даже регистрационные монеты были аудируемой строкой в coin_ledger.
+  // Начальный язык нового игрока берём из Telegram language_code (ru → 'ru',
+  // иначе 'en'); позже игрок может сменить его в приложении.
+  const initialLang = languageCode && !languageCode.toLowerCase().startsWith('ru') ? 'en' : 'ru'
   db.prepare(
-    "INSERT INTO users (id, name, color, coins, last_seen) VALUES (?,?,?,0,datetime('now'))",
-  ).run(id, name, color)
+    "INSERT INTO users (id, name, color, coins, lang, last_seen) VALUES (?,?,?,0,?,datetime('now'))",
+  ).run(id, name, color, initialLang)
   ensureFriendCode(id, null)
   credit(id, STARTER_COINS, 'signup')
   if (username) claimUsername(id, username)
@@ -160,6 +164,7 @@ export function toProfile(u: UserRow): Profile {
     prestige: u.prestige ?? 0,
     friendCode: u.friend_code ?? '',
     joinedAt: u.created_at,
+    lang: u.lang === 'en' ? 'en' : 'ru',
   }
 }
 

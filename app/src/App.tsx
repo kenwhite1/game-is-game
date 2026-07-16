@@ -9,7 +9,8 @@ import { BrandLogo } from './screens/Logo'
 import { TabIcons, CheckIcon, SoundOnIcon, SoundOffIcon, HelpIcon } from './art/icons'
 import { validUsername, normalizeUsername } from '@shared/username'
 import { cosmeticById } from '@shared/cosmetics'
-import { t, useLang, setLang, getLang } from './i18n'
+import { t, useLang, setLang, getLang, toggleLang, tSeason } from './i18n'
+import { api } from './api'
 import { PASS_PREMIUM_STARS, PASS_PLUS_STARS, PASS_PLUS_TIERS, TIER_BOOST_STARS, TIER_BOOST_TIERS } from '@shared/wallet'
 
 const TABS: { key: Tab; ru: string }[] = [
@@ -71,6 +72,15 @@ export function App() {
             ))}
           </div>
           <div className="nav-group">
+            <button
+              className="tab lang-tab"
+              onClick={() => { const next = toggleLang(); void api.setLang(next).catch(() => {}) }}
+              aria-label={t('Язык')}
+              title={t('Язык')}
+              style={{ fontWeight: 900, fontSize: 12, letterSpacing: 0.5 }}
+            >
+              {getLang().toUpperCase()}
+            </button>
             <button className="tab" onClick={toggleSound} aria-label={t('Звук')}>
               {soundOn ? <SoundOnIcon /> : <SoundOffIcon />}
             </button>
@@ -420,7 +430,7 @@ function SeasonPass() {
       <div className="sp-hero">
         <div className="sp-hero-top">
           <div>
-            <h2 style={{ marginBottom: 2 }}>{t(season.season.name)}</h2>
+            <h2 style={{ marginBottom: 2 }}>{tSeason(season.season.name)}</h2>
             <div className="sp-hero-sub">{getLang() === 'en' ? `${daysLeft}d. left · claimable: ${season.claimable}` : `Осталось ${daysLeft} дн. · можно забрать: ${season.claimable}`}</div>
           </div>
           <div className={`sp-tierbadge ${season.premium ? 'prem' : ''}`}>
@@ -539,7 +549,7 @@ function Settings() {
             {(['ru', 'en'] as const).map(code => (
               <button
                 key={code}
-                onClick={() => setLang(code)}
+                onClick={() => { setLang(code); void api.setLang(code).catch(() => {}) }}
                 aria-pressed={lang === code}
                 style={{
                   border: 'none', cursor: 'pointer', fontWeight: 900, fontSize: 13, letterSpacing: 0.5,

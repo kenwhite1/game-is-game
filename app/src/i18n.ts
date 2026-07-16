@@ -63,3 +63,22 @@ export function t(ru: string): string {
 export function numLocale(): string {
   return currentLang === 'ru' ? 'ru' : 'en-US'
 }
+
+/** Название сезона: «Сезон 3» → «Season 3» в EN (номер динамический, поэтому не через словарь). */
+export function tSeason(name: string): string {
+  if (currentLang === 'ru') return name
+  return name.replace('Сезон', 'Season')
+}
+
+/** Подпись условия разблокировки: часть значений динамическая (номер/ранг), поэтому по шаблону. */
+export function tUnlock(label: string): string {
+  if (currentLang === 'ru' || !label) return label
+  let m: RegExpExecArray | null
+  if ((m = /^Уровень (\d+)$/.exec(label))) return `Level ${m[1]}`
+  if ((m = /^Серия (\d+) дней$/.exec(label))) return `${m[1]}-day streak`
+  if ((m = /^Ранг: (.+)$/.exec(label))) return `Rank: ${m[1]}`
+  if ((m = /^Престиж (\d+)$/.exec(label))) return `Prestige ${m[1]}`
+  if ((m = /^Значок «(.+)»$/.exec(label))) return `Badge “${t(m[1])}”`
+  if (/ Game$/.test(label)) return label // «500 Game» — уже нейтрально
+  return t(label) // статичные: «Скоро», «За достижение», «Сезонный пропуск», «Событие»
+}

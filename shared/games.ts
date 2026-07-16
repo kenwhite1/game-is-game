@@ -71,6 +71,18 @@ export const GAMES: GameDef[] = [
     players: 'both',
   },
   {
+    id: 'nightline',
+    name: 'Найтлайн',
+    tagline: '3D ночной рынок от первого лица',
+    blurb: 'Неоновый ночной рынок: ходи по докам от первого лица, делай забросы, дерись с машинами охраны и торгуй на живой бирже. Демо: деньги ненастоящие.',
+    emoji: '🌃',
+    accent: '#22e7ff',
+    accentDeep: '#1893a8',
+    bot: 'jqjoedaujudeabot',
+    category: 'arcade',
+    players: 'solo',
+  },
+  {
     id: 'neontide',
     name: 'Неон-Тайд',
     tagline: '3D лодка из блоков против реки ловушек',

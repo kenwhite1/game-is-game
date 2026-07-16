@@ -50,7 +50,7 @@ export function Profile() {
       {/* identity card */}
       <div className="banner" style={{ background: bannerBg(profile.banner) }}>
         <div className="banner-top">
-          <button onClick={() => setTab('style')} style={{ border: 'none', background: 'none', padding: 0, cursor: 'pointer' }} aria-label="Открыть аватар">
+          <button onClick={() => setTab('style')} style={{ border: 'none', background: 'none', padding: 0, cursor: 'pointer' }} aria-label={t('Открыть аватар')}>
             <Avatar
               color={profile.color} face={profile.face} frame={profile.frame} hat={profile.hat}
               eyewear={profile.eyewear} effect={profile.effect} companion={profile.companion}

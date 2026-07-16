@@ -7,7 +7,7 @@ import { PACKS } from '@shared/wallet'
 import type { Slot } from '@shared/cosmetics'
 import type { CosmeticState, Look } from '@shared/types'
 import type { DailyDeal } from '@shared/shop'
-import { t } from '../i18n'
+import { t, getLang } from '../i18n'
 
 type Filter = 'all' | Slot
 
@@ -74,7 +74,7 @@ export function Shop() {
               if (!s) return null
               const rc = RARITY[s.item.rarity]
               return (
-                <button key={d.itemId} className={`deal ${s.owned ? 'owned' : ''}`} style={{ ['--rar' as string]: rc.color }} onClick={() => void onDeal(d)} aria-label={s.item.name}>
+                <button key={d.itemId} className={`deal ${s.owned ? 'owned' : ''}`} style={{ ['--rar' as string]: rc.color }} onClick={() => void onDeal(d)} aria-label={t(s.item.name)}>
                   {d.leaving && <span className="deal-tag">{t('уходит скоро')}</span>}
                   {d.discountPct > 0 && <span className="deal-off">−{d.discountPct}%</span>}
                   <span className="cos-art"><Swatch item={s.item} look={look} seed={profile.id} /></span>
@@ -134,7 +134,7 @@ function TopUp() {
         {PACKS.map(p => {
           const first = !boughtPacks.includes(p.id) // §4.5: первая покупка удваивает монеты
           return (
-            <button key={p.id} className={`pack ${first ? 'pack-2x' : ''}`} onClick={() => void buyCoins(p.id)} aria-label={`${p.title}: ${p.coins} Game за ${p.stars} Stars${first ? ', первая покупка ×2' : ''}`}>
+            <button key={p.id} className={`pack ${first ? 'pack-2x' : ''}`} onClick={() => void buyCoins(p.id)} aria-label={getLang() === 'en' ? `${t(p.title)}: ${p.coins} Game for ${p.stars} Stars${first ? ', first purchase ×2' : ''}` : `${p.title}: ${p.coins} Game за ${p.stars} Stars${first ? ', первая покупка ×2' : ''}`}>
               <span className="pack-emoji">{p.emoji}</span>
               <span className="pack-coins"><span className="coin">G</span>{p.coins.toLocaleString('ru')}</span>
               <span className="pack-stars">⭐ {p.stars}</span>
@@ -152,7 +152,7 @@ function ShopCell({ state, look, seed, onTap }: { state: CosmeticState; look: Lo
   const rc = RARITY[item.rarity]
   const soon = !owned && price == null
   return (
-    <button className={`cos ${owned ? 'owned' : ''}`} style={{ ['--rar' as string]: rc.color }} onClick={onTap} aria-label={item.name}>
+    <button className={`cos ${owned ? 'owned' : ''}`} style={{ ['--rar' as string]: rc.color }} onClick={onTap} aria-label={t(item.name)}>
       <span className="cos-art"><Swatch item={item} look={look} seed={seed} /></span>
       <span className="cos-name">{t(item.name)}</span>
       <span className="cos-rar" style={{ color: rc.color }}>{t(rc.label)}</span>

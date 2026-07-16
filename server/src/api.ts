@@ -13,6 +13,7 @@ import { startCoop, claimCoop, coopOf } from './coop'
 import { nudgeFriend } from './friendstreak'
 import { touchPresence, clearPresence } from './presence'
 import { getOrCreateUser, getProfile, recordOpen, recentGames, profileDetail, setUsername, userExists } from './profiles'
+import { setUserLang } from './botlang'
 import { addFriendByCode, removeFriend, friendsOf, activityFeed, leaderboard, socialSnapshot, giftCoins, giftCosmetic, acceptChallenge } from './social'
 import { questsOf, weeklyQuestsOf, claimQuest, rerollQuest, rerollsLeft } from './quests'
 import { seasonView, claimTier } from './season'
@@ -67,7 +68,7 @@ api.post('/auth', async c => {
   // Telegram (не подделать), а «только при первом входе» закрывает повторный
   // фарм наград с одного аккаунта.
   const isNew = !userExists(v.user.id)
-  getOrCreateUser(v.user.id, name, v.user.username)
+  getOrCreateUser(v.user.id, name, v.user.username, v.user.language_code)
   const referral = isNew && v.startParam?.startsWith(REF_PREFIX)
     ? applyReferral(v.user.id, v.startParam.slice(REF_PREFIX.length))
     : null
@@ -170,6 +171,16 @@ api.post('/profile/username', async c => {
   const res = setUsername(c.get('uid'), parsed.data.username)
   if ('error' in res) return c.json({ error: res.error }, res.error === 'not_found' ? 404 : 400)
   return c.json(res)
+})
+
+// Язык интерфейса и уведомлений бота: игрок меняет его в настройках приложения,
+// сохраняем в users.lang, чтобы бот слал пуши на выбранном языке.
+const langSchema = z.object({ lang: z.enum(['ru', 'en']) })
+api.post('/profile/lang', async c => {
+  const parsed = langSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'bad_request' }, 400)
+  setUserLang(c.get('uid'), parsed.data.lang)
+  return c.json({ ok: true, lang: parsed.data.lang })
 })
 
 // ─── Cosmetics: wardrobe + equip ─────────────────────────────────────────

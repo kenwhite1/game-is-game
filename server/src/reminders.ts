@@ -1,5 +1,6 @@
 import { db } from './db'
 import { bot } from './bot'
+import { pick } from './botlang'
 
 // «Последний шанс» (§9.5): самый ROI-эффективный пуш. Около конца МСК-дня находим
 // игроков, чья серия вот-вот сгорит (сегодня не играли, заморозок нет), и шлём
@@ -12,12 +13,15 @@ function mskDay(): string { return mskNow().toISOString().slice(0, 10) }
 export function lastChanceReminders(): number {
   const today = mskDay()
   const rows = db.prepare(
-    'SELECT id, streak_current FROM users WHERE streak_current > 0 AND streak_freezes = 0 AND (streak_last IS NULL OR streak_last <> ?) LIMIT 1000',
-  ).all(today) as { id: number; streak_current: number }[]
+    'SELECT id, streak_current, lang FROM users WHERE streak_current > 0 AND streak_freezes = 0 AND (streak_last IS NULL OR streak_last <> ?) LIMIT 1000',
+  ).all(today) as { id: number; streak_current: number; lang: string | null }[]
   if (!bot) return 0
   let sent = 0
   for (const u of rows) {
-    void bot.api.sendMessage(u.id, `🔥 Твоя серия ${u.streak_current} дн. вот-вот сгорит! Сыграй одну партию сегодня, чтобы её спасти.`).catch(() => {})
+    const lang = u.lang === 'en' ? 'en' : 'ru'
+    void bot.api.sendMessage(u.id, pick(lang,
+      `🔥 Твоя серия ${u.streak_current} дн. вот-вот сгорит! Сыграй одну партию сегодня, чтобы её спасти.`,
+      `🔥 Your ${u.streak_current}-day streak is about to break! Play one game today to save it.`)).catch(() => {})
     sent++
   }
   return sent

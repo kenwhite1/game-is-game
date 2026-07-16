@@ -11,7 +11,7 @@ import { CATEGORIES, categoryRu, type Category } from '@shared/games'
 import type { GameCard, Quest } from '@shared/types'
 import { shareInvite } from '../telegram'
 import { isOnline } from '../util'
-import { t, getLang } from '../i18n'
+import { t, getLang, tSeason } from '../i18n'
 
 /** «5 игр» по-русски, «5 games» по-английски. */
 function gamesCount(n: number): string {
@@ -431,7 +431,7 @@ function SeasonCard() {
   return (
     <button className="card season-card" onClick={() => openSheet('season')}>
       <div className="sc-head">
-        <span className="sc-title">{t(season.season.name)} · {t('Пропуск')}{season.premium ? ' ⭐' : ''}</span>
+        <span className="sc-title">{tSeason(season.season.name)} · {t('Пропуск')}{season.premium ? ' ⭐' : ''}</span>
         {season.claimable > 0
           ? <span className="sc-badge">{t('забрать:')} {season.claimable}</span>
           : <span className="sc-sub">{t('тир')} {season.tier}/{season.tiers}</span>}

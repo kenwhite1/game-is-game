@@ -7,10 +7,10 @@ let fails = 0
 const ok = (cond: boolean, msg: string) => { if (!cond) { console.error('  ✗', msg); fails++ } else console.log('  ✓', msg) }
 
 console.log('Каталог:')
-ok(PER_GAME.length === 410, `PER_GAME = 410 (факт ${PER_GAME.length})`)
+ok(PER_GAME.length === 420, `PER_GAME = 420 (факт ${PER_GAME.length})`)
 const masters = ACHIEVEMENTS.filter(a => isMasterStat(a.stat))
-ok(masters.length === 41, `Мастеров = 41 (факт ${masters.length})`)
-ok(GAMES.every(g => masters.some(m => m.gameId === g.id)), 'у каждой из 41 игры есть «Мастер»')
+ok(masters.length === 42, `Мастеров = 42 (факт ${masters.length})`)
+ok(GAMES.every(g => masters.some(m => m.gameId === g.id)), 'у каждой из 42 игр есть «Мастер»')
 
 // Ровно 10 достижений на игру.
 const badCounts = GAMES.filter(g => PER_GAME.filter(a => a.gameId === g.id).length !== 10)

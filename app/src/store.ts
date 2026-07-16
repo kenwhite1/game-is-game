@@ -13,7 +13,7 @@ import { GAMES, defaultLink } from '@shared/games'
 import { api } from './api'
 import { haptic, openGame as openGameLink, openInvoice, getStartParam, inTelegram, shareInvite } from './telegram'
 import { playSfx, isSoundOn, setSoundOn } from './sound'
-import { t } from './i18n'
+import { t, setLang, getLang } from './i18n'
 
 // Статичный каталог на случай, если сервер недоступен (гость, офлайн).
 const STATIC_CATALOG: GameCard[] = GAMES.map(g => ({ ...g, link: defaultLink(g.bot) }))
@@ -178,6 +178,11 @@ export const useStore = create<S>((set, get) => ({
         botUsername: r.botUsername || get().botUsername,
         ready: true,
       })
+      // Синхронизация языка: если на этом устройстве выбор ещё не сделан,
+      // применяем сохранённый серверный язык (кросс-девайс, общий с ботом).
+      try {
+        if (!localStorage.getItem('gg_lang') && r.profile?.lang) setLang(r.profile.lang)
+      } catch { /* private mode */ }
       startParam = r.startParam
       referral = r.referral ?? null
       // Друзья нужны уже на «Доме» (полка «Друзья в сети»), грузим сразу.
@@ -295,7 +300,7 @@ export const useStore = create<S>((set, get) => ({
       set({ quests: r.quests, profile: r.profile, rerollsLeft: r.rerollsLeft })
       haptic('select')
       if (get().soundOn) playSfx('tap')
-      get().showToast(r.free ? 'Задание заменено' : `Задание заменено · −50 Game`)
+      get().showToast(r.free ? 'Задание заменено' : `${t('Задание заменено')} · −50 Game`)
     } catch (e) {
       haptic('warn')
       get().showToast((e as { message?: string }).message === 'too_poor' ? 'Не хватает Game на реролл' : 'Не удалось заменить')
@@ -826,7 +831,9 @@ export const useStore = create<S>((set, get) => ({
     haptic('tap')
     shareInvite(
       `https://t.me/${get().botUsername}?startapp=chl_${card.id}_${profile.id}`,
-      `Бросаю тебе вызов в «${card.name}» 🎮 Кто кого?`,
+      getLang() === 'en'
+        ? `I challenge you in “${card.name}” 🎮 Who wins?`
+        : `Бросаю тебе вызов в «${card.name}» 🎮 Кто кого?`,
     )
   },
 

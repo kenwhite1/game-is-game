@@ -7,7 +7,7 @@ import { RARITY, cosmeticById, SLOTS, SLOT_RU, RECOLOR_COST, RECOLOR_STEPS, hueF
 import type { Slot, Cosmetic, BannerItem, TitleItem, Look, ColorItem } from '@shared/cosmetics'
 import { colorOf } from '@shared/avatars'
 import type { CosmeticState, Profile } from '@shared/types'
-import { t } from '../i18n'
+import { t, tUnlock } from '../i18n'
 
 function bannerBg(id: string): string {
   const c = cosmeticById(id)
@@ -34,7 +34,7 @@ export function Style() {
   }
 
   const lv = levelInfo(profile.xp)
-  const titleText = (cosmeticById(profile.title) as TitleItem | undefined)?.text ?? t('Игрок')
+  const titleText = t((cosmeticById(profile.title) as TitleItem | undefined)?.text ?? 'Игрок')
   const items = (wardrobe?.items ?? []).filter(i => i.item.slot === slot)
   const coins = wardrobe?.coins ?? profile.coins
   const look = profileLook(profile)
@@ -48,7 +48,7 @@ export function Style() {
       if (ok) void equip(slot, s.item.id)
       return
     }
-    showToast(s.lockLabel ? `${t('Откроется:')} ${t(s.lockLabel)}` : t('Этот предмет закрыт 🔒'))
+    showToast(s.lockLabel ? `${t('Откроется:')} ${tUnlock(s.lockLabel)}` : t('Этот предмет закрыт 🔒'))
   }
 
   return (
@@ -116,7 +116,7 @@ function CosmeticCell({ state, look, seed, onPick }: { state: CosmeticState; loo
       className={`cos ${equipped ? 'eq' : ''} ${owned ? '' : 'locked'}`}
       style={{ ['--rar' as string]: rc.color }}
       onClick={onPick}
-      aria-label={item.name}
+      aria-label={t(item.name)}
     >
       <span className="cos-art"><Swatch item={item} look={look} seed={seed} /></span>
       <span className="cos-name">{t(item.name)}</span>
@@ -124,7 +124,7 @@ function CosmeticCell({ state, look, seed, onPick }: { state: CosmeticState; loo
       {equipped && <span className="cos-check"><CheckIcon /></span>}
       {buyable && <span className="cos-buy"><span className="coin">G</span>{price}</span>}
       {!owned && !buyable && (
-        <span className="cos-lock"><LockIcon /><span>{lockLabel ? t(lockLabel) : ''}</span></span>
+        <span className="cos-lock"><LockIcon /><span>{lockLabel ? tUnlock(lockLabel) : ''}</span></span>
       )}
     </button>
   )
@@ -136,6 +136,6 @@ export function Swatch({ item, look, seed }: { item: Cosmetic; look: Look; seed:
   if (item.slot === 'color') return <Avatar color={item.id} face={look.face} seed={seed} size={50} />
   if (item.slot === 'face') return <Avatar color={look.color} face={item.id} seed={seed} size={50} />
   if (item.slot === 'banner') return <span className="sw-banner" style={{ background: (item as BannerItem).bg }} />
-  if (item.slot === 'title') return <span className="sw-title">{(item as TitleItem).text}</span>
+  if (item.slot === 'title') return <span className="sw-title">{t((item as TitleItem).text)}</span>
   return <Avatar look={{ ...look, [item.slot]: item.id }} seed={seed} size={50} />
 }

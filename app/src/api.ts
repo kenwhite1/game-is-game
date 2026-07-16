@@ -75,6 +75,7 @@ export const api = {
   repairStreak: (method: 'pay' | 'play') => req<{ profile: Profile }>('/streak/repair', { method }),
   achievements: () => req<AchievementsPayload>('/achievements'),
   setUsername: (username: string) => req<{ profile: Profile }>('/profile/username', { username }),
+  setLang: (lang: 'ru' | 'en') => req<{ ok: boolean; lang: 'ru' | 'en' }>('/profile/lang', { lang }),
 
   ranked: () => req<{ ranked: RankedView }>('/ranked'),
   boards: () => req<{ boards: Boards }>('/boards'),
