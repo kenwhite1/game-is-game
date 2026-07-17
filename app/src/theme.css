@@ -88,7 +88,7 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 /* -- app shell ------------------------------------------------ */
 .app {
   position: fixed; inset: 0; display: flex; flex-direction: column; overflow: hidden;
-  background: var(--bg-deep);
+  background: #1c1c1f;
 }
 
 /* scrolling page area for each tab */
@@ -744,7 +744,12 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 
 /* -- season pass ---------------------------------------------- */
 .season-card { display: block; width: 100%; text-align: left; cursor: pointer; margin-top: 12px; padding: 14px 16px;
-  border: none; background: linear-gradient(135deg, #2a1640, #4b2a8f 60%, #7b3bd0); color: #fff; }
+  position: relative; overflow: hidden; isolation: isolate;
+  border: none; background: linear-gradient(135deg, #2a1640, #4b2a8f 60%, #7b3bd0); color: #fff;
+  box-shadow: 0 10px 26px -14px rgba(43,22,64,.9), inset 0 0 0 1px rgba(255,255,255,.08); }
+.season-card::after { content: ''; position: absolute; top: 0; bottom: 0; width: 32%; z-index: 0; pointer-events: none;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.18), transparent); animation: sp-sheen 4.5s ease-in-out infinite; }
+.season-card > * { position: relative; z-index: 1; }
 .sc-head { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
 .sc-title { font-size: 15px; font-weight: 900; }
 .sc-sub { margin-left: auto; font-size: 12px; font-weight: 800; color: rgba(255,255,255,.8); }
@@ -821,9 +826,15 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 .sp-legend span:last-child { color: #a8791f; }
 .sp-track { max-height: 58vh; overflow-y: auto; display: flex; flex-direction: column; gap: 9px; padding: 2px; }
 .sp-row { position: relative; display: grid; grid-template-columns: 40px 1fr 1fr; gap: 8px; align-items: stretch; }
-.sp-row:not(.on) { opacity: .45; filter: grayscale(.3); }
-.sp-tier { position: relative; display: grid; place-items: center; font-size: 13px; font-weight: 900; color: var(--brown-deep);
-  background: var(--card-2); border-radius: 12px; box-shadow: inset 0 0 0 1px var(--line); }
+.sp-row:not(.on) { opacity: .5; filter: grayscale(.25); }
+/* connective spine running through the tier column */
+.sp-row::before { content: ''; position: absolute; left: 20px; top: 50%; transform: translateX(-50%);
+  height: calc(50% + 9px); width: 4px; border-radius: 999px; background: var(--line); z-index: 0; }
+.sp-row:last-child::before { display: none; }
+.sp-row.on::before { background: linear-gradient(180deg, #ff9d00, #ffd166); box-shadow: 0 0 8px rgba(255,157,0,.5); }
+.sp-tier { position: relative; z-index: 1; align-self: center; display: grid; place-items: center;
+  width: 38px; height: 38px; font-size: 13px; font-weight: 900; color: var(--brown-deep);
+  background: var(--card-2); border-radius: 50%; box-shadow: inset 0 0 0 1px var(--line); }
 .sp-row.on .sp-tier { color: #fff; background: linear-gradient(135deg, #7b3bd0, #4b2a8f); box-shadow: inset 0 0 0 1px rgba(255,255,255,.15); }
 .sp-cell { position: relative; overflow: hidden; border: none; cursor: default; font: inherit; text-align: left; padding: 10px 11px; border-radius: 13px;
   background: var(--card-2); box-shadow: inset 0 0 0 1px var(--line); display: flex; align-items: center; justify-content: space-between; gap: 6px;
@@ -843,6 +854,20 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 .sp-row.milestone .sp-tier { color: #2a1640; background: linear-gradient(135deg, #ffe08a, #ff9d00);
   box-shadow: 0 3px 10px -4px rgba(255,157,0,.9), inset 0 0 0 1px rgba(255,255,255,.4); }
 .sp-star { font-size: 9px; margin-right: 1px; filter: drop-shadow(0 0 2px rgba(255,157,0,.9)); }
+/* premium lane gets a distinct gold rail so the two tracks read apart */
+.sp-row > .sp-cell:last-child:not(.item):not(.empty):not(.can):not(.claimed) {
+  background: linear-gradient(135deg, rgba(255,209,102,.12), rgba(255,157,0,.05));
+  box-shadow: inset 0 0 0 1px rgba(255,157,0,.28); }
+.sp-cell.can { box-shadow: inset 0 0 0 1.5px var(--blue); }
+.sp-cell.can::after { content: ''; position: absolute; top: 0; bottom: 0; width: 42%; pointer-events: none;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.65), transparent); animation: sp-sheen 2.6s ease-in-out infinite; }
+.sp-cell.claimed { position: relative; }
+.sp-cell.item.can { box-shadow: inset 0 0 0 1.5px #ffd166, 0 0 0 0 rgba(255,209,102,.55); animation: sp-pulse-gold 1.8s ease-in-out infinite; }
+@keyframes sp-pulse-gold { 0%,100% { box-shadow: inset 0 0 0 1.5px #ffd166, 0 0 0 0 rgba(255,209,102,.6); } 50% { box-shadow: inset 0 0 0 1.5px #ffd166, 0 0 0 6px rgba(255,209,102,0); } }
+/* section heading above the reward track */
+.sp-track-title { display: flex; align-items: baseline; gap: 8px; margin: 4px 2px 6px; }
+.sp-track-title b { font-size: 14px; font-weight: 900; color: var(--brown-deep); }
+.sp-track-title span { font-size: 11px; font-weight: 800; color: var(--ink-soft); margin-left: auto; }
 
 /* -- cross-game events (festival) ----------------------------- */
 .fest-card { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; cursor: pointer; margin-top: 12px;
