@@ -71,6 +71,18 @@ export const GAMES: GameDef[] = [
     players: 'both',
   },
   {
+    id: 'warpath',
+    name: 'Тропа войны',
+    tagline: '3D-Risk: захвати весь мир',
+    blurb: 'Настольный Риск в 3D: 42 территории на карте мира, живые кубики на физике, бонусы за континенты. Соло против ботов трёх уровней сложности или передавай телефон друзьям.',
+    emoji: '🌍',
+    accent: '#e0563c',
+    accentDeep: '#a3311c',
+    bot: 'riskrubot',
+    category: 'strategy',
+    players: 'both',
+  },
+  {
     id: 'nightline',
     name: 'Найтлайн',
     tagline: '3D ночной рынок от первого лица',
