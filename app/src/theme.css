@@ -1,5 +1,5 @@
 /* ============================================================
-   Game is Game — премиум-хаб всех наших игр.
+   Game is Game - премиум-хаб всех наших игр.
    База: тёплый кремовый «фирменный» свет (как во всех мини-аппах),
    но с новым фирменным электрик-блю акцентом: уровни, действия,
    активная вкладка. Тактильный материал: карточки с «губой»-тенью,
@@ -27,7 +27,7 @@
   --accent-deep: #d98b1f;
   --gold: #f7cf6f;
 
-  /* НОВЫЙ фирменный электрик-блю — «изюм» хаба */
+  /* НОВЫЙ фирменный электрик-блю - «изюм» хаба */
   --blue-hi: #4a90ff;
   --blue: #3a82f7;
   --blue-deep: #2364dd;
@@ -39,12 +39,12 @@
   --grad-hero: radial-gradient(120% 120% at 12% 0%, rgba(255,255,255,.28), rgba(255,255,255,0) 55%),
                linear-gradient(135deg, var(--blue-hi) 0%, var(--blue) 56%, var(--blue-deeper) 100%);
 
-  /* фиолетовый — активные вкладки и кнопки стиля */
+  /* фиолетовый - активные вкладки и кнопки стиля */
   --purple-hi: #a86bff;
   --purple: #8b3ff0;
   --purple-deep: #6a25c9;
   --purple-lite: #b983ff;
-  /* розовый герой — код друга */
+  /* розовый герой - код друга */
   --grad-pink: radial-gradient(120% 120% at 12% 0%, rgba(255,255,255,.30), rgba(255,255,255,0) 55%),
                linear-gradient(135deg, #ff6ec7 0%, #ff2d95 56%, #e01e7b 100%);
 
@@ -88,7 +88,7 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 /* -- app shell ------------------------------------------------ */
 .app {
   position: fixed; inset: 0; display: flex; flex-direction: column; overflow: hidden;
-  background: #FF5733;
+  background: var(--bg-deep);
 }
 
 /* scrolling page area for each tab */
@@ -158,10 +158,10 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 .banner .tag2 { font-size: 13px; font-weight: 800; color: rgba(255,255,255,.86); margin-top: 1px; }
 .streak-chip { flex-shrink: 0; font-size: 13px; font-weight: 900; color: #fff; padding: 6px 11px; border-radius: 999px;
   background: rgba(255,255,255,.2); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.35); white-space: nowrap; }
-/* §9.6 идеальная серия — золотое пламя (ни одной заморозки) */
+/* §9.6 идеальная серия - золотое пламя (ни одной заморозки) */
 .streak-gold { background: linear-gradient(180deg, #ffd24a, #f2a015); color: #6b3d00;
   box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.6), 0 0 12px rgba(242,169,20,.55); }
-/* §9.3 ремонт серии — карточка с двумя способами восстановить */
+/* §9.3 ремонт серии - карточка с двумя способами восстановить */
 .repair-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow-lip), inset 0 0 0 1.5px #ff8a5c;
   padding: 12px 14px; margin-bottom: 13px; }
 .rc-tx { font-size: 13px; font-weight: 800; color: var(--brown-deep); margin-bottom: 9px; }
@@ -170,13 +170,13 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
   background: var(--card-2); color: var(--brown-deep); cursor: pointer; box-shadow: inset 0 0 0 1.5px var(--line); }
 .btn.sm.accent { background: linear-gradient(135deg, #ffd166, #ff9d00); color: #2a1640; box-shadow: 0 3px 0 #d99a1f; }
 .btn.sm:disabled { opacity: .55; cursor: default; }
-/* §8.3 кооп-квест — карточка совместного прогресса */
+/* §8.3 кооп-квест - карточка совместного прогресса */
 .coop-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow-lip), inset 0 0 0 1.5px var(--line);
   padding: 12px 14px; margin-bottom: 10px; }
 .cc-top { font-size: 12.5px; font-weight: 800; color: var(--brown-deep); margin-bottom: 8px; }
 .cc-bot { display: flex; align-items: center; justify-content: space-between; margin-top: 7px; font-size: 12px; font-weight: 900; color: var(--ink-soft); }
 .cc-done { color: #54b15a; }
-/* §9.5 дружеские серии — чипы с общим пламенем + «пни друга» */
+/* §9.5 дружеские серии - чипы с общим пламенем + «пни друга» */
 .fs-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
 .fs-chip { display: flex; align-items: center; gap: 7px; padding: 7px 11px; border-radius: 999px;
   background: var(--card); box-shadow: var(--shadow-lip), inset 0 0 0 1.5px var(--line); }
@@ -185,7 +185,7 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 .fs-name { font-size: 12px; font-weight: 800; color: var(--ink-soft); max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fs-nudge { border: none; background: var(--blue); color: #fff; font-size: 11px; font-weight: 900;
   padding: 4px 9px; border-radius: 999px; cursor: pointer; }
-/* §10.6 перекраска — ряд свотчей оттенка */
+/* §10.6 перекраска - ряд свотчей оттенка */
 .recolor-row { margin: 0 2px 10px; }
 .rr-head { font-size: 13px; font-weight: 900; color: var(--brown-deep); margin-bottom: 8px; }
 .rr-head .sub { font-size: 11px; font-weight: 800; color: var(--ink-soft); margin-left: 6px; }
@@ -255,7 +255,7 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
   color: #fff; padding: 8px 16px; border-radius: 999px; background: var(--a); box-shadow: 0 3px 0 var(--ad); }
 .feature .ft .play svg { width: 12px; height: 12px; }
 
-/* game of the week — hero card with weekly rotation */
+/* game of the week - hero card with weekly rotation */
 .gotw {
   position: relative; overflow: hidden; width: 100%; cursor: pointer; text-align: left;
   display: flex; align-items: center; gap: 16px; padding: 26px 18px 18px; margin: 8px 0 4px;
@@ -400,7 +400,7 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 .gstat .nm { width: 96px; flex-shrink: 0; font-size: 13.5px; font-weight: 900; color: var(--brown-deep); }
 .gstat .track { flex: 1; height: 10px; border-radius: 999px; background: var(--card-2); overflow: hidden; box-shadow: inset 0 0 0 1px var(--line); }
 .gstat .bar { display: block; height: 100%; min-width: 10px; border-radius: 999px; background: linear-gradient(90deg, var(--a), var(--ad)); transition: width .6s cubic-bezier(.2,.8,.3,1); }
-/* неоновая палитра статистики — циклично по строкам */
+/* неоновая палитра статистики - циклично по строкам */
 .gstat:nth-child(6n+1) .bar { background: linear-gradient(90deg, #ff2d95, #ff6ec7); box-shadow: 0 0 10px rgba(255,45,149,.6); }
 .gstat:nth-child(6n+2) .bar { background: linear-gradient(90deg, #00e0ff, #22d3ee); box-shadow: 0 0 10px rgba(0,224,255,.55); }
 .gstat:nth-child(6n+3) .bar { background: linear-gradient(90deg, #22e06b, #7dff5c); box-shadow: 0 0 10px rgba(52,224,107,.55); }
@@ -758,50 +758,91 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 .sp-prem.on { display: block; text-align: center; font-size: 12.5px; font-weight: 900; padding: 10px 14px; border-radius: 14px;
   background: rgba(123,59,208,.16); color: var(--brown-deep); }
 
-/* hero header */
-.sp-hero { border-radius: 18px; padding: 14px 16px; margin-bottom: 14px; color: #fff;
-  background: linear-gradient(135deg, #2a1640, #4b2a8f 60%, #7b3bd0); }
+/* hero header - layered aurora + starfield, glowing tier medallion */
+@keyframes sp-aurora { 0% { transform: translate(-8%,-6%) rotate(0deg); } 50% { transform: translate(8%,6%) rotate(8deg); } 100% { transform: translate(-8%,-6%) rotate(0deg); } }
+@keyframes sp-sheen { 0% { transform: translateX(-120%); } 60%,100% { transform: translateX(320%); } }
+@keyframes sp-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(255,209,102,.55), inset 0 0 0 1.5px var(--blue); } 50% { box-shadow: 0 0 0 5px rgba(255,209,102,0), inset 0 0 0 1.5px var(--blue); } }
+@keyframes sp-spin { to { transform: rotate(360deg); } }
+
+.sp-hero { position: relative; overflow: hidden; border-radius: 22px; padding: 16px 18px; margin-bottom: 14px; color: #fff; isolation: isolate;
+  background: radial-gradient(120% 140% at 15% 0%, #7b3bd0 0%, #4b2a8f 45%, #2a1640 100%);
+  box-shadow: 0 10px 30px -12px rgba(43,22,64,.85), inset 0 0 0 1px rgba(255,255,255,.08); }
+.sp-hero::before { content: ''; position: absolute; inset: -40%; z-index: -2; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(255,157,0,.5), transparent 70%), radial-gradient(closest-side, rgba(94,231,223,.35), transparent 70%);
+  background-position: 20% 20%, 85% 90%; background-repeat: no-repeat; background-size: 60% 60%, 55% 55%;
+  animation: sp-aurora 14s ease-in-out infinite; filter: blur(6px); opacity: .8; }
+.sp-hero::after { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .5;
+  background-image: radial-gradient(1.4px 1.4px at 12% 30%, #fff 50%, transparent), radial-gradient(1.2px 1.2px at 70% 20%, #fff 50%, transparent),
+    radial-gradient(1.6px 1.6px at 40% 70%, #fff 50%, transparent), radial-gradient(1px 1px at 88% 60%, #fff 50%, transparent),
+    radial-gradient(1.3px 1.3px at 25% 85%, #fff 50%, transparent); }
 .sp-hero-top { display: flex; align-items: center; gap: 10px; }
-.sp-hero-sub { font-size: 12px; font-weight: 800; color: rgba(255,255,255,.82); margin-top: 2px; }
-.sp-tierbadge { margin-left: auto; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px;
-  background: rgba(255,255,255,.14); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.28); }
-.sp-tierbadge.prem { background: linear-gradient(135deg, #ffd166, #ff9d00); color: #2a1640; box-shadow: 0 3px 0 #d99a1f; }
-.sp-tierbadge-n { font-size: 22px; font-weight: 900; line-height: 1; }
-.sp-tierbadge-l { font-size: 9.5px; font-weight: 900; text-transform: uppercase; letter-spacing: .5px; opacity: .8; }
-.sp-hero-bar { height: 9px; border-radius: 999px; background: rgba(255,255,255,.2); overflow: hidden; margin: 12px 0 8px; }
-.sp-hero-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #ffd166, #ff9d00); transition: width .4s ease; }
-.sp-hero-foot { display: flex; justify-content: space-between; gap: 8px; font-size: 11.5px; font-weight: 800; color: rgba(255,255,255,.9); }
-.sp-hero-next { color: #ffd166; flex-shrink: 0; }
+.sp-hero-top h2 { text-shadow: 0 2px 10px rgba(0,0,0,.35); }
+.sp-hero-sub { font-size: 12px; font-weight: 800; color: rgba(255,255,255,.82); margin-top: 3px; letter-spacing: .2px; }
+.sp-tierbadge { position: relative; margin-left: auto; display: grid; place-items: center; width: 60px; height: 60px; border-radius: 20px;
+  background: rgba(255,255,255,.12); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.3), 0 6px 16px -6px rgba(0,0,0,.5); }
+.sp-tierbadge::before { content: ''; position: absolute; inset: -6px; border-radius: 24px; z-index: -1;
+  background: conic-gradient(from 0deg, #ffd166, #ff9d00, #7b3bd0, #5ee7df, #ffd166); filter: blur(7px); opacity: .35; animation: sp-spin 8s linear infinite; }
+.sp-tierbadge.prem { background: linear-gradient(135deg, #ffe08a, #ff9d00); color: #2a1640;
+  box-shadow: 0 4px 0 #d99a1f, 0 8px 20px -6px rgba(255,157,0,.7); }
+.sp-tierbadge.prem::before { opacity: .8; }
+.sp-tierbadge-n { font-size: 25px; font-weight: 900; line-height: 1; }
+.sp-tierbadge-l { font-size: 9.5px; font-weight: 900; text-transform: uppercase; letter-spacing: .6px; opacity: .82; }
+.sp-hero-bar { position: relative; height: 12px; border-radius: 999px; background: rgba(0,0,0,.28); overflow: hidden; margin: 14px 0 9px;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,.4); }
+.sp-hero-fill { position: relative; height: 100%; border-radius: 999px; overflow: hidden; transition: width .5s cubic-bezier(.4,1.3,.5,1);
+  background: linear-gradient(90deg, #ffd166, #ff9d00 70%, #ff7a00);
+  box-shadow: 0 0 12px rgba(255,157,0,.7), inset 0 1px 0 rgba(255,255,255,.5); }
+.sp-hero-fill::after { content: ''; position: absolute; top: 0; bottom: 0; width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.85), transparent); animation: sp-sheen 3.2s ease-in-out infinite; }
+.sp-hero-foot { display: flex; justify-content: space-between; gap: 8px; font-size: 11.5px; font-weight: 800; color: rgba(255,255,255,.92); }
+.sp-hero-next { color: #ffd166; flex-shrink: 0; text-shadow: 0 0 10px rgba(255,209,102,.6); }
 
 /* buy cards */
-.sp-buys { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-.sp-buy { position: relative; border: none; cursor: pointer; font: inherit; text-align: left; padding: 11px 14px; border-radius: 14px;
-  background: var(--card-2); box-shadow: inset 0 0 0 1.5px var(--line); display: grid; grid-template-columns: 1fr auto; row-gap: 2px; align-items: center; }
-.sp-buy.hot { background: linear-gradient(135deg, rgba(255,157,0,.12), rgba(255,209,102,.12)); box-shadow: inset 0 0 0 1.5px #ff9d00; }
+.sp-buys { display: flex; flex-direction: column; gap: 9px; margin-bottom: 18px; }
+.sp-buy { position: relative; overflow: hidden; border: none; cursor: pointer; font: inherit; text-align: left; padding: 12px 15px; border-radius: 16px;
+  background: var(--card-2); box-shadow: inset 0 0 0 1.5px var(--line); display: grid; grid-template-columns: 1fr auto; row-gap: 2px; align-items: center;
+  transition: transform .12s ease, box-shadow .12s ease; }
+.sp-buy:active { transform: scale(.98); }
+.sp-buy.hot { background: linear-gradient(135deg, rgba(255,157,0,.16), rgba(255,209,102,.14)); box-shadow: inset 0 0 0 1.5px #ff9d00, 0 6px 18px -10px rgba(255,157,0,.8); }
+.sp-buy.hot::after { content: ''; position: absolute; top: 0; bottom: 0; width: 35%; pointer-events: none;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.5), transparent); animation: sp-sheen 3.6s ease-in-out infinite 1s; }
 .sp-buy.boost { background: rgba(0,122,255,.08); box-shadow: inset 0 0 0 1.5px var(--blue); }
 .sp-buy-t { font-size: 14px; font-weight: 900; color: var(--brown-deep); }
 .sp-buy-d { grid-column: 1; font-size: 11.5px; font-weight: 700; color: var(--ink-soft); }
 .sp-buy-p { grid-column: 2; grid-row: 1 / span 2; font-size: 14px; font-weight: 900; color: #2a1640;
-  background: #ffd166; padding: 7px 12px; border-radius: 999px; box-shadow: 0 3px 0 #d99a1f; white-space: nowrap; }
-.sp-legend { display: grid; grid-template-columns: 34px 1fr 1fr; gap: 8px; font-size: 10.5px; font-weight: 900;
-  color: var(--ink-soft); text-transform: uppercase; letter-spacing: .5px; padding: 0 2px 6px; }
-.sp-track { max-height: 60vh; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-.sp-row { display: grid; grid-template-columns: 34px 1fr 1fr; gap: 8px; align-items: stretch; }
-.sp-row:not(.on) { opacity: .5; }
-.sp-tier { display: grid; place-items: center; font-size: 13px; font-weight: 900; color: var(--brown-deep);
-  background: var(--card-2); border-radius: 10px; box-shadow: inset 0 0 0 1px var(--line); }
-.sp-cell { position: relative; border: none; cursor: default; font: inherit; text-align: left; padding: 9px 10px; border-radius: 12px;
-  background: var(--card-2); box-shadow: inset 0 0 0 1px var(--line); display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+  background: linear-gradient(135deg, #ffe08a, #ffd166); padding: 8px 13px; border-radius: 999px; box-shadow: 0 3px 0 #d99a1f; white-space: nowrap; }
+.sp-prem.on { position: relative; overflow: hidden;
+  background: linear-gradient(135deg, rgba(255,209,102,.28), rgba(123,59,208,.2)); box-shadow: inset 0 0 0 1.5px #ffd166; }
+.sp-prem.on::after { content: ''; position: absolute; top: 0; bottom: 0; width: 35%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.6), transparent); animation: sp-sheen 4s ease-in-out infinite; }
+
+.sp-legend { display: grid; grid-template-columns: 40px 1fr 1fr; gap: 8px; font-size: 10.5px; font-weight: 900;
+  color: var(--ink-soft); text-transform: uppercase; letter-spacing: .5px; padding: 0 2px 8px; }
+.sp-legend span:last-child { color: #a8791f; }
+.sp-track { max-height: 58vh; overflow-y: auto; display: flex; flex-direction: column; gap: 9px; padding: 2px; }
+.sp-row { position: relative; display: grid; grid-template-columns: 40px 1fr 1fr; gap: 8px; align-items: stretch; }
+.sp-row:not(.on) { opacity: .45; filter: grayscale(.3); }
+.sp-tier { position: relative; display: grid; place-items: center; font-size: 13px; font-weight: 900; color: var(--brown-deep);
+  background: var(--card-2); border-radius: 12px; box-shadow: inset 0 0 0 1px var(--line); }
+.sp-row.on .sp-tier { color: #fff; background: linear-gradient(135deg, #7b3bd0, #4b2a8f); box-shadow: inset 0 0 0 1px rgba(255,255,255,.15); }
+.sp-cell { position: relative; overflow: hidden; border: none; cursor: default; font: inherit; text-align: left; padding: 10px 11px; border-radius: 13px;
+  background: var(--card-2); box-shadow: inset 0 0 0 1px var(--line); display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  transition: transform .1s ease; }
 .sp-cell.empty { color: var(--ink-soft); justify-content: center; }
-.sp-cell.can { cursor: pointer; background: var(--blue-tint); box-shadow: inset 0 0 0 1.5px var(--blue); }
-.sp-cell.claimed { background: rgba(52,199,89,.14); }
+.sp-cell.can { cursor: pointer; background: var(--blue-tint); animation: sp-pulse 1.8s ease-in-out infinite; }
+.sp-cell.can:active { transform: scale(.96); }
+.sp-cell.claimed { background: rgba(52,199,89,.16); box-shadow: inset 0 0 0 1px rgba(52,199,89,.4); }
 .sp-rw { font-size: 12px; font-weight: 900; color: var(--brown-deep); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sp-tag { font-size: 10px; font-weight: 900; color: var(--blue-deep); flex-shrink: 0; }
 .sp-cell.claimed .sp-tag { color: var(--green-deep); }
-.sp-cell.item { background: linear-gradient(135deg, rgba(255,209,102,.22), rgba(123,59,208,.12)); box-shadow: inset 0 0 0 1.5px #ffd166; }
-.sp-cell.item.claimed { background: rgba(52,199,89,.14); box-shadow: inset 0 0 0 1px var(--line); }
-.sp-row.milestone .sp-tier { background: linear-gradient(135deg, #ffd166, #ff9d00); color: #2a1640; box-shadow: none; }
-.sp-star { font-size: 9px; margin-right: 1px; }
+.sp-cell.item { background: linear-gradient(135deg, rgba(255,209,102,.28), rgba(123,59,208,.16)); box-shadow: inset 0 0 0 1.5px #ffd166; }
+.sp-cell.item::before { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .6;
+  background: radial-gradient(closest-side at 85% 15%, rgba(255,255,255,.5), transparent 60%); }
+.sp-cell.item.claimed { background: rgba(52,199,89,.16); box-shadow: inset 0 0 0 1px var(--line); }
+.sp-cell.item.claimed::before { display: none; }
+.sp-row.milestone .sp-tier { color: #2a1640; background: linear-gradient(135deg, #ffe08a, #ff9d00);
+  box-shadow: 0 3px 10px -4px rgba(255,157,0,.9), inset 0 0 0 1px rgba(255,255,255,.4); }
+.sp-star { font-size: 9px; margin-right: 1px; filter: drop-shadow(0 0 2px rgba(255,157,0,.9)); }
 
 /* -- cross-game events (festival) ----------------------------- */
 .fest-card { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; cursor: pointer; margin-top: 12px;
