@@ -42,10 +42,25 @@ export interface GameDef {
   players: 'solo' | 'multi' | 'both'
   /** Есть режимы с контентом 18+ (показываем метку на карточке). */
   adult?: boolean
+  /** Скрыть плитку из хаба (игра остаётся валидной везде: рейтинги, квесты, ачивки). */
+  hideInHub?: boolean
 }
 
 // Порядок здесь = порядок плиток в меню (флагманы первыми).
 export const GAMES: GameDef[] = [
+  {
+    id: 'roost',
+    name: 'Гнездо',
+    tagline: 'Голубиная почта по живой карте мира',
+    blurb: 'Отправляй настоящие письма виртуальными голубями: птица летит по карте мира в реальном времени, скорость зависит от вида и расстояния. Собирай птиц, выводи яйца, гоняй во Флаппи.',
+    emoji: '🕊️',
+    accent: '#97dd67',
+    accentDeep: '#3f7048',
+    // TODO: подставить @username бота Roost из BotFather (пока бота нет).
+    bot: 'roost_bot',
+    category: 'arcade',
+    players: 'both',
+  },
   {
     id: 'maniac',
     name: 'Маньяк',
@@ -57,6 +72,7 @@ export const GAMES: GameDef[] = [
     bot: 'duaowdouawbot',
     category: 'party',
     players: 'both',
+    hideInHub: true,
   },
   {
     id: 'nitroliga',
@@ -93,6 +109,7 @@ export const GAMES: GameDef[] = [
     bot: 'sadghsdgbot',
     category: 'arcade',
     players: 'solo',
+    hideInHub: true,
   },
   {
     id: 'pomni',
@@ -105,6 +122,7 @@ export const GAMES: GameDef[] = [
     bot: 'theshoreofmemoriesbot',
     category: 'arcade',
     players: 'solo',
+    hideInHub: true,
   },
   {
     id: 'neontide',
@@ -590,7 +608,7 @@ export interface GameCard extends GameDef {
 }
 
 export function buildCatalog(overrides: Record<string, { bot?: string; link?: string }> = {}): GameCard[] {
-  return GAMES.map(g => {
+  return GAMES.filter(g => !g.hideInHub).map(g => {
     const o = overrides[g.id] ?? {}
     const bot = o.bot || g.bot
     return { ...g, bot, link: o.link || defaultLink(bot) }

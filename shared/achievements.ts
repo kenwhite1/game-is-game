@@ -1,6 +1,6 @@
-// Достижения — постоянный «хребет» мета-слоя (§6–7 библии). Определения живут в
+// Достижения - постоянный «хребет» мета-слоя (§6–7 библии). Определения живут в
 // коде (как BADGES/COSMETICS), прогресс считается из свёрнутых счётчиков
-// (user_progress, §2.5) и базовой статистики. Каждое достижение — «лесенка»:
+// (user_progress, §2.5) и базовой статистики. Каждое достижение - «лесенка»:
 // одна цель с растущими порогами и тирами. Единый источник правды клиент+сервер.
 
 import { CATEGORIES, GAMES, type Category, type GameDef } from './games'
@@ -38,13 +38,13 @@ export interface Achievement {
   hidden?: boolean
   /** Пороги по возрастанию. */
   rungs: Rung[]
-  /** id игры для достижений уровня игры (§7B); null/undefined — кросс-игровое. */
+  /** id игры для достижений уровня игры (§7B); null/undefined - кросс-игровое. */
   gameId?: string
 }
 
 const r = (tier: Tier, target: number, name: string): Rung => ({ tier, target, name })
 
-// ── Кросс-игровые «лесенки» (§7A) — то, ради чего хаб лучше папки из 41 игры ──
+// ── Кросс-игровые «лесенки» (§7A) - то, ради чего хаб лучше папки из 41 игры ──
 const CROSS: Achievement[] = [
   {
     id: 'catalogue', category: 'exploration', stat: 'distinct_games_played',
@@ -186,14 +186,14 @@ const POLYMATH: Achievement = {
 
 // ── Достижения уровня игры (§7B): один шаблон из 10 архетипов × 41 игра ≈ 410 ─
 // Конвенция ключей прогресса (их наполняет сервер из отчёта матча, см. SDK):
-//   successes_game_<id>  — победа ИЛИ финиш (прогресс/победитель)
-//   matches_game_<id>    — сыграно матчей (любой исход)
-//   winsvsh_game_<id>    — побед над живыми людьми
-//   f_<id>_<flag>        — булев «фирменный» момент из report.stats (счётчик срабатываний)
-//   s_<id>_<num>         — числовое накопление из report.stats (голы, сундуки…)
-//   modes_game_<id>      — сколько разных режимов сыграно (для «Знатока режимов»)
-//   master_<id>          — производное: все достижения игры взяты (мета-проход)
-// Игре, чтобы «зажечь» достижение, достаточно прислать нужный ключ в stats —
+//   successes_game_<id>  - победа ИЛИ финиш (прогресс/победитель)
+//   matches_game_<id>    - сыграно матчей (любой исход)
+//   winsvsh_game_<id>    - побед над живыми людьми
+//   f_<id>_<flag>        - булев «фирменный» момент из report.stats (счётчик срабатываний)
+//   s_<id>_<num>         - числовое накопление из report.stats (голы, сундуки…)
+//   modes_game_<id>      - сколько разных режимов сыграно (для «Знатока режимов»)
+//   master_<id>          - производное: все достижения игры взяты (мета-проход)
+// Игре, чтобы «зажечь» достижение, достаточно прислать нужный ключ в stats -
 // хабу не нужен код на игру (данные-как-конфиг, §7B). SDK-PER-GAME.md перечисляет
 // требуемые ключи по каждой игре.
 
@@ -222,7 +222,7 @@ const FAST: Record<Category, string> = {
   puzzle: 'Реши быстрее порога времени',
   strategy: 'Победи менее чем за 25 ходов',
 }
-/** Фирменный приём (#8) по играм; нет записи — общий «Виртуоз». */
+/** Фирменный приём (#8) по играм; нет записи - общий «Виртуоз». */
 const SIG: Record<string, { name: string; desc: string }> = {
   uno: { name: 'Чистая рука', desc: 'Победи, скинув последней картой «+4»' },
   domino: { name: 'Рыба', desc: 'Выиграй по очкам в наглухо заблокированной партии' },
@@ -281,7 +281,7 @@ function templateSet(g: GameDef): Achievement[] {
   ]
 }
 
-// Флагманы и соло-игры — авторские наборы (§7B); архетипы те же, но «под игру».
+// Флагманы и соло-игры - авторские наборы (§7B); архетипы те же, но «под игру».
 const maniacSet = (g: GameDef): Achievement[] => [
   A(g.id, 'firstwin', 'progression', `successes_game_${g.id}`, 'Первая кровь', 'Выиграй первый матч в «Маньяке»', [r('bronze', 1, 'Первая кровь')]),
   A(g.id, 'signature', 'skill', `f_${g.id}_novote`, 'Кто здесь Маньяк', 'Победи за Маньяка, не собрав против себя ни одного голоса', [r('gold', 1, 'Кто здесь Маньяк')]),
@@ -356,7 +356,7 @@ const petSet = (g: GameDef): Achievement[] => [
 ]
 
 // ПОМНИ рапортует result:'finish', mode:'solo' и числовые stats (recognized,
-// buried, clues, year) — побед и живых соперников тут нет, поэтому шаблонные
+// buried, clues, year) - побед и живых соперников тут нет, поэтому шаблонные
 // «Против людей»/«Камбэк» были бы недостижимы. Набор строго под то, что игра шлёт.
 const pomniSet = (g: GameDef): Achievement[] => [
   A(g.id, 'firstwin', 'progression', `successes_game_${g.id}`, 'Первая жизнь', 'Проживи первую жизнь в «Помни»', [r('bronze', 1, 'Первая жизнь')]),
@@ -376,7 +376,7 @@ const BESPOKE: Record<string, (g: GameDef) => Achievement[]> = {
   pauk: paukSet, pet: petSet, pomni: pomniSet,
 }
 
-/** Достижения уровня игры для всех 41 игры (флагманы/соло — авторские, прочее — шаблон). */
+/** Достижения уровня игры для всех 41 игры (флагманы/соло - авторские, прочее - шаблон). */
 export const PER_GAME: Achievement[] = GAMES.flatMap(g => (BESPOKE[g.id] ?? templateSet)(g))
 
 export const ACHIEVEMENTS: Achievement[] = [...CROSS, POLYMATH, ...CATEGORY_MASTERS, ...PER_GAME]
@@ -385,7 +385,7 @@ export const ACHIEVEMENTS: Achievement[] = [...CROSS, POLYMATH, ...CATEGORY_MAST
  *  уже открытых достижений / «Мастеров»). */
 export const META_STATS = new Set(['gg_score', 'achievements_unlocked', 'games_mastered'])
 
-/** Достижение — производный «Мастер игры» (открывается, когда взяты все прочие её достижения). */
+/** Достижение - производный «Мастер игры» (открывается, когда взяты все прочие её достижения). */
 export function isMasterStat(stat: string): boolean {
   return stat.startsWith('master_')
 }
@@ -418,7 +418,7 @@ export interface AchView {
   /** id игры для достижений уровня игры; отсутствует у кросс-игровых. */
   gameId?: string
   hidden: boolean
-  /** Индекс взятого тира (-1 — ещё не начато). */
+  /** Индекс взятого тира (-1 - ещё не начато). */
   tierReached: number
   value: number
   rungs: { tier: Tier; target: number; name: string }[]

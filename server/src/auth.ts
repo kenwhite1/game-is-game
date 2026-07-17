@@ -63,21 +63,24 @@ export async function verifyToken(token: string): Promise<number | null> {
 
 // ─── Launch token (Results SDK, §2.3) ─────────────────────────────────────
 // Хаб подписывает короткоживущий токен при запуске игры и передаёт его игре
-// через startapp. Игра возвращает его в /api/sdk/result — так результат
+// через startapp. Игра возвращает его в /api/sdk/result - так результат
 // привязан к реальному запуску этим игроком именно этой игры. Подделать нельзя
 // (подпись секретом хаба), поэтому играм не нужен отдельный общий ключ.
-export async function signLaunch(userId: number, gameId: string): Promise<string> {
-  return new SignJWT({ uid: userId, gid: gameId, scope: 'launch' })
+export async function signLaunch(userId: number, gameId: string, lang: 'ru' | 'en' = 'ru'): Promise<string> {
+  // `lng` едет в токене, чтобы игра открылась на языке хаба (§i18n): startapp несёт
+  // только один параметр, поэтому язык кладём в claims запуска, а не в query.
+  return new SignJWT({ uid: userId, gid: gameId, scope: 'launch', lng: lang })
     .setProtectedHeader({ alg: 'HS256' })
     .setExpirationTime('2h')
     .sign(secret)
 }
 
-export async function verifyLaunch(token: string): Promise<{ uid: number; gid: string } | null> {
+export async function verifyLaunch(token: string): Promise<{ uid: number; gid: string; lng: 'ru' | 'en' } | null> {
   try {
     const { payload } = await jwtVerify(token, secret)
     if (payload.scope !== 'launch' || typeof payload.uid !== 'number' || typeof payload.gid !== 'string') return null
-    return { uid: payload.uid, gid: payload.gid }
+    const lng = payload.lng === 'en' ? 'en' : 'ru'
+    return { uid: payload.uid, gid: payload.gid, lng }
   } catch {
     return null
   }

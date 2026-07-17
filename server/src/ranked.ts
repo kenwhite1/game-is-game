@@ -22,7 +22,7 @@ const readOppRating = db.prepare('SELECT rating, rd FROM ranked_ratings WHERE us
 interface RatingRow { rating: number; games: number; peak: number; rd: number; vol: number }
 
 /** Обновить рейтинг игрока по результату рангового матча против людей.
- *  Если игра прислала id соперников — настоящий Glicko-2 против их рейтингов;
+ *  Если игра прислала id соперников - настоящий Glicko-2 против их рейтингов;
  *  иначе Elo-против-поля (§13.2). Первый матч сезона мягко сброшен из прошлого. */
 export function updateRating(uid: number, gameId: string, result: string, humanPlayers?: number, opponents?: number[]): void {
   if (!RANKED_GAMES.has(gameId)) return
@@ -45,7 +45,7 @@ export function updateRating(uid: number, gameId: string, result: string, humanP
     }
   }
 
-  // «Из грязи в князи» (§7A⑲): победа в низшем дивизионе (Бронза) — до обновления.
+  // «Из грязи в князи» (§7A⑲): победа в низшем дивизионе (Бронза) - до обновления.
   if (score === 1 && divisionOf(cur.rating).index === 0) bumpProgress(uid, 'underdog', 1)
 
   const oppIds = (opponents ?? []).filter(id => id !== uid)

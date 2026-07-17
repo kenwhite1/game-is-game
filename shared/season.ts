@@ -43,7 +43,7 @@ export interface TierRow {
 }
 
 // Награды по тирам. Существующие косметики раздаём как призы (грант владения);
-// большая часть — монеты и заморозки. Премиум щедрее и с «сезонными» вещами.
+// большая часть - монеты и заморозки. Премиум щедрее и с «сезонными» вещами.
 const PREMIUM_ITEMS: Record<number, string> = {
   5: 'frame_electric', 10: 'title_pro', 20: 'frame_amethyst',
   30: 'frame_diamond', 40: 'title_vip', 50: 'frame_glitch',

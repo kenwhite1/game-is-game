@@ -4,12 +4,12 @@ import { writeFeed, bumpProgress, getProgress } from './events'
 import { FREEZE_CAP, STREAK_MILESTONES, streakDailyReward, STREAK_REPAIR, STREAK_REPAIR_HOURS, STREAK_REPAIR_PLAYS } from '../../shared/economy'
 import { tickFriendStreaks } from './friendstreak'
 
-// Серия («streak») — сильнейший рычаг ежедневного возврата (§9 библии).
+// Серия («streak») - сильнейший рычаг ежедневного возврата (§9 библии).
 // Пока игры не рапортуют матчи через SDK, серию продвигает первый ЗАПУСК игры
-// за день (единственный доступный сигнал). Когда появится Results SDK — сюда же
+// за день (единственный доступный сигнал). Когда появится Results SDK - сюда же
 // подключится match_result без изменения витрины.
 
-/** День в МСК (UTC+3) как YYYY-MM-DD — общая граница «дня» для серии. */
+/** День в МСК (UTC+3) как YYYY-MM-DD - общая граница «дня» для серии. */
 function mskDay(ts = Date.now()): string {
   return new Date(ts + 3 * 3600 * 1000).toISOString().slice(0, 10)
 }
@@ -63,9 +63,9 @@ export function tickStreak(uid: number): StreakTick {
       current = u.c + 1 // подряд
     } else {
       const missed = gap - 1
-      if (u.f >= missed) { freezesUsed = missed; current = u.c + 1; perfect = false } // заморозки спасли — уже не идеальна
+      if (u.f >= missed) { freezesUsed = missed; current = u.c + 1; perfect = false } // заморозки спасли - уже не идеальна
       else {
-        // Серия прервалась — новая. Если было что терять (≥2 дня), открываем окно ремонта (§9.3).
+        // Серия прервалась - новая. Если было что терять (≥2 дня), открываем окно ремонта (§9.3).
         current = 1
         perfect = true
         if (u.c >= 2) { brokeValue = u.c; repairUntil = Date.now() + STREAK_REPAIR_HOURS * 3600_000 }
@@ -129,7 +129,7 @@ export function repairStreak(uid: number, method: 'pay' | 'play'): RepairResult 
     if (!debit(uid, STREAK_REPAIR, 'streak_repair', `d${info.value}`)) return { ok: false, reason: 'too_poor' }
   }
   const restored = info.value + 1 // прощаем пропуск + сегодняшняя игра
-  const best = restored // не меньше прежнего рекорда — max в SQL
+  const best = restored // не меньше прежнего рекорда - max в SQL
   db.prepare('UPDATE users SET streak_current=?, streak_best=MAX(streak_best,?), streak_broke_value=0, streak_repair_until=0, streak_perfect=0 WHERE id=?')
     .run(restored, best, uid)
   writeFeed(uid, 'streak', `восстановил(а) серию ${restored} дней 🔧🔥`)

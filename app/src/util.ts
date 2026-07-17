@@ -4,7 +4,7 @@ import { getLang } from './i18n'
 /** Относительное время: «5 мин назад» / «5m ago», «вчера» / «yesterday». */
 export function timeAgo(iso: string | null): string {
   if (!iso) return ''
-  // SQLite datetime('now') пишет в UTC без зоны — приведём к ISO с Z.
+  // SQLite datetime('now') пишет в UTC без зоны - приведём к ISO с Z.
   const ts = Date.parse(iso.includes('T') ? iso : iso.replace(' ', 'T') + 'Z')
   if (Number.isNaN(ts)) return ''
   const en = getLang() === 'en'

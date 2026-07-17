@@ -86,7 +86,7 @@ export function leaveClan(uid: number): { ok: boolean } {
     db.prepare('DELETE FROM clan_members WHERE user_id=?').run(uid)
     const remaining = db.prepare('SELECT user_id FROM clan_members WHERE clan_id=? ORDER BY joined_at ASC LIMIT 1').get(clanId) as { user_id: number } | undefined
     if (!remaining) {
-      // Последний ушёл — распускаем клан.
+      // Последний ушёл - распускаем клан.
       db.prepare('DELETE FROM clans WHERE id=?').run(clanId)
       db.prepare('DELETE FROM clan_claims WHERE clan_id=?').run(clanId)
     } else if (isOwner) {

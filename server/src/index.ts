@@ -34,7 +34,7 @@ const port = Number(process.env.PORT ?? 3000)
 // Bind 0.0.0.0 explicitly so a platform edge proxy (Railway, Fly, etc.) can reach us.
 serve({ fetch: app.fetch, port, hostname: '0.0.0.0' }, async info => {
   console.log(`game-is-game launcher listening on 0.0.0.0:${info.port}${DEV_MODE ? ' (DEV MODE, no bot token)' : ''}`)
-  startReminderTimer() // §9.5 «последний шанс» — пуш под конец МСК-дня
+  startReminderTimer() // §9.5 «последний шанс» - пуш под конец МСК-дня
   if (!APP_URL) {
     console.warn('⚠ APP_URL is not set: webhook + Mini App button cannot be configured. Set it to your public https URL.')
   }

@@ -21,7 +21,7 @@ export function packsBought(uid: number): string[] {
 
 /** Зачислить оплаченный пакет. Идемпотентно по charge_id: повторный апдейт
  *  от Telegram не зачислит монеты дважды. §4.5: первая покупка КАЖДОГО пакета
- *  удваивает монеты (разовый удвоитель — сильный буст конверсии, без инфляции). */
+ *  удваивает монеты (разовый удвоитель - сильный буст конверсии, без инфляции). */
 export function recordPayment(uid: number, pack: CoinPack, chargeId: string): PaymentResult {
   let credited = false
   let doubled = false
@@ -39,7 +39,7 @@ export function recordPayment(uid: number, pack: CoinPack, chargeId: string): Pa
     if (priorSame === 0) {
       doubled = true
       coins = pack.coins * 2
-      credit(uid, pack.coins, 'purchase', `${chargeId}:first2x`) // удвоитель — отдельная строка ledger
+      credit(uid, pack.coins, 'purchase', `${chargeId}:first2x`) // удвоитель - отдельная строка ledger
     }
     credited = true
   })()

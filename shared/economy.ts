@@ -1,4 +1,4 @@
-// Экономика Game — единый источник правды по числам (Appendix A из
+// Экономика Game - единый источник правды по числам (Appendix A из
 // «Achievements/Quests/Economy Bible»). Клиент и сервер импортируют отсюда,
 // чтобы шкалы и награды нигде не расходились. Без Node/браузерных зависимостей.
 
@@ -8,11 +8,11 @@ export const STARTER_COINS = 300
 // ─── Фаусет запусков: награда за ШИРОТУ, а не за спам по одной игре ────────
 /** Монет за первый за день запуск игры, которую сегодня ещё не открывали. */
 export const LAUNCH_BREADTH_REWARD = 10
-/** Сколько РАЗНЫХ игр в день оплачиваются широтой (дальше — 0). Итог ≤100🪙/день. */
+/** Сколько РАЗНЫХ игр в день оплачиваются широтой (дальше - 0). Итог ≤100🪙/день. */
 export const LAUNCH_BREADTH_CAP = 10
 
 // ─── Награды за матчи (Results SDK, §4.2) ─────────────────────────────────
-// Игра рапортует ЧТО произошло; сколько это стоит — решает хаб (эти числа).
+// Игра рапортует ЧТО произошло; сколько это стоит - решает хаб (эти числа).
 export const MATCH_PLAYED_SOLO = 5
 export const MATCH_PLAYED_HUMAN = 10
 export const MATCH_WON_SOLO = 10
@@ -22,7 +22,13 @@ export const FIRST_WIN_OF_DAY = 25
 /** Потолок монет с матчей за день (анти-инфляция). */
 export const MATCH_COIN_CAP = 500
 
-/** Считается ли матч «против людей» (иначе — соло/против ботов, платит меньше). */
+// ─── Заработок G внутри игр (Results SDK /earn) ───────────────────────────
+// Игра начисляет G за игровые события (килл, собранный ресурс и т.п.) через
+// хаб. Хаб - единственная точка изменения баланса; чтобы скомпрометированная
+// игра не печатала валюту, действует общий дневной потолок заработка из игр.
+export const GAME_EARN_CAP = 500
+
+/** Считается ли матч «против людей» (иначе - соло/против ботов, платит меньше). */
 export function isVsHumans(humanPlayers?: number): boolean {
   return (humanPlayers ?? 1) >= 2
 }
@@ -34,7 +40,7 @@ export interface MatchReward {
   total: number
 }
 
-/** Награда за матч ДО применения дневного потолка (потолок — на сервере). */
+/** Награда за матч ДО применения дневного потолка (потолок - на сервере). */
 export function matchReward(opts: { result: string; humanPlayers?: number; firstWinToday: boolean }): MatchReward {
   const human = isVsHumans(opts.humanPlayers)
   const played = human ? MATCH_PLAYED_HUMAN : MATCH_PLAYED_SOLO
@@ -79,7 +85,7 @@ export const STREAK_MILESTONES: Record<number, StreakMilestone> = {
   365: { coins: 6000 },
 }
 
-/** Причина изменения баланса — коды для аудита в coin_ledger (§16). */
+/** Причина изменения баланса - коды для аудита в coin_ledger (§16). */
 export type CoinReason =
   | 'signup'
   | 'launch_breadth'
@@ -105,3 +111,4 @@ export type CoinReason =
   | 'clan'
   | 'collection'
   | 'level'
+  | 'game_earn'

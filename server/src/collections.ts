@@ -4,7 +4,7 @@ import { writeFeed } from './events'
 import { ownerCtxOf } from './cosmetics'
 import { COLLECTIONS, cosmeticById, isOwned, type CollectionView } from '../../shared/cosmetics'
 
-// Бонусы коллекций (§10.5): собрал все предметы коллекции — забери бонус (раз).
+// Бонусы коллекций (§10.5): собрал все предметы коллекции - забери бонус (раз).
 
 function claimedSet(uid: number): Set<string> {
   return new Set((db.prepare('SELECT collection FROM collection_claims WHERE user_id=?').all(uid) as { collection: string }[]).map(r => r.collection))

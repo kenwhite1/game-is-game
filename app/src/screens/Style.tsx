@@ -79,7 +79,7 @@ export function Style() {
       </div>
 
       {slot === 'color' && (() => {
-        // §10.6 перекраска тела: повороты оттенка активного цвета за 🪙 (0 — сброс).
+        // §10.6 перекраска тела: повороты оттенка активного цвета за 🪙 (0 - сброс).
         const bodyHex = colorOf(profile.color, profile.id).hex
         const rarity = (cosmeticById(profile.color) as ColorItem | undefined)?.rarity ?? 'common'
         const curHue = profile.recolors?.[profile.color] ?? 0

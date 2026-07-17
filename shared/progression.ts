@@ -14,7 +14,7 @@ export function xpFromOpens(opens: number): number {
 // Плавно растущая: быстрые ранние уровни для онбординга, «престижные» поздние.
 //   xpToNext(level) = 80 + 20·level   → L1→2 = 100, L2→3 = 120, … L49→50 = 1060.
 //   cumulativeXP(L)  = 10·L² + 70·L − 80 (XP, чтобы ДОСТИЧЬ уровня L; L1 = 0).
-// ≈29k XP до L50, ≈107k до L100 — L100 как марафонский знак отличия.
+// ≈29k XP до L50, ≈107k до L100 - L100 как марафонский знак отличия.
 
 /** XP, нужный для перехода с `level` на `level+1`. */
 export function xpToNext(level: number): number {

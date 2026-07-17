@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
 import { validateInitData, issueToken, verifyToken, signLaunch, verifyLaunch, DEV_MODE } from './auth'
-import { handleResult } from './sdk'
+import { handleResult, sdkBalance, handleSpend, handleEarn } from './sdk'
 import { encodeLaunchParam } from '../../shared/sdk'
 import { achievementsView } from './achievements'
 import { doPrestige } from './xp'
@@ -13,7 +13,7 @@ import { startCoop, claimCoop, coopOf } from './coop'
 import { nudgeFriend } from './friendstreak'
 import { touchPresence, clearPresence } from './presence'
 import { getOrCreateUser, getProfile, recordOpen, recentGames, profileDetail, setUsername, userExists } from './profiles'
-import { setUserLang } from './botlang'
+import { setUserLang, userLang } from './botlang'
 import { addFriendByCode, removeFriend, friendsOf, activityFeed, leaderboard, socialSnapshot, giftCoins, giftCosmetic, acceptChallenge } from './social'
 import { questsOf, weeklyQuestsOf, claimQuest, rerollQuest, rerollsLeft } from './quests'
 import { seasonView, claimTier } from './season'
@@ -49,7 +49,8 @@ function withLaunchParam(link: string, encoded: string): string {
  *  чтобы игра получила его из startapp и могла честно рапортовать матч (§2.6). */
 async function catalogFor(uid: number) {
   const base = catalog()
-  return Promise.all(base.map(async g => ({ ...g, link: withLaunchParam(g.link, encodeLaunchParam(await signLaunch(uid, g.id))) })))
+  const lang = userLang(uid)
+  return Promise.all(base.map(async g => ({ ...g, link: withLaunchParam(g.link, encodeLaunchParam(await signLaunch(uid, g.id, lang))) })))
 }
 
 api.get('/health', c => c.json({ ok: true }))
@@ -57,6 +58,26 @@ api.get('/health', c => c.json({ ok: true }))
 // Public catalog, so the menu still renders if a guest opens the URL directly.
 // meta = global opens/likes per game, so charts work for guests too.
 api.get('/catalog', c => c.json({ catalog: catalog(), meta: gameMeta() }))
+
+// «Игры от игроков»: витрина UGC-игр из «Мастерской». Студия отдаёт свой
+// публичный фид (/api/ugc/feed?featured=1 - только отмеченные основателями);
+// хаб лишь проксирует его с кэшем, чтобы полка не дёргала студию на каждый
+// рендер. Без MASTERSKAYA_URL полка пуста и в приложении не показывается.
+let ugcCache: { at: number; games: unknown[] } | null = null
+api.get('/ugc', async c => {
+  const base = (process.env.MASTERSKAYA_URL ?? '').replace(/\/$/, '')
+  if (!base) return c.json({ games: [] })
+  if (ugcCache && Date.now() - ugcCache.at < 300_000) return c.json({ games: ugcCache.games })
+  try {
+    const res = await fetch(`${base}/api/ugc/feed?featured=1`)
+    const json = (await res.json()) as { games?: unknown[] }
+    ugcCache = { at: Date.now(), games: Array.isArray(json.games) ? json.games : [] }
+  } catch {
+    // студия недоступна - показываем пусто и попробуем через 5 минут снова
+    ugcCache = { at: Date.now(), games: [] }
+  }
+  return c.json({ games: ugcCache.games })
+})
 
 api.post('/auth', async c => {
   const body = await c.req.json<{ initData: string }>().catch(() => null)
@@ -107,7 +128,7 @@ api.post('/presence/ping', async c => {
   return c.json({ ok: true })
 })
 
-// Results SDK (§2): игра рапортует исход матча. Аутентификация — токеном
+// Results SDK (§2): игра рапортует исход матча. Аутентификация - токеном
 // запуска (подписан хабом), а не пользовательским JWT, поэтому маршрут стоит
 // ДО auth-гейта. Хаб сам считает награду; игра не может начислить валюту.
 api.post('/sdk/result', async c => {
@@ -118,10 +139,31 @@ api.post('/sdk/result', async c => {
   return c.json(out.body, out.status as 200 | 400 | 401)
 })
 
+// Единая валюта G: игра читает баланс и тратит G по токену запуска. На весь
+// проект один счёт (users.coins) - у игр своей валюты нет. Тоже до auth-гейта.
+api.get('/sdk/balance', async c => {
+  const claims = await verifyLaunch(c.req.header('x-gg-launch') ?? '')
+  if (!claims) return c.json({ ok: false, coins: 0, error: 'bad_launch' }, 401)
+  return c.json(sdkBalance(claims.uid))
+})
+api.post('/sdk/spend', async c => {
+  const claims = await verifyLaunch(c.req.header('x-gg-launch') ?? '')
+  if (!claims) return c.json({ ok: false, coins: 0, error: 'bad_launch' }, 401)
+  const out = handleSpend(await c.req.json().catch(() => null), claims)
+  return c.json(out.body, out.status as 200 | 400 | 402)
+})
+// Заработок G из игр (килл, ресурс…). Идемпотентно, с дневным потолком.
+api.post('/sdk/earn', async c => {
+  const claims = await verifyLaunch(c.req.header('x-gg-launch') ?? '')
+  if (!claims) return c.json({ ok: false, coins: 0, error: 'bad_launch' }, 401)
+  const out = handleEarn(await c.req.json().catch(() => null), claims)
+  return c.json(out.body, out.status as 200 | 400)
+})
+
 // auth gate for everything below
 api.use('/*', async (c, next) => {
   const p = c.req.path
-  if (p.endsWith('/auth') || p.endsWith('/health') || p.endsWith('/catalog') || p.endsWith('/presence/ping') || p.endsWith('/sdk/result')) return next()
+  if (p.endsWith('/auth') || p.endsWith('/health') || p.endsWith('/catalog') || p.endsWith('/presence/ping') || p.endsWith('/sdk/result') || p.endsWith('/sdk/balance') || p.endsWith('/sdk/spend')) return next()
   const token = c.req.header('authorization')?.replace(/^Bearer /, '')
   const uid = token ? await verifyToken(token) : null
   if (!uid) return c.json({ error: 'unauthorized' }, 401)
@@ -211,7 +253,7 @@ api.post('/cosmetics/buy', async c => {
   return c.json({ profile: getProfile(uid), wardrobe: wardrobeOf(uid) })
 })
 
-// Перекраска надетого предмета (§10.6): поворот оттенка за 🪙 (hue=0 — сброс).
+// Перекраска надетого предмета (§10.6): поворот оттенка за 🪙 (hue=0 - сброс).
 const recolorSchema = z.object({ itemId: z.string().min(1).max(64), hue: z.number().int().min(0).max(360) })
 api.post('/cosmetics/recolor', async c => {
   const parsed = recolorSchema.safeParse(await c.req.json().catch(() => null))
@@ -232,7 +274,7 @@ api.post('/open', async c => {
   // Запуск из хаба = игрок сейчас в игре (пока сама игра не начнёт пинговать).
   touchPresence(uid, parsed.data.gameId)
   // Токен запуска для Results SDK: игра вернёт его в /sdk/result (§2.3).
-  const launchToken = await signLaunch(uid, parsed.data.gameId)
+  const launchToken = await signLaunch(uid, parsed.data.gameId, userLang(uid))
   return c.json({ profile, recent: recentGames(uid), launchToken })
 })
 
@@ -391,7 +433,7 @@ api.post('/season/premium-plus', async c => {
   }
 })
 
-// «Буст тиров»: разовая покупка за ⭐ — мгновенно +N тиров по пропуску.
+// «Буст тиров»: разовая покупка за ⭐ - мгновенно +N тиров по пропуску.
 api.post('/season/boost', async c => {
   if (!bot) return c.json({ error: 'unavailable' }, 503)
   try {
@@ -486,7 +528,7 @@ api.post('/friend-streak/nudge', async c => {
 api.get('/ranked', c => c.json({ ranked: rankedOf(c.get('uid')) }))
 api.get('/boards', c => c.json({ boards: boards(c.get('uid')) }))
 
-// Здоровье экономики (§16.3) + аномалии (§16.2) — только операторам или в DEV.
+// Здоровье экономики (§16.3) + аномалии (§16.2) - только операторам или в DEV.
 api.get('/admin/economy', c => {
   const uid = c.get('uid')
   if (!DEV_MODE && !ADMIN_IDS.has(uid)) return c.json({ error: 'forbidden' }, 403)

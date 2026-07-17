@@ -36,7 +36,7 @@ export interface Profile {
   streakBest: number
   /** Заморозки серии на руках. */
   freezes: number
-  /** Серия ни разу не спасена заморозкой — «золотое пламя» (§9.6). */
+  /** Серия ни разу не спасена заморозкой - «золотое пламя» (§9.6). */
   streakPerfect: boolean
   /** Открытое окно ремонта серии (§9.3), если серия недавно порвалась. */
   streakRepair?: { value: number; until: number; plays: number; canPlayFree: boolean; cost: number; playsNeeded: number } | null
@@ -115,7 +115,7 @@ export interface ReferralApplied {
 export interface Friend {
   id: number
   name: string
-  /** Полный образ — чтобы видеть друга «как он одет». */
+  /** Полный образ - чтобы видеть друга «как он одет». */
   look: Look
   level: number
   /** id последней игры, которую запускал друг. */

@@ -26,7 +26,7 @@ export function applyReferral(uid: number, rawCode: string): ReferralApplied | n
       .prepare('UPDATE users SET referred_by=? WHERE id=? AND referred_by IS NULL')
       .run(referrer.id, uid)
     if (claimed.changes === 0) return false
-    // Приглашение сразу делает игроков друзьями — новичок не видит пустой хаб.
+    // Приглашение сразу делает игроков друзьями - новичок не видит пустой хаб.
     const befriend = db.prepare('INSERT OR IGNORE INTO friendships (user_id, friend_id) VALUES (?,?)')
     befriend.run(uid, referrer.id)
     befriend.run(referrer.id, uid)

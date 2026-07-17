@@ -1,4 +1,4 @@
-// Проверки каталога достижений (§7B). Не тест-фреймворк — просто ассерты на
+// Проверки каталога достижений (§7B). Не тест-фреймворк - просто ассерты на
 // инварианты, которые легко сломать при правках: npx tsx scripts/check-catalogue.ts
 import { GAMES } from '../shared/games'
 import { ACHIEVEMENTS, PER_GAME, isMasterStat, reachedIndex, achievementById } from '../shared/achievements'

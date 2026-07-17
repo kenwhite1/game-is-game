@@ -99,7 +99,7 @@ export function unlockPremiumPlus(uid: number): void {
   grantSeasonXp(uid, PASS_PLUS_TIERS * XP_PER_TIER)
 }
 
-/** «Буст тиров»: разовая покупка за ⭐ — мгновенно продвинуть по пропуску. */
+/** «Буст тиров»: разовая покупка за ⭐ - мгновенно продвинуть по пропуску. */
 export function boostTiers(uid: number): void {
   grantSeasonXp(uid, TIER_BOOST_TIERS * XP_PER_TIER)
 }

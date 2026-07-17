@@ -47,6 +47,22 @@ export interface FriendStreak {
   canNudge: boolean
 }
 
+/** Плитка «Игры от игроков» (UGC из «Мастерской», проксирует сервер хаба). */
+export interface UgcGame {
+  slug: string
+  title: string
+  tagline: string
+  emoji: string
+  category: string
+  author: string
+  plays: number
+  likes: number
+  link: string | null
+  accent: string
+  accentDeep: string
+  bg: string
+}
+
 export const api = {
   async auth(): Promise<AuthResponse> {
     const r = await req<AuthResponse>('/auth', { initData: getInitData() })
@@ -55,6 +71,7 @@ export const api = {
     return r
   },
   catalog: () => req<{ catalog: GameCard[]; meta: Record<string, GameMeta> }>('/catalog'),
+  ugc: () => req<{ games: UgcGame[] }>('/ugc'),
   open: (gameId: string) => req<{ profile: Profile; recent: string[]; launchToken?: string }>('/open', { gameId }),
   toggleFavorite: (gameId: string) => req<{ favorite: boolean; favorites: string[] }>('/favorites/toggle', { gameId }),
   rate: (gameId: string, value: RatingValue | 0) =>

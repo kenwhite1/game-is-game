@@ -4,7 +4,7 @@ import { writeFeed } from './events'
 import { levelInfo } from '../../shared/progression'
 
 // Account XP (§5): постоянный опыт уровня аккаунта, развязанный от «запусков».
-// XP теперь дают матчи, квесты, достижения и серия — level отражает всю
+// XP теперь дают матчи, квесты, достижения и серия - level отражает всю
 // активность, а не только тапы по плиткам. Кривая растущая (§5.3, progression.ts).
 
 export const PRESTIGE_LEVEL = 100
@@ -28,7 +28,7 @@ export function grantAccountXp(uid: number, amount: number): void {
     let bonus = 0
     for (let l = lvBefore + 1; l <= lvAfter; l++) {
       bonus += 20 * l // §5.3: каждый уровень платит
-      bonus += LEVEL_MILESTONES[l] ?? 0 // вехи 5/10/25/50/75/100 — сундук сверху
+      bonus += LEVEL_MILESTONES[l] ?? 0 // вехи 5/10/25/50/75/100 - сундук сверху
     }
     if (bonus > 0) credit(uid, bonus, 'level', `lv:${lvAfter}`)
     writeFeed(uid, 'level', `достиг(ла) ${lvAfter} уровня 🎉`)

@@ -1,10 +1,10 @@
 // Ранговый режим и лидерборды (§13 библии). Рейтинг per-game считается СЕРВЕРОМ
 // из match_results (только против людей). Пока игры не рапортуют матчи через
-// SDK, рейтинги стоят на месте — движок готов и включается по мере интеграции.
-// Дивизионы — видимый слой над числовым рейтингом. GG-лига агрегирует лучшие
+// SDK, рейтинги стоят на месте - движок готов и включается по мере интеграции.
+// Дивизионы - видимый слой над числовым рейтингом. GG-лига агрегирует лучшие
 // дивизионы по всем ранговым играм: мастер в трёх играх выше специалиста в одной.
 
-/** Игры со смыслом ранга (навык, не удача) — §13.2. */
+/** Игры со смыслом ранга (навык, не удача) - §13.2. */
 export const RANKED_GAMES = new Set<string>([
   'go', 'shogi', 'xiangqi', 'reversi', 'ryad', 'morskoyboy',
   'nitroliga', 'shaybus', 'duplet', 'maniac',
@@ -16,7 +16,7 @@ export const FIELD_ANCHOR = 1000
 
 export interface Division { name: string; tier: string; index: number }
 
-// Границы дивизионов по рейтингу. Внутри полосы — под-тиры III/II/I.
+// Границы дивизионов по рейтингу. Внутри полосы - под-тиры III/II/I.
 const BANDS: { min: number; name: string }[] = [
   { min: -Infinity, name: 'Бронза' },
   { min: 1000, name: 'Серебро' },
@@ -31,7 +31,7 @@ export function divisionOf(rating: number): Division {
   let idx = 0
   for (let i = 0; i < BANDS.length; i++) if (rating >= BANDS[i].min) idx = i
   const band = BANDS[idx]
-  // Под-тир: где в 150-очковой полосе находится рейтинг (I — верх). Бронза и
+  // Под-тир: где в 150-очковой полосе находится рейтинг (I - верх). Бронза и
   // Грандмастер без под-тиров.
   if (idx === 0 || idx === BANDS.length - 1) return { name: band.name, tier: '', index: idx }
   const into = rating - band.min // 0..150
@@ -49,7 +49,7 @@ export function ladderContribution(rating: number): number {
   return Math.max(0, Math.round(rating - START_RATING))
 }
 
-/** K-фактор: новичкам двигаем рейтинг резче, опытным — плавно. */
+/** K-фактор: новичкам двигаем рейтинг резче, опытным - плавно. */
 export function kFactor(games: number): number {
   return games < 10 ? 40 : 24
 }
@@ -60,7 +60,7 @@ export function expectedScore(rating: number): number {
 }
 
 // ─── Настоящий Glicko-2 (§13.2) ────────────────────────────────────────────
-// Используется, когда игра прислала id соперников: их текущие рейтинги — вход.
+// Используется, когда игра прислала id соперников: их текущие рейтинги - вход.
 export const START_RD = 350
 export const START_VOL = 0.06
 export const GLICKO_TAU = 0.5

@@ -4,7 +4,7 @@ import { pick } from './botlang'
 
 // «Последний шанс» (§9.5): самый ROI-эффективный пуш. Около конца МСК-дня находим
 // игроков, чья серия вот-вот сгорит (сегодня не играли, заморозок нет), и шлём
-// напоминание. Планировщик — простой in-process таймер (одна инстанс-Railway).
+// напоминание. Планировщик - простой in-process таймер (одна инстанс-Railway).
 
 function mskNow(): Date { return new Date(Date.now() + 3 * 3600 * 1000) }
 function mskDay(): string { return mskNow().toISOString().slice(0, 10) }
@@ -39,5 +39,5 @@ export function startReminderTimer(): void {
       const n = lastChanceReminders()
       console.log(`last-chance reminders sent: ${n}`)
     }
-  }, 5 * 60 * 1000).unref?.() // каждые 5 минут; unref — не держать процесс
+  }, 5 * 60 * 1000).unref?.() // каждые 5 минут; unref - не держать процесс
 }

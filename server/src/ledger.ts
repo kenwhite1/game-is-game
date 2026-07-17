@@ -2,7 +2,7 @@ import { db } from './db'
 import type { CoinReason } from '../../shared/economy'
 
 // Единственная точка изменения баланса монет. Вместо «UPDATE users SET coins…»
-// повсюду — credit/debit, которые ещё и пишут строку в coin_ledger с причиной,
+// повсюду - credit/debit, которые ещё и пишут строку в coin_ledger с причиной,
 // чтобы экономику можно было аудировать и ловить инфляцию/абузы (§16 библии).
 
 const insertRow = db.prepare(
@@ -18,7 +18,7 @@ export const credit = db.transaction((uid: number, delta: number, reason: CoinRe
   return bal
 })
 
-/** Списать при достаточном балансе (атомарно). true — если хватило и списали. */
+/** Списать при достаточном балансе (атомарно). true - если хватило и списали. */
 export const debit = db.transaction((uid: number, amount: number, reason: CoinReason, ref?: string): boolean => {
   const res = db.prepare('UPDATE users SET coins = coins - ? WHERE id = ? AND coins >= ?').run(amount, uid, amount)
   if (res.changes === 0) return false

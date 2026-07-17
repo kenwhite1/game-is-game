@@ -157,7 +157,7 @@ function AchievementCard({ a }: { a: AchView }) {
   const into = Math.min(a.value, next.target) - (maxed ? 0 : prevTarget)
   const pct = maxed ? 100 : Math.max(0, Math.min(100, Math.round((into / span) * 100)))
   const rare = done && a.rarity > 0 && a.rarity < 0.05
-  const masked = a.hidden && !done // §6.3: скрытые достижения — «???» до открытия
+  const masked = a.hidden && !done // §6.3: скрытые достижения - «???» до открытия
   return (
     <div className={`ach ${done ? 'on' : ''} ${rare ? 'rare' : ''}`}>
       <span className="ach-em">{masked ? '❓' : tierEmoji}</span>
@@ -178,7 +178,7 @@ function AchievementCard({ a }: { a: AchView }) {
   )
 }
 
-/** Взятые и близкие к цели — вперёд; затем по прогрессу. */
+/** Взятые и близкие к цели - вперёд; затем по прогрессу. */
 function byProgress(x: AchView, y: AchView): number {
   if ((y.tierReached >= 0 ? 1 : 0) !== (x.tierReached >= 0 ? 1 : 0)) return y.tierReached - x.tierReached
   const px = x.value / (x.rungs[Math.min(x.tierReached + 1, x.rungs.length - 1)].target || 1)
@@ -192,7 +192,7 @@ function Achievements() {
   const [open, setOpen] = useState<Set<string>>(new Set())
   if (!ach || ach.items.length === 0) return null
 
-  // Кросс-игровые (без gameId) — отдельной сеткой; уровня игры — по играм.
+  // Кросс-игровые (без gameId) - отдельной сеткой; уровня игры - по играм.
   const cross = ach.items.filter(a => !a.gameId).sort(byProgress)
   const byGame = new Map<string, AchView[]>()
   for (const a of ach.items) {

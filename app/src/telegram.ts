@@ -77,7 +77,7 @@ export function openGame(link: string): void {
 }
 
 // Открыть счёт Stars. Статус придёт в колбэк ('paid' = успех); вне Telegram
-// счёт открыть нельзя — вернём false, чтобы экран показал подсказку.
+// счёт открыть нельзя - вернём false, чтобы экран показал подсказку.
 export function openInvoice(url: string, cb: (status: string) => void): boolean {
   if (!tg?.openInvoice) return false
   try {
@@ -88,7 +88,7 @@ export function openInvoice(url: string, cb: (status: string) => void): boolean 
   }
 }
 
-// Скопировать текст в буфер. true — успех (для тоста).
+// Скопировать текст в буфер. true - успех (для тоста).
 export async function copyText(text: string): Promise<boolean> {
   try {
     await navigator.clipboard.writeText(text)

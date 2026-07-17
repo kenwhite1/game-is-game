@@ -10,7 +10,7 @@ import { grantAccountXp } from './xp'
 // Персональная выдача: у каждого игрока свой набор из 3 дневных + 3 недельных
 // заданий (детерминированно по uid+период), с бакетным разбросом типов, один
 // бесплатный реролл в день и бонус за полный набор. Прогресс считается на лету
-// из opens/match_results (окно — сегодня / с понедельника). Пока игры не
+// из opens/match_results (окно - сегодня / с понедельника). Пока игры не
 // рапортуют матчи через SDK, дневные квесты завязаны на ЗАПУСКИ/действия, чтобы
 // оставаться выполнимыми уже сейчас; победные метрики копятся для будущего.
 
@@ -30,7 +30,7 @@ interface QuestDef {
   target: number
   reward: number
   bucket: Bucket
-  /** since — нижняя граница окна (дата 'YYYY-MM-DD', включительно). */
+  /** since - нижняя граница окна (дата 'YYYY-MM-DD', включительно). */
   progress(uid: number, since: string): number
 }
 
@@ -112,7 +112,7 @@ function ensureAssigned(uid: number, period: 'day' | 'week', key: string): { slo
   if (rows.length > 0) return rows
   const picks: string[] = []
   if (period === 'day') {
-    // По одному из каждого бакета — гарантированный разброс типов.
+    // По одному из каждого бакета - гарантированный разброс типов.
     DAILY_BUCKETS.forEach((b, i) => {
       const pool = DAILY_POOL.filter(d => d.bucket === b)
       picks.push(pickSeeded(pool, seedFrom(`${uid}:${key}:${i}`)).id)
@@ -170,7 +170,7 @@ export function rerollQuest(uid: number, questId: string): RerollResult {
   const candidates = DAILY_POOL.filter(d => d.bucket === def.bucket && !active.has(d.id))
   const replacement = candidates.length > 0
     ? pickSeeded(candidates, seedFrom(`${uid}:${key}:reroll:${questId}:${rerollsUsedToday(uid)}`))
-    : def // нечем заменить — оставляем как есть, но реролл всё равно «потрачен» только если списали
+    : def // нечем заменить - оставляем как есть, но реролл всё равно «потрачен» только если списали
   if (candidates.length === 0) return { ok: true, quests: questsOf(uid), free: rerollsLeft(uid) > 0 }
 
   const free = rerollsLeft(uid) > 0

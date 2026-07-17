@@ -4,7 +4,7 @@ import { writeFeed } from './events'
 import { COOP_TARGET, COOP_REWARD, COOP_ITEM, type CoopView } from '../../shared/coop'
 
 // Кооп-квесты (§8.3): пара друзей на общий недельный таргет; прогресс копится от
-// обоих (каждая победа любого из пары), награда — каждому по отдельному клейму.
+// обоих (каждая победа любого из пары), награда - каждому по отдельному клейму.
 
 function weekMonday(): string {
   const d = new Date()
@@ -56,7 +56,7 @@ export function coopOf(uid: number): CoopView[] {
 
 export type CoopClaimResult = { ok: true; reward: number } | { ok: false; reason: 'unknown' | 'not_member' | 'not_done' | 'claimed' }
 
-/** Забрать награду за общий клир (каждый участник — свой клейм, один раз). */
+/** Забрать награду за общий клир (каждый участник - свой клейм, один раз). */
 export function claimCoop(uid: number, id: number): CoopClaimResult {
   const r = db.prepare('SELECT * FROM coop_quests WHERE id=? AND week=?').get(id, weekMonday()) as {
     id: number; a_id: number; b_id: number; target: number; progress: number; a_claimed: number; b_claimed: number
@@ -69,7 +69,7 @@ export function claimCoop(uid: number, id: number): CoopClaimResult {
   const col = isA ? 'a_claimed' : 'b_claimed'
   db.prepare(`UPDATE coop_quests SET ${col}=1 WHERE id=?`).run(id)
   credit(uid, COOP_REWARD, 'quest', `coop:${id}`)
-  // Кооп-косметика — навсегда, один раз (идемпотентно на пользователя).
+  // Кооп-косметика - навсегда, один раз (идемпотентно на пользователя).
   db.prepare('INSERT OR IGNORE INTO cosmetics_owned (user_id, item_id) VALUES (?,?)').run(uid, COOP_ITEM)
   writeFeed(uid, 'streak', `завершил(а) кооп-квест с другом 🤝`)
   return { ok: true, reward: COOP_REWARD }

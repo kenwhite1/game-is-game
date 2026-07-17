@@ -114,7 +114,7 @@ export function activityFeed(uid: number, limit = 30): ActivityItem[] {
       ts: r.ts,
     }))
 
-  // Мета-события (достижения/серии) друзей и свои — «лучшая реклама» мета-слоя.
+  // Мета-события (достижения/серии) друзей и свои - «лучшая реклама» мета-слоя.
   const meta = db
     .prepare(
       `SELECT f.id, f.user_id, f.kind, f.text, f.ts, u.name, ${LOOK_COLS}
@@ -206,13 +206,13 @@ export type GiftItemResult =
   | { ok: true; itemId: string }
   | { ok: false; reason: 'not_found' | 'not_tradeable' | 'not_friends' | 'not_owned' | 'already_owns' | 'limit' }
 
-/** Подарить косметику другу (§14.2). Только ТОРГУЕМЫЕ вещи — заслуги остаются
+/** Подарить косметику другу (§14.2). Только ТОРГУЕМЫЕ вещи - заслуги остаются
  *  bound («флекс нельзя подарить»). Дневной лимит + атомарный перевод владения
  *  (у дарителя снимается и разэкипируется, другу выдаётся). Денег не касается. */
 export function giftCosmetic(uid: number, friendId: number, itemId: string): GiftItemResult {
   const item = cosmeticById(itemId)
   if (!item) return { ok: false, reason: 'not_found' }
-  if (!isTradeable(item)) return { ok: false, reason: 'not_tradeable' } // bound — нельзя
+  if (!isTradeable(item)) return { ok: false, reason: 'not_tradeable' } // bound - нельзя
   if (!db.prepare('SELECT 1 FROM friendships WHERE user_id=? AND friend_id=?').get(uid, friendId)) {
     return { ok: false, reason: 'not_friends' }
   }
@@ -227,7 +227,7 @@ export function giftCosmetic(uid: number, friendId: number, itemId: string): Gif
 
   db.transaction(() => {
     db.prepare('DELETE FROM cosmetics_owned WHERE user_id=? AND item_id=?').run(uid, itemId)
-    // Разэкипировать, если предмет надет (slot — контролируемый enum, не инъекция).
+    // Разэкипировать, если предмет надет (slot - контролируемый enum, не инъекция).
     db.prepare(`UPDATE users SET ${item.slot}=NULL WHERE id=? AND ${item.slot}=?`).run(uid, itemId)
     db.prepare('INSERT OR IGNORE INTO cosmetics_owned (user_id, item_id) VALUES (?,?)').run(friendId, itemId)
     db.prepare('INSERT INTO gift_items (from_id, to_id, item_id) VALUES (?,?,?)').run(uid, friendId, itemId)
@@ -262,7 +262,7 @@ export function acceptChallenge(uid: number, fromId: number, gameId: string): { 
   db.transaction(() => {
     const ins = db.prepare('INSERT OR IGNORE INTO challenges (from_id, to_id, game_id, day, ts) VALUES (?,?,?,?,?)')
       .run(fromId, uid, gameId, day, Date.now())
-    if (ins.changes === 0) return // уже награждали сегодня — не фармим
+    if (ins.changes === 0) return // уже награждали сегодня - не фармим
     credit(uid, CHALLENGE_REWARD, 'challenge', `from:${fromId}`)
     credit(fromId, CHALLENGE_REWARD, 'challenge', `to:${uid}`)
     ok = true

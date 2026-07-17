@@ -60,7 +60,7 @@ export function Friends() {
   // уже играющего просто добавит в друзья.
   const inviteUrl = inviteLink(botUsername, myCode)
   const shareText = getLang() === 'en'
-    ? `Come to Game is Game — all our games in one place! You'll get +${REFERRED_BONUS} Game to start 🎁 My code: ${myCode}`
+    ? `Come to Game is Game - all our games in one place! You'll get +${REFERRED_BONUS} Game to start 🎁 My code: ${myCode}`
     : `Залетай в Game is Game, все наши игры в одном месте! Получишь +${REFERRED_BONUS} Game на старте 🎁 Мой код: ${myCode}`
   const onCopy = async () => { const ok = await copyText(myCode); showToast(ok ? t('Код скопирован ✨') : myCode) }
   const onShare = () => shareInvite(inviteUrl, shareText)
@@ -269,9 +269,9 @@ function GiftSheet({ friend, onClose }: { friend: Friend; onClose(): void }) {
   const [amount, setAmount] = useState(100)
   const [busy, setBusy] = useState(false)
   const coins = profile?.coins ?? 0
-  // Гардероб мог не загрузиться (мы на вкладке «Друзья») — подтянем для списка подарков.
+  // Гардероб мог не загрузиться (мы на вкладке «Друзья») - подтянем для списка подарков.
   useEffect(() => { if (!wardrobe) void loadWardrobe() }, [wardrobe, loadWardrobe])
-  // §14.2: дарить можно только ТОРГУЕМЫЕ вещи, которыми владеешь (заслуги — bound).
+  // §14.2: дарить можно только ТОРГУЕМЫЕ вещи, которыми владеешь (заслуги - bound).
   const giftable = (wardrobe?.items ?? [])
     .filter(i => i.owned && isTradeable(i.item))
     .map(i => i.item)

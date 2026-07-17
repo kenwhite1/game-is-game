@@ -50,7 +50,7 @@ function usernameFree(uname: string, selfId: number): boolean {
 }
 
 /** Занять ник за игроком, если он валиден и свободен. Молча пропускает, если
- *  занят или проигрывает гонку по UNIQUE-индексу — тогда ник останется пустым,
+ *  занят или проигрывает гонку по UNIQUE-индексу - тогда ник останется пустым,
  *  и игрок выберет свой. */
 function claimUsername(id: number, raw: string): void {
   const uname = normalizeUsername(raw)
@@ -58,7 +58,7 @@ function claimUsername(id: number, raw: string): void {
   try {
     db.prepare('UPDATE users SET username=? WHERE id=?').run(uname, id)
   } catch {
-    // столкновение по UNIQUE — оставляем пустым
+    // столкновение по UNIQUE - оставляем пустым
   }
 }
 
@@ -82,7 +82,7 @@ function ensureFriendCode(id: number, existing: string | null): string {
       const row = db.prepare('SELECT friend_code FROM users WHERE id=?').get(id) as { friend_code: string | null }
       if (row?.friend_code) return row.friend_code
     } catch {
-      // столкновение по UNIQUE — пробуем другой код
+      // столкновение по UNIQUE - пробуем другой код
     }
   }
   // Крайне маловероятный фолбэк: код на основе id, всё ещё уникальный.
@@ -106,7 +106,7 @@ export function getOrCreateUser(id: number, name: string, username?: string, lan
       db.prepare('UPDATE users SET color=? WHERE id=?').run(c, id)
       existing.color = c
     }
-    // Игрок мог завести @username в Telegram уже после регистрации — подхватим,
+    // Игрок мог завести @username в Telegram уже после регистрации - подхватим,
     // но только если он ещё не выбрал собственный ник (его не перетираем).
     if (!existing.username && username) {
       claimUsername(id, username)
@@ -115,7 +115,7 @@ export function getOrCreateUser(id: number, name: string, username?: string, lan
     return existing
   }
   const color = defaultColor(id)
-  // Вставляем без ника, затем пытаемся занять @username из Telegram — так
+  // Вставляем без ника, затем пытаемся занять @username из Telegram - так
   // конфликт по UNIQUE не роняет регистрацию (ник просто останется пустым).
   // Вставляем с нулём монет, затем начисляем стартовый бонус через ledger,
   // чтобы даже регистрационные монеты были аудируемой строкой в coin_ledger.
@@ -168,7 +168,7 @@ export function toProfile(u: UserRow): Profile {
   }
 }
 
-/** Заработанные значки (id) игрока — для расчёта открытия косметики. */
+/** Заработанные значки (id) игрока - для расчёта открытия косметики. */
 export function badgeSet(id: number): Set<string> {
   const profile = getProfile(id)
   if (!profile) return new Set()
@@ -201,7 +201,7 @@ export function equippedOf(id: number): Record<Slot, string> {
 export function getProfile(id: number): Profile | null {
   const u = db.prepare('SELECT * FROM users WHERE id=?').get(id) as UserRow | undefined
   if (!u) return null
-  // Старые записи могли появиться до миграции хаба — донастроим на лету.
+  // Старые записи могли появиться до миграции хаба - донастроим на лету.
   if (!u.friend_code) u.friend_code = ensureFriendCode(id, null)
   if (!u.color) {
     u.color = defaultColor(id)
@@ -210,9 +210,9 @@ export function getProfile(id: number): Profile | null {
   return toProfile(u)
 }
 
-/** Выбрать ник — доступно, только пока у игрока ника нет (у кого есть @username
+/** Выбрать ник - доступно, только пока у игрока ника нет (у кого есть @username
  *  из Telegram, ник фиксирован). Ник уникален (регистронезависимо). Аватар и
- *  прочая косметика — через equip (там проверяется владение). */
+ *  прочая косметика - через equip (там проверяется владение). */
 export function setUsername(id: number, raw: string): { profile: Profile } | { error: string } {
   const current = db.prepare('SELECT username FROM users WHERE id=?').get(id) as { username: string | null } | undefined
   if (!current) return { error: 'not_found' }
@@ -261,12 +261,12 @@ export function recordOpen(id: number, gameId: string): Profile {
   // Дневные ладдеры (§7A ⑤⑦): разнообразие по дням + пик игр за день.
   varietyTick(id, gameId)
   updateDayPeaks(id)
-  // Достижения широты/коллекции могли продвинуться — синкаем (идемпотентно).
+  // Достижения широты/коллекции могли продвинуться - синкаем (идемпотентно).
   syncAchievements(id)
   // События: тикаем общую цель и конвертируем токены завершившихся событий.
   tickCommunity(1)
   settleExpired(id)
-  // Отложенная реферальная награда — выплачиваем, если новичок наиграл минимум.
+  // Отложенная реферальная награда - выплачиваем, если новичок наиграл минимум.
   settleReferral(id)
 
   return getProfile(id)!

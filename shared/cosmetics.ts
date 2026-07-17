@@ -1,25 +1,25 @@
-// Косметика хаба Game is Game — «скины», которые НАДЕВАЮТСЯ на персонажа.
+// Косметика хаба Game is Game - «скины», которые НАДЕВАЮТСЯ на персонажа.
 // Слоты (как в Roblox-редакторе образа):
-//   color     — цвет тела персонажа «Бубл»
-//   face      — выражение лица
-//   frame     — кольцо-рамка вокруг аватара
-//   hat       — головной убор (поверх макушки)
-//   eyewear   — на лицо (очки/маски)
-//   effect    — аура/частицы вокруг персонажа
-//   companion — питомец рядом
-//   banner    — фон карточки игрока
-//   title     — титул под именем
-// Аксессуары (hat/eyewear/effect/companion) рисуются слоями на аватаре —
+//   color     - цвет тела персонажа «Бубл»
+//   face      - выражение лица
+//   frame     - кольцо-рамка вокруг аватара
+//   hat       - головной убор (поверх макушки)
+//   eyewear   - на лицо (очки/маски)
+//   effect    - аура/частицы вокруг персонажа
+//   companion - питомец рядом
+//   banner    - фон карточки игрока
+//   title     - титул под именем
+// Аксессуары (hat/eyewear/effect/companion) рисуются слоями на аватаре -
 // в любом месте, где он виден (профиль, друзья, лента, таблица лидеров).
 //
-// Валюта — «Game» (мягкая, зарабатывается игрой). Часть предметов открывается
+// Валюта - «Game» (мягкая, зарабатывается игрой). Часть предметов открывается
 // прогрессом (уровень/значки), часть покупается в магазине за Game, топовые
 // мифики пока заперты под будущую премиум-монетизацию.
 //
 // Файл без браузерных/Node-зависимостей: импортируется отовсюду.
 
 // Персонаж «Бубл» один на всех; кастомизируется цветом тела и выражением лица,
-// поверх — надеваемые аксессуары. Поэтому слоты «color» и «face» вместо emoji.
+// поверх - надеваемые аксессуары. Поэтому слоты «color» и «face» вместо emoji.
 export type Slot = 'color' | 'face' | 'frame' | 'hat' | 'eyewear' | 'effect' | 'companion' | 'banner' | 'title'
 export type Rarity = 'common' | 'rare' | 'epic' | 'legendary' | 'mythic'
 
@@ -269,7 +269,7 @@ export const COMPANION_ITEMS: CompanionItem[] = [
   C('comp_dino', 'Динозаврик', '🦕', 'mythic', 'Топ', shop('mythic')),
 ]
 
-// ─── Баннеры (тёмные/сочные — белый текст всегда читается) ──────────────
+// ─── Баннеры (тёмные/сочные - белый текст всегда читается) ──────────────
 const B = (id: string, name: string, rarity: Rarity, collection: string, unlock: Unlock, bg: string, anim?: BannerItem['anim']): BannerItem =>
   ({ id, slot: 'banner', name, rarity, collection, unlock, bg, anim })
 
@@ -349,7 +349,7 @@ export const TITLE_ITEMS: TitleItem[] = [
 ]
 
 // ─── §10.7 рост каталога: партия дешёвых предметов (цвета/титулы/уборы) ──────
-// К цели ~400 к концу года — контент-долг; здесь заметная партия из «дешёвых»
+// К цели ~400 к концу года - контент-долг; здесь заметная партия из «дешёвых»
 // слотов (данные-строки, маржинальная стоимость ≈ 0).
 const EXTRA_COLORS: ColorItem[] = ([
   ['Индиго', '#4b3fd6', 'rare'], ['Изумруд', '#2ecc71', 'rare'], ['Рубин', '#e0245e', 'rare'],
@@ -386,7 +386,7 @@ export function cosmeticById(id: string | null | undefined): Cosmetic | undefine
 }
 
 // ── Коллекции (§10.5) ──────────────────────────────────────────────────────
-// Тег collection становится сетом: собрал все предметы коллекции — получаешь
+// Тег collection становится сетом: собрал все предметы коллекции - получаешь
 // бонус. Бонус тем больше, чем «дороже» предметы коллекции по редкости.
 export interface CollectionDef { name: string; itemIds: string[]; total: number; bonus: number }
 /** Витрина коллекции для игрока (прогресс + статус бонуса). */
@@ -398,7 +398,7 @@ export const COLLECTIONS: CollectionDef[] = (() => {
     arr.push(c); groups.set(c.collection, arr)
   }
   return [...groups.entries()]
-    .filter(([, items]) => items.length >= 3) // сет — от трёх предметов
+    .filter(([, items]) => items.length >= 3) // сет - от трёх предметов
     .map(([name, items]) => ({
       name,
       itemIds: items.map(i => i.id),
@@ -424,7 +424,7 @@ export const DEFAULT_EQUIP: Record<Slot, string> = {
   title: 'title_player',
 }
 
-/** Полный «образ» игрока — что надето во всех визуальных слотах. */
+/** Полный «образ» игрока - что надето во всех визуальных слотах. */
 export interface Look {
   color: string
   face: string
@@ -440,7 +440,7 @@ export interface Look {
 // ─── Перекраска (§10.6) ─────────────────────────────────────────────────────
 /** Стоимость перекраски по редкости (150–400🪙). */
 export const RECOLOR_COST: Record<Rarity, number> = { common: 150, rare: 200, epic: 280, legendary: 350, mythic: 400 }
-/** Доступные повороты оттенка: 12 шагов по 30°. 0 — оригинал. */
+/** Доступные повороты оттенка: 12 шагов по 30°. 0 - оригинал. */
 export const RECOLOR_STEPS = 12
 /** CSS-фильтр перекраски для рендера. */
 export function hueFilter(hue: number): string {
@@ -484,14 +484,14 @@ export function isOwned(item: Cosmetic, ctx: OwnerCtx): boolean {
   }
 }
 
-/** Цена товара магазина в Game (редкость × множитель слота, Appendix B); null — не продаётся. */
+/** Цена товара магазина в Game (редкость × множитель слота, Appendix B); null - не продаётся. */
 export function shopPrice(item: Cosmetic): number | null {
   return item.unlock.kind === 'shop' ? slotAdjustedPrice(item.unlock.price, item.slot) : null
 }
 
 // ── Торгуемость (§14.1) ────────────────────────────────────────────────────
 // По умолчанию ВСЁ несменяемо (bound): заслуги нельзя купить. Торгуется только
-// узкий набор ПОКУПНЫХ декоративных вещей — «нельзя купить флекс».
+// узкий набор ПОКУПНЫХ декоративных вещей - «нельзя купить флекс».
 export const TRADEABLE_IDS = new Set<string>([
   'frame_amethyst', 'frame_electric', 'frame_diamond', 'c_candy', 'title_pro',
 ])

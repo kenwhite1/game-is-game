@@ -5,7 +5,7 @@ import type { MatchReport } from '../../shared/sdk'
 
 // Внутренняя шина событий + свёрнутые счётчики прогресса (§2.4, §2.5). Все
 // системы (достижения/квесты/ранги) читают user_progress, а не гоняют тяжёлые
-// запросы. event_log — append-only поток для реплея/аудита.
+// запросы. event_log - append-only поток для реплея/аудита.
 
 const GAME_CAT = new Map(GAMES.map(g => [g.id, g.category]))
 
@@ -73,7 +73,7 @@ export function progressMatch(uid: number, gameId: string, r: MatchReport): void
   bumpProgress(uid, `matches_game_${gameId}`, 1)
   // Режим (для «Знатока режимов»): раздельные счётчики, из них считается distinct.
   bumpProgress(uid, `pm_${gameId}_${r.mode ?? 'solo'}`, 1)
-  // «Успех» = победа ИЛИ финиш (раннеры/пасьянсы рапортуют finish) — для #1/#3/#10.
+  // «Успех» = победа ИЛИ финиш (раннеры/пасьянсы рапортуют finish) - для #1/#3/#10.
   const success = r.result === 'win' || r.result === 'finish'
   if (r.result === 'finish') bumpProgress(uid, `finishes_game_${gameId}`, 1)
   if (success) bumpProgress(uid, `successes_game_${gameId}`, 1)
@@ -101,7 +101,7 @@ export function progressMatch(uid: number, gameId: string, r: MatchReport): void
   if (r.result === 'win' && r.stats?.combobreaker === true) bumpProgress(uid, 'combobreaker', 1)
   // Свободные игровые метрики (§7B): булев true (не в проигрыше) = «фирменный»
   // момент → f_<id>_<flag>; число = накопление → s_<id>_<num>. Игре достаточно
-  // прислать нужный ключ — код на хабе для новой игры не нужен.
+  // прислать нужный ключ - код на хабе для новой игры не нужен.
   if (r.stats) {
     const notLoss = r.result !== 'loss'
     for (const [rawKey, v] of Object.entries(r.stats)) {

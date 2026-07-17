@@ -14,7 +14,7 @@ import { economyReportText } from './econ'
 export const bot = BOT_TOKEN ? new Bot(BOT_TOKEN) : null
 
 // Язык уведомлений для входящего апдейта: сохранённый выбор игрока, а для новых
-// (ещё не заведённых) — их Telegram language_code.
+// (ещё не заведённых) - их Telegram language_code.
 function langOf(ctx: { from?: { id: number; language_code?: string } }): Lang {
   if (!ctx.from) return 'ru'
   return userExists(ctx.from.id) ? userLang(ctx.from.id) : normLang(ctx.from.language_code)
@@ -103,7 +103,7 @@ function gamesKeyboard() {
 
 if (bot) {
   void bot.api.setMyName('Game is Game').catch(() => {})
-  // Русский — язык по умолчанию; английский Telegram отдаёт клиентам с en-локалью.
+  // Русский - язык по умолчанию; английский Telegram отдаёт клиентам с en-локалью.
   void bot.api.setMyDescription(DESCRIPTION('ru')).catch(() => {})
   void bot.api.setMyDescription(DESCRIPTION('en'), { language_code: 'en' }).catch(() => {})
   void bot.api.setMyShortDescription(SHORT_DESCRIPTION('ru')).catch(() => {})
@@ -218,7 +218,7 @@ if (bot) {
     await ctx.reply(economyReportText())
   })
 
-  // Только для админов (ADMIN_IDS); это движок «подписался — узнал первым».
+  // Только для админов (ADMIN_IDS); это движок «подписался - узнал первым».
   bot.command('announce', async ctx => {
     if (!ctx.from || !ADMIN_IDS.has(ctx.from.id)) return
     const m = (typeof ctx.match === 'string' ? ctx.match : '').trim()
@@ -263,7 +263,7 @@ if (bot) {
     try {
       const p = JSON.parse(payload)
       ok = p.kind === 'pass' || p.kind === 'pass_plus' || p.kind === 'tier_boost' ? true : !!packById(p.packId)
-    } catch { /* чужой или битый payload — отклоняем */ }
+    } catch { /* чужой или битый payload - отклоняем */ }
     await ctx.answerPreCheckoutQuery(ok, ok ? undefined : 'Этот товар больше недоступен. Попробуй ещё раз из приложения.')
   })
 

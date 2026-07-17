@@ -1,4 +1,4 @@
-// Английский словарь для хаба. Ключ — русская исходная строка (см. i18n.ts).
+// Английский словарь для хаба. Ключ - русская исходная строка (см. i18n.ts).
 // Если строки нет в словаре, t() вернёт русский ключ (безопасный фолбэк).
 export const EN: Record<string, string> = {
   // ── Навигация / вкладки ──────────────────────────────────────────────
@@ -87,7 +87,7 @@ export const EN: Record<string, string> = {
   'ТЕГ': 'TAG',
   'Создать': 'Create',
   'Найти команду': 'Find a team',
-  'Пока команд нет, создай первую!': 'No teams yet — create the first one!',
+  'Пока команд нет, создай первую!': 'No teams yet - create the first one!',
   'Вступить': 'Join',
 
   // ── Барахолка / рынок ────────────────────────────────────────────────
@@ -101,14 +101,14 @@ export const EN: Record<string, string> = {
   'Снять': 'Cancel',
   'Лоты игроков': 'Player listings',
   'Пока пусто': "It's empty here",
-  'Загляни позже, тут появятся образы игроков.': 'Check back later — player items will show up here.',
+  'Загляни позже, тут появятся образы игроков.': 'Check back later - player items will show up here.',
   'Купить': 'Buy',
 
   // ── Рейтинги ─────────────────────────────────────────────────────────
   'Рейтинги': 'Leaderboards',
   'GG-лига': 'GG League',
   'Неделя': 'Week',
-  'Играй и зарабатывай, рейтинг наполнится.': 'Play and earn — the leaderboard will fill up.',
+  'Играй и зарабатывай, рейтинг наполнится.': 'Play and earn - the leaderboard will fill up.',
   'Бронза': 'Bronze',
   'Серебро': 'Silver',
   'Золото': 'Gold',
@@ -124,6 +124,7 @@ export const EN: Record<string, string> = {
 
   // ── Сезонный пропуск ─────────────────────────────────────────────────
   'Бесплатно': 'Free',
+  'Награды сезона': 'Season rewards',
   'Премиум': 'Premium',
   'максимум': 'maxed',
   'дальше:': 'next:',
@@ -198,7 +199,7 @@ export const EN: Record<string, string> = {
   'Друзей': 'Friends',
   'рек.': 'best',
   'дней': 'days',
-  'порвалась, восстанови за 24 ч!': 'broke — restore it within 24h!',
+  'порвалась, восстанови за 24 ч!': 'broke - restore it within 24h!',
   '▶ 3 игры даром': '▶ 3 games free',
   'Игры': 'Games',
   'Престиж: сбросить уровень за звезду': 'Prestige: reset your level for a star',
@@ -241,7 +242,7 @@ export const EN: Record<string, string> = {
   'до 3 в день': 'up to 3 a day',
   'Или подари предмет': 'Or gift an item',
   'Дарить можно только покупные вещи, заслуги остаются с тобой.':
-    'You can only gift purchased items — earned rewards stay with you.',
+    'You can only gift purchased items - earned rewards stay with you.',
   'Не хватает Game': 'Not enough Game',
   'Лимит: 5 подарков в день': 'Limit: 5 gifts a day',
   'Вы не в друзьях': "You're not friends",
@@ -287,12 +288,12 @@ export const EN: Record<string, string> = {
   'за Telegram Stars': 'with Telegram Stars',
   '×2 первая': '×2 first buy',
   'Скоро': 'Soon',
-  'Уже куплено, надень во вкладке «Аватар»': 'Already owned — equip it on the Avatar tab',
+  'Уже куплено, надень во вкладке «Аватар»': 'Already owned - equip it on the Avatar tab',
   'Скоро в продаже ✨': 'Coming soon ✨',
   'Не хватает Game 💰': 'Not enough Game 💰',
 
   // ── Стиль / аватар ───────────────────────────────────────────────────
-  'Не хватает Game 💰, загляни в Магазин': 'Not enough Game 💰 — check the Shop',
+  'Не хватает Game 💰, загляни в Магазин': 'Not enough Game 💰 - check the Shop',
   'Этот предмет закрыт 🔒': 'This item is locked 🔒',
   'Перекрасить тело': 'Recolor body',
   'сброс бесплатно': 'reset is free',
@@ -333,7 +334,7 @@ export const EN: Record<string, string> = {
   'Вызов принят:': 'Challenge accepted:',
   'теперь в друзьях 🎉': 'is now your friend 🎉',
   'Задание выполнено:': 'Quest complete:',
-  'Уровень сброшен, вперёд по новой!': 'Level reset — off you go again!',
+  'Уровень сброшен, вперёд по новой!': 'Level reset - off you go again!',
   'Серия восстановлена 🔧🔥': 'Streak restored 🔧🔥',
   'Награда получена:': 'Reward claimed:',
   'Коллекция собрана:': 'Collection complete:',
@@ -520,9 +521,9 @@ export const EN: Record<string, string> = {
   'Партийная карточная игра для компании: подбирай самый смешной ответ на вопрос раунда.':
     'A party card game for the group: pick the funniest answer to the round’s question.',
   'Классика вечеринок: отвечай честно или выполняй задание, три набора на любую компанию.':
-    'A party classic: answer honestly or take the dare — three decks for any crowd.',
+    'A party classic: answer honestly or take the dare - three decks for any crowd.',
   'Соревнование эрудитов: пять тем, быстрые раунды, играй один или с друзьями.':
-    'A battle of wits: five topics, fast rounds — play solo or with friends.',
+    'A battle of wits: five topics, fast rounds - play solo or with friends.',
   'Социальная игра: у всех одно слово, у крота другое. Вычисли, кто прикидывается.':
     'A social game: everyone shares one word, the mole has another. Work out who’s faking.',
   'Классическое домино: выкладывай кости, блокируй соперника, считай очки.':
@@ -546,7 +547,7 @@ export const EN: Record<string, string> = {
   'Игра в слова на доске 15x15: выкладывай буквы, зарабатывай очки за редкие клетки.':
     'A word game on a 15×15 board: place letters and score big on rare squares.',
   'Филворд: слова спрятаны в сетке и переплетены как нитки, найди их все.':
-    'A word search: words hide in the grid, woven like threads — find them all.',
+    'A word search: words hide in the grid, woven like threads - find them all.',
   'Неоновая аркада про обжорку в лабиринте: собирай точки и уворачивайся от призраков.':
     'A neon arcade muncher in a maze: gobble the dots and dodge the ghosts.',
   'Bubble shooter: стреляй шариками, собирай тройки по цвету и очищай поле.':

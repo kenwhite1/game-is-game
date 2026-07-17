@@ -10,7 +10,7 @@ import {
 const GAME_CAT = new Map(GAMES.map(g => [g.id, g.category]))
 
 // Движок событий: токены, событийные квесты, магазин за 🎟 и общая цель.
-// Грант предметов инлайном (без server/cosmetics) — чтобы не плодить цикл.
+// Грант предметов инлайном (без server/cosmetics) - чтобы не плодить цикл.
 
 function startDate(f: Festival): string {
   return new Date(f.startMs).toISOString().slice(0, 10)
@@ -40,7 +40,7 @@ function grantItem(uid: number, itemId: string): void {
   if (cosmeticById(itemId)) db.prepare('INSERT OR IGNORE INTO cosmetics_owned (user_id, item_id) VALUES (?,?)').run(uid, itemId)
 }
 
-// ── Прогресс событийных квестов (окно — с начала события) ──────────────────
+// ── Прогресс событийных квестов (окно - с начала события) ──────────────────
 function statValue(uid: number, stat: EventStat, since: string): number {
   const q: Record<EventStat, string> = {
     distinct_since: 'SELECT COUNT(DISTINCT game_id) AS n FROM opens WHERE user_id=? AND date(ts) >= ?',
@@ -62,7 +62,7 @@ function communityValue(eventId: string): number {
 }
 
 /** §12.2 множитель-уикенд: победа в spotlight-жанре активного события даёт
- *  бонусные 🎟. Возвращает начисленные токены (0 — если не подошло). */
+ *  бонусные 🎟. Возвращает начисленные токены (0 - если не подошло). */
 export function awardMatchTokens(uid: number, gameId: string, result: string): number {
   if (result !== 'win') return 0
   const f = activeFestival(Date.now())

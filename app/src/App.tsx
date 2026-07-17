@@ -469,6 +469,10 @@ function SeasonPass() {
         )}
       </div>
 
+      <div className="sp-track-title">
+        <b>{t('Награды сезона')}</b>
+        <span>{getLang() === 'en' ? `tier ${season.tier}/${season.tiers}` : `тир ${season.tier}/${season.tiers}`}</span>
+      </div>
       <div className="sp-legend"><span>{t('Тир')}</span><span>{t('Бесплатно')}</span><span>{t('Премиум')}</span></div>
       <div className="sp-track">
         {season.rows.map(r => (

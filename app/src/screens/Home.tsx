@@ -1,6 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useStore } from '../store'
+import { api, type UgcGame } from '../api'
+import { openGame } from '../telegram'
 import { Avatar } from '../art/Avatar'
 import { GameTileIcon } from '../art/GameTileIcon'
 import { PlayIcon } from '../art/icons'
@@ -37,7 +39,7 @@ function gameStyle(card: GameCard): CSSProperties {
   return { '--a': card.accent, '--ad': card.accentDeep, '--glow': glow(card.accent) } as CSSProperties
 }
 
-/** «5 игр», «31 игра», «2 игры» — русские формы множественного числа. */
+/** «5 игр», «31 игра», «2 игры» - русские формы множественного числа. */
 function ruGames(n: number): string {
   const d10 = n % 10, d100 = n % 100
   const word = d10 === 1 && d100 !== 11 ? 'игра'
@@ -249,8 +251,50 @@ export function Home() {
         ))}
       </div>
 
+      {!browsing && <UgcShelf />}
+
       <GameSheet />
     </div>
+  )
+}
+
+/** «Игры от игроков»: витрина игр, собранных в «Мастерской» и отмеченных
+ *  основателями. Пустой фид (студия не подключена / ничего не отмечено) -
+ *  полки нет вовсе. Плитки открывают мини-апп студии по deep-link. */
+function UgcShelf() {
+  const [games, setGames] = useState<UgcGame[]>([])
+  useEffect(() => {
+    api.ugc().then(r => setGames(r.games)).catch(() => {})
+  }, [])
+  if (games.length === 0) return null
+  return (
+    <>
+      <div className="sec">
+        <h2>{t('Игры от игроков')}</h2>
+        <span className="sub">{t('Сделано в Мастерской')}</span>
+      </div>
+      <div className="game-grid">
+        {games.map(g => (
+          <div
+            key={g.slug}
+            className="game-card"
+            style={{ '--a': g.accent, '--ad': g.accentDeep, '--glow': glow(g.accent) } as CSSProperties}
+            onClick={() => g.link && openGame(g.link)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && g.link) openGame(g.link) }}
+            aria-label={`${t('Открыть')} ${g.title}`}
+          >
+            <span className="gc-icon" style={{ fontSize: 44, lineHeight: '58px' }}>{g.emoji}</span>
+            <span className="gc-title">{g.title}</span>
+            <span className="gc-sub">{g.tagline || `${t('от')} ${g.author}`}</span>
+            <span className="gc-foot">
+              <span className="gc-play"><PlayIcon /> {t('Играть')}</span>
+            </span>
+          </div>
+        ))}
+      </div>
+    </>
   )
 }
 
@@ -322,7 +366,7 @@ function GameSheet() {
           className="rate-btn fav-row"
           onClick={() => shareInvite(
             `https://t.me/${botUsername}?startapp=${g.id}`,
-            getLang() === 'en' ? `Playing “${t(g.name)}” on Game is Game — come join! 🎮` : `Играю в «${g.name}» в Game is Game, залетай! 🎮`,
+            getLang() === 'en' ? `Playing “${t(g.name)}” on Game is Game - come join! 🎮` : `Играю в «${g.name}» в Game is Game, залетай! 🎮`,
           )}
         >📤 {t('Поделиться с друзьями')}</button>
         <button className="btn accent" style={{ width: '100%', marginTop: 10 }} onClick={() => { openGameSheet(null); launch(g) }}>
@@ -375,7 +419,7 @@ function QuestsCard() {
 
 /** Игра недели: одна игра из каталога, детерминированно ротируется раз в неделю.
  *  Неделя привязана к эпохе Unix (шаг 7 дней), поэтому выбор стабилен всю неделю
- *  и одинаков на всех устройствах — без обращения к серверу. */
+ *  и одинаков на всех устройствах - без обращения к серверу. */
 function GameOfWeekCard() {
   const catalog = useStore(s => s.catalog)
   const launch = useStore(s => s.launch)

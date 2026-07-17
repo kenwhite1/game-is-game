@@ -10,7 +10,7 @@ import {
 } from '../../shared/achievements'
 
 // Достижения уровня игры, сгруппированные по игре (для «Мастеров»), и список
-// самих «Мастеров» — считаются один раз при загрузке модуля.
+// самих «Мастеров» - считаются один раз при загрузке модуля.
 const PER_GAME_MEMBERS = new Map<string, Achievement[]>()
 const MASTER_LIST: Achievement[] = []
 for (const a of ACHIEVEMENTS) {
@@ -39,7 +39,7 @@ function countMastered(reached: Map<string, number>): number {
 
 // Движок достижений: собирает снимок прогресса, открывает взятые «лесенки»
 // (идемпотентно), платит монеты за каждый новый тир через ledger и считает
-// GG Score. Мета-величины (gg_score, achievements_unlocked) — вторым проходом.
+// GG Score. Мета-величины (gg_score, achievements_unlocked) - вторым проходом.
 
 function scalar(sql: string, uid: number): number {
   return (db.prepare(sql).get(uid) as { n: number } | undefined)?.n ?? 0
@@ -113,7 +113,7 @@ export function syncAchievements(uid: number): { newly: UnlockedRung[]; score: n
 
   // Проход 1: обычные достижения (в т.ч. уровня игры), кроме «Мастеров»/мета.
   for (const a of ACHIEVEMENTS) if (!META_STATS.has(a.stat) && !isMasterStat(a.stat)) evalOne(a)
-  // Проход 1.5: «Мастера» игр — зависят от того, взяты ли все достижения игры.
+  // Проход 1.5: «Мастера» игр - зависят от того, взяты ли все достижения игры.
   computeMasterStats(snap, reached)
   for (const a of ACHIEVEMENTS) if (isMasterStat(a.stat)) evalOne(a)
   // Мета-величины зависят от результата предыдущих проходов (вкл. «Мастеров»).
@@ -121,7 +121,7 @@ export function syncAchievements(uid: number): { newly: UnlockedRung[]; score: n
   snap.gg_score = s1.score
   snap.achievements_unlocked = s1.count
   snap.games_mastered = countMastered(reached)
-  // Проход 2: мета-достижения (GG Score, трофеи, Полимат) — могут добавить очков.
+  // Проход 2: мета-достижения (GG Score, трофеи, Полимат) - могут добавить очков.
   for (const a of ACHIEVEMENTS) if (META_STATS.has(a.stat)) evalOne(a)
 
   const final = scoreAndCount(reached)
@@ -168,7 +168,7 @@ export function achievementsView(uid: number): AchievementsPayload {
 
 const ACH_TOTAL = ACHIEVEMENTS.reduce((n, a) => n + a.rungs.length, 0)
 
-/** Дешёвая сводка для экрана профиля — читает уже посчитанное, без синка/выплат. */
+/** Дешёвая сводка для экрана профиля - читает уже посчитанное, без синка/выплат. */
 export function achievementsSummary(uid: number): { score: number; unlocked: number; total: number } {
   const unlocked = (db.prepare('SELECT COALESCE(SUM(tier_reached+1),0) AS n FROM user_achievements WHERE user_id=?').get(uid) as { n: number }).n
   return { score: getProgress(uid, 'gg_score'), unlocked, total: ACH_TOTAL }

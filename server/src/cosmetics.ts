@@ -30,7 +30,7 @@ function ownerCtx(uid: number, level: number): OwnerCtx {
   return { level, badges: badgeSet(uid), owned: ownedSet(uid), achTiers: achTiersOf(uid), streakBest }
 }
 
-/** Контекст владения по uid (сам достаёт уровень) — для внешних модулей. */
+/** Контекст владения по uid (сам достаёт уровень) - для внешних модулей. */
 export function ownerCtxOf(uid: number): OwnerCtx {
   const profile = getProfile(uid)
   return ownerCtx(uid, profile?.level ?? 1)
@@ -99,7 +99,7 @@ export function buy(uid: number, itemId: string): BuyResult {
   if (!item) return { ok: false, reason: 'not_found' }
   const base = shopPrice(item)
   if (base == null) return { ok: false, reason: 'not_for_sale' }
-  // Если товар сегодня на витрине со скидкой — берём цену дня.
+  // Если товар сегодня на витрине со скидкой - берём цену дня.
   const price = dealFor(shopDayKey(), itemId)?.price ?? base
 
   const profile = getProfile(uid)
@@ -142,7 +142,7 @@ export function recolor(uid: number, itemId: string, hue: number): RecolorResult
     return { ok: false, reason: 'not_owned' }
   }
   const snapped = (((Math.round(hue / 30) * 30) % 360) + 360) % 360 // шаг 30°
-  if (snapped === 0) { // сброс к оригиналу — бесплатно
+  if (snapped === 0) { // сброс к оригиналу - бесплатно
     db.prepare('DELETE FROM cosmetic_recolors WHERE user_id=? AND item_id=?').run(uid, itemId)
     return { ok: true }
   }

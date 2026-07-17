@@ -16,7 +16,7 @@ import { playSfx, isSoundOn, setSoundOn } from './sound'
 import { t, setLang, getLang } from './i18n'
 
 // Статичный каталог на случай, если сервер недоступен (гость, офлайн).
-const STATIC_CATALOG: GameCard[] = GAMES.map(g => ({ ...g, link: defaultLink(g.bot) }))
+const STATIC_CATALOG: GameCard[] = GAMES.filter(g => !g.hideInHub).map(g => ({ ...g, link: defaultLink(g.bot) }))
 
 export type Tab = 'home' | 'shop' | 'style' | 'friends' | 'profile'
 type Sheet = 'about' | 'help' | 'settings' | 'editProfile' | 'season' | 'festival' | 'boards' | 'market' | 'clan' | 'collections' | null
@@ -191,7 +191,7 @@ export const useStore = create<S>((set, get) => ({
       void get().refreshQuests()
       // Прогресс сезонного пропуска для карточки на «Доме».
       void get().loadSeason()
-      // Активное событие (если идёт) — для баннера на «Доме».
+      // Активное событие (если идёт) - для баннера на «Доме».
       void get().loadFestival()
     } catch {
       // гость или офлайн: показываем меню из публичного каталога или статики
@@ -209,7 +209,7 @@ export const useStore = create<S>((set, get) => ({
       ? startParam.slice(4)
       : null
 
-    // Вызов другу: chl_<gameId>_<fromId> — награда обоим и сразу запуск игры.
+    // Вызов другу: chl_<gameId>_<fromId> - награда обоим и сразу запуск игры.
     const challenge = startParam?.startsWith('chl_')
       ? (() => {
           const rest = startParam.slice(4)
@@ -340,7 +340,7 @@ export const useStore = create<S>((set, get) => ({
   async giftCosmetic(friendId, itemId) {
     try {
       await api.giftCosmetic(friendId, itemId)
-      // Предмет ушёл из моего гардероба — перезагрузим при следующем открытии.
+      // Предмет ушёл из моего гардероба - перезагрузим при следующем открытии.
       set({ wardrobeLoaded: false })
       haptic('success')
       return { ok: true }
@@ -465,7 +465,7 @@ export const useStore = create<S>((set, get) => ({
     try {
       const r = await api.social()
       set({ friends: r.friends, activity: r.activity, leaderboard: r.leaderboard, invited: r.invited ?? 0, coop: r.coop ?? [], friendStreaks: r.friendStreaks ?? [], socialLoaded: true })
-    } catch { /* офлайн — оставляем что есть */ }
+    } catch { /* офлайн - оставляем что есть */ }
   },
 
   async loadDetail() {
