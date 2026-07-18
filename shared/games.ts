@@ -595,6 +595,18 @@ export const GAMES: GameDef[] = [
     category: 'strategy',
     players: 'both',
   },
+  {
+    id: 'masterskaya',
+    name: 'Мастерская',
+    tagline: 'Собери свою игру за 5 минут',
+    blurb: 'Конструктор мини-игр: собери тест, викторину, аркаду или питомца из шаблонов и опубликуй для всех. Внутри — игры, которые собрали другие игроки.',
+    emoji: '🛠️',
+    accent: '#f2a93b',
+    accentDeep: '#d98b1f',
+    bot: 'golubpochtabot',
+    category: 'party',
+    players: 'both',
+  },
 ]
 
 /** Прямая ссылка на Mini App игры. Открывает игру сразу, без чата с ботом. */
