@@ -61,6 +61,18 @@ export const GAMES: GameDef[] = [
     players: 'both',
   },
   {
+    id: 'serdechko',
+    name: 'Сердечко',
+    tagline: 'Проверь совместимость друзей',
+    blurb: 'Купидон-3000 сводит двух друзей из хаба: спрашивает даты рождения, наполняет стеклянное сердце и выдаёт целый псевдонаучный отчёт о совместимости со знаками зодиака, стихиями и досье.',
+    emoji: '💘',
+    accent: '#ef7d92',
+    accentDeep: '#b93f36',
+    bot: 'edauueuodbot',
+    category: 'party',
+    players: 'solo',
+  },
+  {
     id: 'maniac',
     name: 'Маньяк',
     tagline: '3D детектив: вычисли убийцу',
