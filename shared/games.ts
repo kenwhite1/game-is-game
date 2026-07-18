@@ -56,8 +56,7 @@ export const GAMES: GameDef[] = [
     emoji: '🕊️',
     accent: '#97dd67',
     accentDeep: '#3f7048',
-    // TODO: подставить @username бота Roost из BotFather (пока бота нет).
-    bot: 'roost_bot',
+    bot: 'roostmsgbot',
     category: 'arcade',
     players: 'both',
   },
