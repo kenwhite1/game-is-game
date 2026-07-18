@@ -295,19 +295,19 @@ const maniacSet = (g: GameDef): Achievement[] => [
   A(g.id, 'master', 'meta', `master_${g.id}`, 'Мастер Маньяка', 'Открой все достижения «Маньяка»', [r('platinum', 1, 'Мастер Маньяка')]),
 ]
 const nitroSet = (g: GameDef): Achievement[] => [
-  A(g.id, 'firstwin', 'progression', `successes_game_${g.id}`, 'Первый гол', 'Выиграй первый матч в «Нитро-лиге»', [r('bronze', 1, 'Первый гол')]),
+  A(g.id, 'firstwin', 'progression', `successes_game_${g.id}`, 'Первый гол', 'Выиграй первый матч в «Тачкоболе»', [r('bronze', 1, 'Первый гол')]),
   A(g.id, 'signature', 'skill', `f_${g.id}_hattrick`, 'Хет-трик', 'Забей 3+ гола за один матч', [r('gold', 1, 'Хет-трик')]),
   A(g.id, 'aerial', 'skill', `f_${g.id}_aerial`, 'Воздушный ас', 'Забей гол с лёта, в воздухе', [r('gold', 1, 'Воздушный ас')]),
   A(g.id, 'flawless', 'skill', `f_${g.id}_clean`, 'Сухая победа', 'Выиграй, не пропустив ни одного гола', [r('gold', 1, 'Сухая победа')]),
   A(g.id, 'comeback', 'skill', `f_${g.id}_comeback`, 'Камбэк', 'Выиграй, уступая 2+ гола', [r('gold', 1, 'Камбэк')], true),
   A(g.id, 'scorer', 'progression', `s_${g.id}_goals`, 'Бомбардир', 'Забивай голы', [r('silver', 100, 'Бомбардир'), r('gold', 500, 'Голеадор')]),
-  A(g.id, 'winner', 'progression', `successes_game_${g.id}`, 'Чемпион', 'Побеждай в «Нитро-лиге»', [r('silver', 10, 'Чемпион'), r('gold', 50, 'Звезда лиги'), r('diamond', 200, 'Легенда')]),
+  A(g.id, 'winner', 'progression', `successes_game_${g.id}`, 'Чемпион', 'Побеждай в «Тачкоболе»', [r('silver', 10, 'Чемпион'), r('gold', 50, 'Звезда лиги'), r('diamond', 200, 'Легенда')]),
   A(g.id, 'humans', 'social', `winsvsh_game_${g.id}`, 'Дерби', 'Обыграй живого соперника', [r('silver', 1, 'Дерби')]),
-  A(g.id, 'regular', 'dedication', `matches_game_${g.id}`, 'На разогреве', 'Играй в «Нитро-лигу»', [r('bronze', 25, 'На разогреве'), r('silver', 100, 'Ветеран трассы')]),
-  A(g.id, 'master', 'meta', `master_${g.id}`, 'Мастер Нитро', 'Открой все достижения «Нитро-лиги»', [r('platinum', 1, 'Мастер Нитро')]),
+  A(g.id, 'regular', 'dedication', `matches_game_${g.id}`, 'На разогреве', 'Играй в «Тачкобол»', [r('bronze', 25, 'На разогреве'), r('silver', 100, 'Ветеран трассы')]),
+  A(g.id, 'master', 'meta', `master_${g.id}`, 'Мастер Тачкобола', 'Открой все достижения «Тачкобола»', [r('platinum', 1, 'Мастер Тачкобола')]),
 ]
 const neonSet = (g: GameDef): Achievement[] => [
-  A(g.id, 'firstwin', 'progression', `successes_game_${g.id}`, 'Спуск на воду', 'Заверши первый заплыв в «Неон-Тайде»', [r('bronze', 1, 'Спуск на воду')]),
+  A(g.id, 'firstwin', 'progression', `successes_game_${g.id}`, 'Спуск на воду', 'Заверши первый заплыв в «Кораблике»', [r('bronze', 1, 'Спуск на воду')]),
   A(g.id, 'flawless', 'skill', `f_${g.id}_flawless`, 'Целым и невредимым', 'Доберись до сундука, не потеряв ни одного блока', [r('gold', 1, 'Целым и невредимым')]),
   A(g.id, 'signature', 'skill', `f_${g.id}_gold`, 'Золотой флот', 'Заверши заплыв на золотых блоках', [r('gold', 1, 'Золотой флот')]),
   A(g.id, 'engineer', 'skill', `f_${g.id}_waterfall`, 'Инженер', 'Переживи секцию водопада', [r('gold', 1, 'Инженер')]),
@@ -315,8 +315,8 @@ const neonSet = (g: GameDef): Achievement[] => [
   A(g.id, 'chest', 'progression', `s_${g.id}_chest`, 'Богач', 'Забирай золотой сундук', [r('silver', 25, 'Богач'), r('gold', 100, 'Магнат реки')]),
   A(g.id, 'winner', 'progression', `successes_game_${g.id}`, 'Речной волк', 'Заверши заплывы', [r('silver', 10, 'Речной волк'), r('gold', 50, 'Капитан'), r('diamond', 200, 'Легенда реки')]),
   A(g.id, 'humans', 'social', `f_${g.id}_coop`, 'Кооп', 'Заверши заплыв вместе с другом', [r('silver', 1, 'Кооп')]),
-  A(g.id, 'regular', 'dedication', `matches_game_${g.id}`, 'Юнга', 'Играй в «Неон-Тайд»', [r('bronze', 25, 'Юнга'), r('silver', 100, 'Боцман')]),
-  A(g.id, 'master', 'meta', `master_${g.id}`, 'Мастер Неон-Тайда', 'Открой все достижения «Неон-Тайда»', [r('platinum', 1, 'Мастер Неон-Тайда')]),
+  A(g.id, 'regular', 'dedication', `matches_game_${g.id}`, 'Юнга', 'Играй в «Кораблик»', [r('bronze', 25, 'Юнга'), r('silver', 100, 'Боцман')]),
+  A(g.id, 'master', 'meta', `master_${g.id}`, 'Мастер Кораблика', 'Открой все достижения «Кораблика»', [r('platinum', 1, 'Мастер Кораблика')]),
 ]
 const chekSet = (g: GameDef): Achievement[] => [
   A(g.id, 'firstwin', 'progression', `successes_game_${g.id}`, 'Корона', 'Возьми первую корону в «Чехарде»', [r('bronze', 1, 'Корона')]),
@@ -331,8 +331,8 @@ const chekSet = (g: GameDef): Achievement[] => [
   A(g.id, 'master', 'meta', `master_${g.id}`, 'Мастер Чехарды', 'Открой все достижения «Чехарды»', [r('platinum', 1, 'Мастер Чехарды')]),
 ]
 const paukSet = (g: GameDef): Achievement[] => [
-  A(g.id, 'firstwin', 'progression', `successes_game_${g.id}`, 'Первый пасьянс', 'Собери первый пасьянс в «Пауке»', [r('bronze', 1, 'Первый пасьянс')]),
-  A(g.id, 'regular', 'dedication', `matches_game_${g.id}`, 'Раскладчик', 'Раскладывай «Паука»', [r('bronze', 25, 'Раскладчик'), r('silver', 100, 'Завсегдатай')]),
+  A(g.id, 'firstwin', 'progression', `successes_game_${g.id}`, 'Первый пасьянс', 'Собери первый пасьянс в «Паутинке»', [r('bronze', 1, 'Первый пасьянс')]),
+  A(g.id, 'regular', 'dedication', `matches_game_${g.id}`, 'Раскладчик', 'Раскладывай «Паутинку»', [r('bronze', 25, 'Раскладчик'), r('silver', 100, 'Завсегдатай')]),
   A(g.id, 'winner', 'progression', `successes_game_${g.id}`, 'Пасьянсник', 'Собирай пасьянсы', [r('silver', 10, 'Пасьянсник'), r('gold', 50, 'Мастер раскладов'), r('diamond', 200, 'Легенда пасьянса')]),
   A(g.id, 'flawless', 'skill', `f_${g.id}_flawless`, 'Без отмен', 'Собери пасьянс, ни разу не отменив ход', [r('gold', 1, 'Без отмен')]),
   A(g.id, 'fast', 'skill', `f_${g.id}_fast`, 'Скоростной', 'Собери пасьянс быстрее порога', [r('gold', 1, 'Скоростной')]),
@@ -340,7 +340,7 @@ const paukSet = (g: GameDef): Achievement[] => [
   A(g.id, 'hard', 'skill', `f_${g.id}_hard`, 'Арахнолог', 'Собери расклад в четыре масти', [r('silver', 1, 'Арахнолог')]),
   A(g.id, 'clean', 'skill', `f_${g.id}_clean`, 'Чистое поле', 'Разбери всю доску без застреваний', [r('silver', 1, 'Чистое поле')]),
   A(g.id, 'comeback', 'skill', `f_${g.id}_comeback`, 'Из тупика', 'Собери пасьянс из почти безвыходного расклада', [r('gold', 1, 'Из тупика')], true),
-  A(g.id, 'master', 'meta', `master_${g.id}`, 'Мастер Паука', 'Открой все достижения «Паука»', [r('platinum', 1, 'Мастер Паука')]),
+  A(g.id, 'master', 'meta', `master_${g.id}`, 'Мастер Паутинки', 'Открой все достижения «Паутинки»', [r('platinum', 1, 'Мастер Паутинки')]),
 ]
 const petSet = (g: GameDef): Achievement[] => [
   A(g.id, 'firstwin', 'progression', `successes_game_${g.id}`, 'Первый друг', 'Проведи первый день с питомцем', [r('bronze', 1, 'Первый друг')]),
