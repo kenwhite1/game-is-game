@@ -5,12 +5,7 @@
    активная вкладка. Тактильный материал: карточки с «губой»-тенью,
    мягкие слои, стеклянная навигация. Спокойно, дорого, по-игровому.
    ============================================================ */
-@font-face {
-  font-family: 'Actay Wide';
-  src: url('https://db.onlinewebfonts.com/t/5f3589e3d4b854aada3b2b1548d15cb4.woff2') format('woff2'),
-       url('https://db.onlinewebfonts.com/t/5f3589e3d4b854aada3b2b1548d15cb4.woff') format('woff');
-  font-weight: 400 900; font-display: swap;
-}
+
 :root {
   /* фирменный кремовый */
   --bg: #f3e2bc;
@@ -74,7 +69,7 @@ html, body, #root { height: 100%; margin: 0; }
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: 'Jost', system-ui, sans-serif;
+  font-family: 'Nunito', system-ui, sans-serif;
   font-size: 16px;
   font-weight: 600;
   overscroll-behavior: none;
@@ -88,7 +83,7 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 /* -- app shell ------------------------------------------------ */
 .app {
   position: fixed; inset: 0; display: flex; flex-direction: column; overflow: hidden;
-  background: #b3b0a8;
+  background: #f2ca96;
 }
 
 /* scrolling page area for each tab */
@@ -693,7 +688,7 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
   justify-content: space-between; width: 100%; }
 .gc-info { border: none; cursor: pointer; width: 26px; height: 26px; border-radius: 999px;
   background: var(--card-2); color: var(--ink-soft); font-size: 13px; font-weight: 900;
-  font-family: Georgia, serif; font-style: italic; display: grid; place-items: center;
+  font-family: Nunito, serif; font-style: italic; display: grid; place-items: center;
   box-shadow: inset 0 0 0 1px var(--line); }
 .gc-info:active { transform: scale(.9); }
 .game-card { cursor: pointer; }
@@ -722,7 +717,7 @@ h1, h2, h3 { margin: 0; font-weight: 900; color: inherit; letter-spacing: -0.02e
 
 /* ─── Задания дня, друзья в сети, подарки ───────────────────────────── */
 
-.quests { margin-top: 14px; padding: 14px 16px; background: #d544ee; font-family: 'Actay Wide', 'Jost', system-ui, sans-serif; }
+.quests { margin-top: 14px; padding: 14px 16px; background: #d544ee; font-family: 'Nunito', system-ui, sans-serif; }
 .quests * { font-family: inherit; }
 .q-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
 .q-title-main { font-size: 16px; font-weight: 900; color: #fff; }
