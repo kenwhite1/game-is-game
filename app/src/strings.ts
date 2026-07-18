@@ -151,6 +151,9 @@ export const EN: Record<string, string> = {
   'Играть': 'Play',
   'Найдено': 'Found',
   'Все игры': 'All games',
+  'Игры от игроков': 'Player-made games',
+  'Сделано в Мастерской': 'Made in the Workshop',
+  'от': 'by',
   'В избранном пусто': 'No favorites yet',
   'Ничего не нашлось': 'Nothing found',
   'Отмечай игры звёздочкой, и они соберутся здесь.': 'Star games and they will gather here.',
@@ -431,6 +434,8 @@ export const EN: Record<string, string> = {
   'Лото': 'Bingo',
   'Лесенки': 'Snakes & Ladders',
   'Магнат': 'Tycoon',
+  'Гнездо': 'Roost',
+  'Тропа войны': 'Warpath',
   'Морской бой': 'Battleship',
   'Маджонг': 'Mahjong',
   'Реверси': 'Reversi',
@@ -457,6 +462,8 @@ export const EN: Record<string, string> = {
   'Натиск': 'Onslaught',
 
   // ── Каталог игр: подписи (tagline) ───────────────────────────────────
+  'Голубиная почта по живой карте мира': 'Pigeon post across a living world map',
+  '3D-Risk: захвати весь мир': '3D Risk: conquer the whole world',
   '3D детектив: вычисли убийцу': '3D whodunit: find the killer',
   '3D ракетный футбол на тачках': '3D rocket car football',
   '3D лодка из блоков против реки ловушек': '3D block boat vs. a river of traps',
@@ -500,6 +507,12 @@ export const EN: Record<string, string> = {
   'Стратегия захвата карты': 'A map-conquest strategy game',
 
   // ── Каталог игр: описания (blurb) ────────────────────────────────────
+  'Отправляй настоящие письма виртуальными голубями: птица летит по карте мира в реальном времени, скорость зависит от вида и расстояния. Собирай птиц, выводи яйца, гоняй во Флаппи.':
+    'Send real letters by virtual pigeons: the bird flies across the world map in real time, its speed depends on species and distance. Collect birds, hatch eggs, race in Flappy.',
+  'Настольный Риск в 3D: 42 территории на карте мира, живые кубики на физике, бонусы за континенты. Соло против ботов трёх уровней сложности или передавай телефон друзьям.':
+    'Tabletop Risk in 3D: 42 territories on the world map, live physics dice, continent bonuses. Solo against bots on three difficulty levels or pass the phone to friends.',
+  'Настольная монополия в 3D: покупай улицы, строй дома и отели, разоряй соперников. Играй с ботами или друзьями онлайн.':
+    'Tabletop Monopoly in 3D: buy streets, build houses and hotels, bankrupt your rivals. Play against bots or with friends online.',
   'Социальная 3D-дедукция: один тайный Маньяк с ножом, один Шериф с единственным патроном, остальные выживают и вычисляют, кто есть кто. Соло с ботами или с друзьями по коду комнаты.':
     'Social 3D deduction: one secret Maniac with a knife, one Sheriff with a single bullet, everyone else survives and works out who is who. Solo with bots or with friends by room code.',
   'Реактивные тачки играют в футбол: буст, сальто и голы. Матч против бота или 1×1 с другом по коду комнаты.':

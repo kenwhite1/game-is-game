@@ -74,7 +74,7 @@ export function App() {
           <div className="nav-group">
             <button
               className="tab lang-tab"
-              onClick={() => { const next = toggleLang(); void api.setLang(next).catch(() => {}) }}
+              onClick={() => { const next = toggleLang(); void api.setLang(next).catch(() => {}).then(() => useStore.getState().refreshCatalog()) }}
               aria-label={t('Язык')}
               title={t('Язык')}
               style={{ fontWeight: 900, fontSize: 12, letterSpacing: 0.5 }}
@@ -553,7 +553,7 @@ function Settings() {
             {(['ru', 'en'] as const).map(code => (
               <button
                 key={code}
-                onClick={() => { setLang(code); void api.setLang(code).catch(() => {}) }}
+                onClick={() => { setLang(code); void api.setLang(code).catch(() => {}).then(() => useStore.getState().refreshCatalog()) }}
                 aria-pressed={lang === code}
                 style={{
                   border: 'none', cursor: 'pointer', fontWeight: 900, fontSize: 13, letterSpacing: 0.5,

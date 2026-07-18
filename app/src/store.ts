@@ -63,6 +63,7 @@ interface S {
   botUsername: string
 
   init(): Promise<void>
+  refreshCatalog(): Promise<void>
   setTab(t: Tab): void
   launch(card: GameCard): void
   openGameSheet(id: string | null): void
@@ -246,6 +247,16 @@ export const useStore = create<S>((set, get) => ({
       const card = get().catalog.find(g => g.id === startParam)
       if (card) get().launch(card)
     }
+  },
+
+  // Пересобрать каталог после смены языка: токены запуска в ссылках подписаны
+  // языком игрока (§i18n), поэтому при переключении их нужно перевыпустить —
+  // иначе игра откроется на прежнем языке (start_param несёт старый lng).
+  async refreshCatalog() {
+    try {
+      const r = await api.auth()
+      if (r.catalog?.length) set({ catalog: r.catalog, meta: r.meta ?? get().meta })
+    } catch { /* офлайн/гость: оставляем текущий каталог */ }
   },
 
   setTab(tab) {
