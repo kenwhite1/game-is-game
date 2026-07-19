@@ -73,6 +73,18 @@ export const GAMES: GameDef[] = [
     players: 'solo',
   },
   {
+    id: 'reysik',
+    name: 'Рейсик',
+    tagline: 'Фокус-таймер как авиалиния',
+    blurb: 'Каждая фокус-сессия это настоящий рейс: выбери аэропорт, место в салоне, получи посадочный и лети через 3D-глобус с реальными странами. Посадка приносит мили, статусы клуба и коллекцию рейсов.',
+    emoji: '✈️',
+    accent: '#2E8FC6',
+    accentDeep: '#1b5f8c',
+    bot: 'focustimerappbot',
+    category: 'party',
+    players: 'solo',
+  },
+  {
     id: 'riseup',
     name: 'Звоночек',
     tagline: 'Будильник, который берёт плату за тишину',
