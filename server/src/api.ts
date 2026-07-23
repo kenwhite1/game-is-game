@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
 import { validateInitData, issueToken, verifyToken, signLaunch, verifyLaunch, DEV_MODE } from './auth'
-import { handleResult, sdkBalance, handleSpend, handleEarn } from './sdk'
+import { handleResult, sdkBalance, handleSpend, handleEarn, sdkFriends } from './sdk'
 import { encodeLaunchParam } from '../../shared/sdk'
 import { achievementsView } from './achievements'
 import { doPrestige } from './xp'
@@ -160,10 +160,18 @@ api.post('/sdk/earn', async c => {
   return c.json(out.body, out.status as 200 | 400)
 })
 
+// Друзья игрока для игр, которые сводят реальных людей («Сердечко»). Только
+// чтение и только безопасный минимум образа; тоже по токену запуска.
+api.get('/sdk/friends', async c => {
+  const claims = await verifyLaunch(c.req.header('x-gg-launch') ?? '')
+  if (!claims) return c.json({ ok: false, me: null, friends: [], error: 'bad_launch' }, 401)
+  return c.json(sdkFriends(claims.uid))
+})
+
 // auth gate for everything below
 api.use('/*', async (c, next) => {
   const p = c.req.path
-  if (p.endsWith('/auth') || p.endsWith('/health') || p.endsWith('/catalog') || p.endsWith('/presence/ping') || p.endsWith('/sdk/result') || p.endsWith('/sdk/balance') || p.endsWith('/sdk/spend')) return next()
+  if (p.endsWith('/auth') || p.endsWith('/health') || p.endsWith('/catalog') || p.endsWith('/presence/ping') || p.endsWith('/sdk/result') || p.endsWith('/sdk/balance') || p.endsWith('/sdk/spend') || p.endsWith('/sdk/friends')) return next()
   const token = c.req.header('authorization')?.replace(/^Bearer /, '')
   const uid = token ? await verifyToken(token) : null
   if (!uid) return c.json({ error: 'unauthorized' }, 401)

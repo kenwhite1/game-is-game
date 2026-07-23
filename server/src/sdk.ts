@@ -14,6 +14,8 @@ import { grantAccountXp } from './xp'
 import { updateRating } from './ranked'
 import { screenMatch } from './anomaly'
 import { matchReward, MATCH_COIN_CAP, GAME_EARN_CAP, type CoinReason } from '../../shared/economy'
+import { friendsOf } from './social'
+import { colorOf } from '../../shared/avatars'
 import type { MatchReport, ReportResponse } from '../../shared/sdk'
 
 // Реализация /api/sdk/result (§2.2). Хаб - единственный, кто считает награды.
@@ -198,4 +200,31 @@ export function handleResult(launchToken: string | undefined, rawBody: unknown, 
 
   const p = getProfile(uid)
   return { status: 200, body: { ok: true, rewarded: reward.total > 0, coins: p?.coins ?? 0 } }
+}
+
+// ─── Список друзей для игр (/api/sdk/friends) ───────────────────────────────
+// Игры вроде «Сердечка» сводят реальных друзей игрока. Отдаём только безопасный
+// минимум для отрисовки кругляша: id, имя, цвет тела и лицо. Ни @username, ни
+// онлайн-статуса, ни прогресса - игре это не нужно.
+export interface SdkPerson {
+  id: number
+  name: string
+  /** hex цвета тела из образа хаба. */
+  color: string
+  /** id выражения лица (f_*). */
+  face: string
+}
+
+export function sdkFriends(uid: number): { ok: true; me: SdkPerson | null; friends: SdkPerson[] } {
+  const me = getProfile(uid)
+  return {
+    ok: true,
+    me: me ? { id: me.id, name: me.name, color: colorOf(me.color, me.id).hex, face: me.face } : null,
+    friends: friendsOf(uid).map(f => ({
+      id: f.id,
+      name: f.name,
+      color: colorOf(f.look.color, f.id).hex,
+      face: f.look.face,
+    })),
+  }
 }
