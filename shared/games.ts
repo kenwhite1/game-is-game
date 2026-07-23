@@ -85,18 +85,6 @@ export const GAMES: GameDef[] = [
     players: 'solo',
   },
   {
-    id: 'riseup',
-    name: 'Звоночек',
-    tagline: 'Будильник, который берёт плату за тишину',
-    blurb: 'Будильник со 100% пробуждением: остановить звонок можно только за звёзды Telegram, и цена растёт с каждой попыткой. Звонит прямо в чат, даже когда приложение закрыто. Дремать бесплатно (потом).',
-    emoji: '⏰',
-    accent: '#f2a93b',
-    accentDeep: '#d98b1f',
-    bot: 'alarmclockrubot',
-    category: 'party',
-    players: 'solo',
-  },
-  {
     id: 'maniac',
     name: 'Маньяк',
     tagline: '3D детектив: вычисли убийцу',
